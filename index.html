@@ -495,6 +495,908 @@
             opacity: 0;
             pointer-events: none;
         }
+
+        /* Koło fortuny popup */
+        .wheel-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(10px);
+            animation: backgroundPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes backgroundPulse {
+            0%, 100% {
+                background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
+            }
+            50% {
+                background: linear-gradient(135deg, rgba(138, 43, 226, 0.9), rgba(75, 0, 130, 0.9));
+            }
+        }
+
+        .wheel-container {
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 40px;
+            padding: 50px;
+            max-width: 700px;
+            width: 90%;
+            position: relative;
+            box-shadow:
+                0 25px 80px rgba(0,0,0,0.3),
+                0 0 0 1px rgba(255,255,255,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.6);
+            text-align: center;
+            animation: containerGlow 0.8s ease-out;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .wheel-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #8a2be2, #4b0082);
+            border-radius: 42px;
+            z-index: -1;
+            animation: borderRotate 3s linear infinite;
+        }
+
+        @keyframes borderRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes containerGlow {
+            from {
+                transform: scale(0.9) translateY(20px);
+                opacity: 0;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            }
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+                box-shadow:
+                    0 25px 80px rgba(0,0,0,0.3),
+                    0 0 0 1px rgba(255,255,255,0.2),
+                    inset 0 1px 0 rgba(255,255,255,0.6);
+            }
+        }
+
+        .wheel-close {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 28px;
+            color: #666;
+            cursor: pointer;
+            background: linear-gradient(45deg, #ff6b6b, #ff4757);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .wheel-close:hover {
+            background: linear-gradient(45deg, #ff4757, #ff3838);
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+        }
+
+        .wheel-title {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleShine 2s ease-in-out infinite;
+            letter-spacing: 1px;
+        }
+
+        @keyframes titleShine {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 40px;
+            filter: drop-shadow(0 15px 35px rgba(0,0,0,0.2));
+        }
+
+        .wheel {
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            position: relative;
+            overflow: visible;
+            background: linear-gradient(45deg, #f8f9fa 0%, #e9ecef 100%);
+            box-shadow:
+                0 20px 60px rgba(0,0,0,0.3),
+                inset 0 5px 15px rgba(255,255,255,0.8),
+                inset 0 -5px 15px rgba(0,0,0,0.1);
+            transition: transform 4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 3px solid rgba(255,255,255,0.8);
+        }
+
+        .wheel::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.02) 100%);
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .wheel-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border-right: 1px solid rgba(255,255,255,0.3);
+            z-index: 5;
+            overflow: visible;
+            box-sizing: border-box;
+        }
+
+        .wheel-segment:hover {
+            filter: brightness(1.1);
+        }
+
+        .wheel-segment.winner {
+            filter: brightness(1.3) contrast(1.2);
+            animation: winnerPulse 1.5s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+        }
+
+        @keyframes winnerPulse {
+            0%, 100% {
+                filter: brightness(1.3) contrast(1.2);
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            }
+            50% {
+                filter: brightness(1.5) contrast(1.4);
+                box-shadow: 0 0 50px rgba(255, 215, 0, 1);
+            }
+        }
+
+        .wheel-text {
+            color: #1a1a1a !important;
+            font-weight: 900 !important;
+            font-size: 14px !important;
+            text-shadow:
+                0 1px 2px rgba(255,255,255,0.9),
+                0 0 3px rgba(255,255,255,0.7),
+                1px 1px 0 rgba(255,255,255,1),
+                -1px -1px 0 rgba(255,255,255,1);
+            letter-spacing: 0.5px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            z-index: 100 !important;
+            position: relative !important;
+            background: rgba(255,255,255,0.95) !important;
+            padding: 3px 6px !important;
+            border-radius: 4px !important;
+            border: 1px solid rgba(0,0,0,0.3) !important;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15) !important;
+            display: block !important;
+            min-width: 45px !important;
+            text-align: center !important;
+            margin: 0 auto !important;
+            transform: none !important;
+        }
+
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+            z-index: 2000;
+            box-shadow:
+                0 8px 25px rgba(102, 126, 234, 0.4),
+                inset 0 2px 5px rgba(255,255,255,0.3);
+            border: 3px solid rgba(255,255,255,0.8);
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff4757;
+            font-size: 45px;
+            z-index: 3000;
+            filter: drop-shadow(0 6px 15px rgba(255, 71, 87, 0.8));
+            animation: pointerGlow 2s ease-in-out infinite;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .winner-indicator {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2500;
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+        }
+
+        .winner-indicator.hidden {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
+
+        .winner-name {
+            font-size: 24px;
+            font-weight: 900;
+            color: #2c3e50;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .winner-emoji {
+            font-size: 40px;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        .drink-icon {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            z-index: 100;
+            animation: drinkFloat 2s ease-in-out infinite;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        @keyframes drinkFloat {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0) scale(1);
+            }
+            25% {
+                transform: translateX(-50%) translateY(-3px) scale(1.1);
+            }
+            50% {
+                transform: translateX(-50%) translateY(0) scale(1.05);
+            }
+            75% {
+                transform: translateX(-50%) translateY(-2px) scale(1.08);
+            }
+        }
+
+        @keyframes pointerGlow {
+            0%, 100% {
+                filter: drop-shadow(0 4px 8px rgba(255, 107, 107, 0.5));
+            }
+            50% {
+                filter: drop-shadow(0 4px 12px rgba(255, 107, 107, 0.8));
+            }
+        }
+
+        .spin-button {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 50%, #8a2be2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 45px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow:
+                0 10px 30px rgba(102, 126, 234, 0.4),
+                0 4px 15px rgba(138, 43, 226, 0.2),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .spin-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .spin-button:hover:not(:disabled) {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow:
+                0 15px 40px rgba(102, 126, 234, 0.6),
+                0 8px 25px rgba(138, 43, 226, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        .spin-button:hover::before {
+            left: 100%;
+        }
+
+        .spin-button:active:not(:disabled) {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .spin-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            filter: grayscale(50%);
+        }
+
+        .result {
+            margin-top: 35px;
+            padding: 30px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(248,249,250,0.9) 100%);
+            border-radius: 25px;
+            animation: resultAppear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow:
+                0 15px 35px rgba(0,0,0,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .result.hidden {
+            display: none;
+        }
+
+        @keyframes resultAppear {
+            from {
+                transform: scale(0.7) translateY(30px) rotate(-5deg);
+                opacity: 0;
+                filter: blur(10px);
+            }
+            to {
+                transform: scale(1) translateY(0) rotate(0deg);
+                opacity: 1;
+                filter: blur(0px);
+            }
+        }
+
+        #result-text {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.5px;
+        }
+
+        #result-emoji {
+            font-size: 4rem;
+            animation: emojiBounce 1.2s ease-in-out infinite;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+            margin-top: 10px;
+        }
+
+        @keyframes emojiBounce {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            25% {
+                transform: translateY(-8px) scale(1.1);
+            }
+            50% {
+                transform: translateY(0) scale(1.05);
+            }
+            75% {
+                transform: translateY(-4px) scale(1.08);
+            }
+        }
+
+        /* Confetti animation */
+        .confetti {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            animation: fall 3.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            top: -10px;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10px) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            10% {
+                transform: translateY(10vh) rotate(36deg) scale(1.1);
+                opacity: 0.9;
+            }
+            50% {
+                transform: translateY(50vh) rotate(180deg) scale(0.9);
+                opacity: 0.7;
+            }
+            80% {
+                transform: translateY(80vh) rotate(360deg) scale(1.2);
+                opacity: 0.4;
+            }
+            100% {
+                transform: translateY(110vh) rotate(720deg) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        /* Segment colors for better visibility */
+        .segment-0 { background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,249,250,0.9) 100%); }
+        .segment-1 { background: linear-gradient(135deg, rgba(240,248,255,0.95) 0%, rgba(230,240,255,0.9) 100%); }
+        .segment-2 { background: linear-gradient(135deg, rgba(255,250,240,0.95) 0%, rgba(255,245,230,0.9) 100%); }
+        .segment-3 { background: linear-gradient(135deg, rgba(248,255,248,0.95) 0%, rgba(240,255,240,0.9) 100%); }
+        .segment-4 { background: linear-gradient(135deg, rgba(255,248,248,0.95) 0%, rgba(255,240,240,0.9) 100%); }
+        .segment-5 { background: linear-gradient(135deg, rgba(250,250,255,0.95) 0%, rgba(245,245,255,0.9) 100%); }
+        .segment-6 { background: linear-gradient(135deg, rgba(255,255,248,0.95) 0%, rgba(255,255,240,0.9) 100%); }
+        .segment-7 { background: linear-gradient(135deg, rgba(248,255,255,0.95) 0%, rgba(240,255,255,0.9) 100%); }
+
+        /* Glow effect for wheel during spin */
+        .wheel.spinning {
+            animation: wheelGlow 4s ease-out;
+        }
+
+        @keyframes wheelGlow {
+            0% {
+                filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.3));
+            }
+            25% {
+                filter: drop-shadow(0 0 40px rgba(102, 126, 234, 0.6));
+            }
+            50% {
+                filter: drop-shadow(0 0 60px rgba(138, 43, 226, 0.8));
+            }
+            75% {
+                filter: drop-shadow(0 0 40px rgba(102, 126, 234, 0.6));
+            }
+            100% {
+                filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.3));
+            }
+        }
+
+        /* Modern success particles */
+        .success-particles {
+            position: absolute;
+            pointer-events: none;
+            animation: particlesFloat 2s ease-out forwards;
+        }
+
+        @keyframes particlesFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.8);
+            }
+        }
+
+        /* Responsive design with modern breakpoints */
+        @media (max-width: 1024px) {
+            .wheel-container {
+                padding: 40px;
+                max-width: 600px;
+            }
+
+            .wheel {
+                width: 300px;
+                height: 300px;
+            }
+
+            .wheel::before {
+                width: 270px;
+                height: 270px;
+            }
+
+            .wheel-center {
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
+
+            .winner-indicator {
+                top: -75px;
+            }
+
+            .winner-name {
+                font-size: 22px;
+            }
+
+            .winner-emoji {
+                font-size: 38px;
+            }
+
+            .drink-icon {
+                font-size: 22px;
+                top: 14px;
+            }
+
+            .wheel-text {
+                font-size: 14px;
+                padding: 3px 6px !important;
+                min-width: 45px !important;
+            }
+
+            .wheel-segment {
+                padding: 10px;
+            }
+
+            .wheel-title {
+                font-size: 1.9rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .wheel-container {
+                padding: 30px;
+                margin: 15px;
+                max-width: 95%;
+            }
+
+            .wheel {
+                width: 280px;
+                height: 280px;
+            }
+
+            .wheel::before {
+                width: 250px;
+                height: 250px;
+            }
+
+            .wheel-center {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+
+            .wheel-pointer {
+                font-size: 30px;
+                top: -18px;
+            }
+
+            .winner-indicator {
+                top: -70px;
+            }
+
+            .winner-name {
+                font-size: 20px;
+            }
+
+            .winner-emoji {
+                font-size: 35px;
+            }
+
+            .drink-icon {
+                font-size: 20px;
+                top: 12px;
+            }
+
+            .wheel-text {
+                font-size: 13px;
+                padding: 2px 5px !important;
+                min-width: 42px !important;
+            }
+
+            .wheel-segment {
+                padding: 8px;
+            }
+
+            .wheel-title {
+                font-size: 1.6rem;
+                margin-bottom: 30px;
+            }
+
+            .spin-button {
+                padding: 16px 35px;
+                font-size: 1.1rem;
+                letter-spacing: 1px;
+                margin-top: 40px;
+            }
+
+            .result {
+                padding: 25px;
+                margin-top: 25px;
+            }
+
+            #result-text {
+                font-size: 1.5rem;
+            }
+
+            #result-emoji {
+                font-size: 3.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .wheel-container {
+                padding: 20px;
+            }
+
+            .wheel {
+                width: 240px;
+                height: 240px;
+            }
+
+            .wheel::before {
+                width: 210px;
+                height: 210px;
+            }
+
+            .wheel-center {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+
+            .wheel-pointer {
+                font-size: 25px;
+                top: -15px;
+            }
+
+            .winner-indicator {
+                top: -60px;
+            }
+
+            .winner-name {
+                font-size: 18px;
+            }
+
+            .winner-emoji {
+                font-size: 30px;
+            }
+
+            .drink-icon {
+                font-size: 18px;
+                top: 10px;
+            }
+
+            .wheel-text {
+                font-size: 12px;
+                padding: 2px 4px !important;
+                min-width: 40px !important;
+            }
+
+            .wheel-segment {
+                padding: 5px;
+            }
+
+            .wheel-title {
+                font-size: 1.3rem;
+                margin-bottom: 25px;
+            }
+
+            .spin-button {
+                padding: 14px 28px;
+                font-size: 1rem;
+                margin-top: 35px;
+            }
+
+            .wheel-close {
+                width: 40px;
+                height: 40px;
+                font-size: 24px;
+                top: 20px;
+                right: 20px;
+            }
+        }
+
+        /* Duży przycisk drinkowe koło fortuny */
+        .wheel-button-container {
+            text-align: center;
+            margin: 60px 0 40px 0;
+            position: relative;
+        }
+
+        .drink-wheel-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8a2be2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 30px 50px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow:
+                0 15px 35px rgba(102, 126, 234, 0.4),
+                0 8px 20px rgba(138, 43, 226, 0.2),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 400px;
+            max-width: 600px;
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        .drink-wheel-button:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow:
+                0 25px 50px rgba(102, 126, 234, 0.6),
+                0 15px 30px rgba(138, 43, 226, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        .drink-wheel-button:active {
+            transform: translateY(-4px) scale(1.02);
+        }
+
+        .button-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 2;
+        }
+
+        .button-icon {
+            font-size: 3rem;
+            animation: spin 3s linear infinite;
+            margin-right: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .button-text {
+            flex: 1;
+            text-align: center;
+        }
+
+        .button-text h2 {
+            color: white;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+        }
+
+        .button-text p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin: 0;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .button-arrow {
+            font-size: 2.5rem;
+            animation: bounce 2s ease-in-out infinite;
+            margin-left: 20px;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-8px);
+            }
+            60% {
+                transform: translateY(-4px);
+            }
+        }
+
+        .button-glow {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .drink-wheel-button:hover .button-glow {
+            left: 100%;
+        }
+
+        /* Responsive dla dużego przycisku */
+        @media (max-width: 768px) {
+            .wheel-button-container {
+                margin: 40px 0 30px 0;
+            }
+
+            .drink-wheel-button {
+                padding: 25px 30px;
+                min-width: 320px;
+            }
+
+            .button-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .button-icon {
+                font-size: 2.5rem;
+                margin-right: 0;
+            }
+
+            .button-text h2 {
+                font-size: 1.8rem;
+            }
+
+            .button-text p {
+                font-size: 1rem;
+            }
+
+            .button-arrow {
+                font-size: 2rem;
+                margin-left: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .drink-wheel-button {
+                padding: 20px 25px;
+                min-width: 280px;
+            }
+
+            .button-text h2 {
+                font-size: 1.5rem;
+            }
+
+            .button-text p {
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -541,6 +1443,21 @@
 
         <div class="map-container">
             <div id="map"></div>
+        </div>
+
+        <!-- Duży przycisk drinkowe koło fortuny -->
+        <div class="wheel-button-container">
+            <button id="drink-wheel-button" class="drink-wheel-button">
+                <div class="button-content">
+                    <div class="button-icon">🎰</div>
+                    <div class="button-text">
+                        <h2>KOŁO FORTUNY</h2>
+                        <p>KTO LECI PO DRINKI? 🍺</p>
+                    </div>
+                    <div class="button-arrow">🎲</div>
+                </div>
+                <div class="button-glow"></div>
+            </button>
         </div>
 
         <div class="legend">
@@ -1217,8 +2134,8 @@
 
                 // Aktualizacja liczników
                 if (beerCounter < 42) beerCounter += Math.floor(Math.random() * 3) + 1;
-                if (beachCounter < 15) beachCounter += Math.floor(Math.random() * 2);
-                if (friendCounter < 9) friendCounter += Math.floor(Math.random() * 2);
+                if (beachCounter < 15) beachCounter += Math.floor(Math.random() * 2) + 1;
+                if (friendCounter < 9) friendCounter += Math.floor(Math.random() * 2) + 1;
 
                 beerCount.textContent = Math.min(beerCounter, 42);
                 beachCount.textContent = Math.min(beachCounter, 15);
@@ -1264,6 +2181,355 @@
                 clearInterval(beerInterval);
             }, 6500); // Dopasowane do czasu loading screen
         }
+    </script>
+
+    <!-- Popup z kołem fortuny -->
+    <div id="wheel-popup" class="wheel-popup">
+        <div class="wheel-container">
+            <div class="wheel-close">&times;</div>
+            <h2 class="wheel-title">🎰 KOŁO FORTUNY - KTO LECI PO DRINKI? 🍺</h2>
+            <div class="wheel-wrapper">
+                <div id="winner-indicator" class="winner-indicator hidden">
+                    <div id="winner-name" class="winner-name"></div>
+                    <div id="winner-emoji" class="winner-emoji"></div>
+                </div>
+                <div id="wheel" class="wheel">
+                    <div class="wheel-center">
+                        <div class="wheel-pointer">▼</div>
+                    </div>
+                </div>
+                <button id="spin-button" class="spin-button">KRĘĆ KOŁEM! 🎲</button>
+            </div>
+            <div id="result" class="result hidden">
+                <h3 id="result-text"></h3>
+                <p id="result-emoji"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Koło fortuny
+        class WheelOfFortune {
+            constructor() {
+                this.names = [
+                    { name: "Patryk", chance: 0, emoji: "😴" },
+                    { name: "Ola", chance: 1, emoji: "🍸" },
+                    { name: "Kami", chance: 1, emoji: "🍺" },
+                    { name: "Młody", chance: 1, emoji: "🥃" },
+                    { name: "Kuba", chance: 1, emoji: "🍻" },
+                    { name: "Kasia", chance: 1, emoji: "🍹" },
+                    { name: "Bartas", chance: 1, emoji: "🍶" },
+                    { name: "Eryk", chance: 9, emoji: "🥂" } // 90% szans
+                ];
+
+                this.wheel = document.getElementById('wheel');
+                this.spinButton = document.getElementById('spin-button');
+                this.resultDiv = document.getElementById('result');
+                this.resultText = document.getElementById('result-text');
+                this.resultEmoji = document.getElementById('result-emoji');
+                this.popup = document.getElementById('wheel-popup');
+                this.closeBtn = document.querySelector('.wheel-close');
+                this.winnerIndicator = document.getElementById('winner-indicator');
+                this.winnerName = document.getElementById('winner-name');
+                this.winnerEmoji = document.getElementById('winner-emoji');
+
+                this.isSpinning = false;
+                this.angle = 0;
+                this.winnerSegment = null;
+
+                this.init();
+                this.createWheel();
+            }
+
+            init() {
+                this.spinButton.addEventListener('click', () => this.spin());
+                this.closeBtn.addEventListener('click', () => this.closePopup());
+
+                // Zamykanie na kliknięcie poza popup
+                this.popup.addEventListener('click', (e) => {
+                    if (e.target === this.popup) {
+                        this.closePopup();
+                    }
+                });
+            }
+
+            createWheel() {
+                console.log('Creating wheel with names:', this.names); // Debug
+                const segmentAngle = 360 / this.names.length;
+                let currentAngle = 0;
+
+                // Wyczyść koło przed dodaniem nowych segmentów
+                this.wheel.innerHTML = `
+                    <div class="wheel-center">
+                        <div class="wheel-pointer">▼</div>
+                    </div>
+                `;
+
+                this.names.forEach((person, index) => {
+                    const segment = document.createElement('div');
+                    segment.className = `wheel-segment segment-${index}`;
+                    segment.style.transform = `rotate(${currentAngle}deg)`;
+                    segment.style.background = this.getSegmentColor(index);
+
+                    const text = document.createElement('div');
+                    text.className = 'wheel-text';
+                    text.textContent = person.name;
+
+                    // Dodaj kontener na ikonę drinka (ukrytą na początku)
+                    const drinkIcon = document.createElement('div');
+                    drinkIcon.className = 'drink-icon';
+                    drinkIcon.textContent = '🍺';
+                    drinkIcon.style.display = 'none';
+
+                    console.log(`Adding segment ${index}: ${person.name}`); // Debug
+
+                    segment.appendChild(text);
+                    segment.appendChild(drinkIcon);
+                    this.wheel.appendChild(segment);
+
+                    currentAngle += segmentAngle;
+                });
+                
+                console.log('Wheel creation completed'); // Debug
+            }
+
+            getSegmentColor(index) {
+                const colors = [
+                    '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A',
+                    '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+                ];
+                return colors[index % colors.length];
+            }
+
+            getWeightedRandomName() {
+                const weightedNames = [];
+
+                this.names.forEach(person => {
+                    // Dodaj tyle kopii imienia ile wynosi szansa
+                    for (let i = 0; i < person.chance; i++) {
+                        weightedNames.push(person);
+                    }
+                });
+
+                if (weightedNames.length === 0) {
+                    // Jeśli wszystkie mają 0% szans, wybierz losowo
+                    return this.names[Math.floor(Math.random() * this.names.length)];
+                }
+
+                const randomIndex = Math.floor(Math.random() * weightedNames.length);
+                return weightedNames[randomIndex];
+            }
+
+            spin() {
+                if (this.isSpinning) return;
+
+                this.isSpinning = true;
+                this.spinButton.disabled = true;
+                this.spinButton.textContent = 'KRĘCI SIĘ... 🎰';
+
+                // Schowaj poprzednie wyniki
+                this.resultDiv.classList.add('hidden');
+                this.winnerIndicator.classList.add('hidden');
+
+                // Usuń podświetlenie poprzedniego segmentu
+                if (this.winnerSegment) {
+                    this.winnerSegment.classList.remove('winner');
+                    // Ukryj ikonę drinka
+                    const drinkIcon = this.winnerSegment.querySelector('.drink-icon');
+                    if (drinkIcon) {
+                        drinkIcon.style.display = 'none';
+                    }
+                }
+
+                // Dodaj efekt świetlny podczas obrotu
+                this.wheel.classList.add('spinning');
+
+                // Dodaj wibrację dla lepszego efektu
+                if (navigator.vibrate) {
+                    navigator.vibrate([50, 100, 50]);
+                }
+
+                const winner = this.getWeightedRandomName();
+                const segmentAngle = 360 / this.names.length;
+                const winnerIndex = this.names.findIndex(person => person.name === winner.name);
+                const winnerAngle = winnerIndex * segmentAngle;
+
+                // Zapamiętaj zwycięski segment
+                this.winnerIndex = winnerIndex;
+
+                // Zresetuj kąt do aktualnej pozycji koła (żeby uniknąć kumulacji)
+                const currentTransform = window.getComputedStyle(this.wheel).transform;
+                let currentAngle = 0;
+
+                // Wyciągnij aktualny kąt z transformacji matrix
+                if (currentTransform !== 'none') {
+                    const values = currentTransform.split('(')[1].split(')')[0].split(',');
+                    const a = parseFloat(values[0]);
+                    const b = parseFloat(values[1]);
+                    currentAngle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
+                }
+
+                // Normalizuj kąt do zakresu 0-360
+                currentAngle = ((currentAngle % 360) + 360) % 360;
+
+                // Debug log dla diagnozy
+                console.log(`Current angle: ${currentAngle}, Winner index: ${winnerIndex}, Winner angle: ${winnerAngle}`);
+
+                // Zawsze minimum 3 pełne obroty + losowe dodatkowe (1-4), żeby każdy spin był widowiskowy
+                const minSpins = 3; // Minimum 3 pełne obroty
+                const extraSpins = Math.random() * 4 + 1; // Dodatkowe 1-4 obroty
+                const totalSpins = minSpins + extraSpins;
+
+                const finalAngle = currentAngle + (totalSpins * 360) - winnerAngle + (segmentAngle / 2);
+
+                // Czas animacji zależy od liczby obrotów - więcej obrotów = dłuższa animacja
+                const animationDuration = Math.max(3000, Math.min(6000, totalSpins * 800));
+
+                console.log(`Total spins: ${totalSpins.toFixed(2)} (${minSpins} min + ${extraSpins.toFixed(2)} extra), Final angle: ${finalAngle.toFixed(2)}, Duration: ${animationDuration}ms`);
+
+                // Wymuś reflow przed nową animacją
+                this.wheel.offsetHeight;
+
+                this.wheel.style.transform = `rotate(${finalAngle}deg)`;
+
+                // Zapisz prawidłowy kąt (zawsze dodatni, 0-360)
+                this.angle = ((finalAngle % 360) + 360) % 360;
+                console.log(`Stored angle: ${this.angle.toFixed(2)}`);
+
+                setTimeout(() => {
+                    this.showResult(winner);
+                }, animationDuration); // Czas trwania animacji dostosowany do liczby obrotów
+            }
+
+            showResult(winner) {
+                this.isSpinning = false;
+                this.spinButton.disabled = false;
+                this.spinButton.textContent = 'KRĘĆ PONOWNIE! 🎲';
+
+                // Usuń efekt świetlny
+                this.wheel.classList.remove('spinning');
+
+                // Pokaż wskaźnik zwycięzcy nad kołem
+                this.winnerName.textContent = winner.name;
+                this.winnerEmoji.textContent = winner.emoji;
+                this.winnerIndicator.classList.remove('hidden');
+
+                // Podświetl zwycięski segment
+                const segments = this.wheel.querySelectorAll('.wheel-segment');
+                if (this.winnerSegment) {
+                    this.winnerSegment.classList.remove('winner');
+                    // Ukryj poprzednią ikonę drinka
+                    const oldDrinkIcon = this.winnerSegment.querySelector('.drink-icon');
+                    if (oldDrinkIcon) {
+                        oldDrinkIcon.style.display = 'none';
+                    }
+                }
+                this.winnerSegment = segments[this.winnerIndex];
+                if (this.winnerSegment) {
+                    this.winnerSegment.classList.add('winner');
+                    // Pokaż ikonę drinka w zwycięskim segmencie
+                    const drinkIcon = this.winnerSegment.querySelector('.drink-icon');
+                    if (drinkIcon) {
+                        drinkIcon.style.display = 'block';
+                    }
+                }
+
+                this.resultText.textContent = `${winner.name} LECI PO DRINKI!`;
+                this.resultEmoji.textContent = winner.emoji;
+                this.resultDiv.classList.remove('hidden');
+
+                // Dodatkowe efekty dźwiękowe/animacje
+                this.createConfetti();
+
+                // Dodaj sukces partikle
+                this.createSuccessParticles();
+            }
+
+            createConfetti() {
+                for (let i = 0; i < 50; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti';
+                        confetti.style.left = Math.random() * 100 + 'vw';
+                        confetti.style.animationDelay = Math.random() * 3 + 's';
+                        confetti.style.background = this.getRandomColor();
+                        document.body.appendChild(confetti);
+
+                        setTimeout(() => {
+                            confetti.remove();
+                        }, 3000);
+                    }, i * 50);
+                }
+            }
+
+            getRandomColor() {
+                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            createSuccessParticles() {
+                const container = this.resultDiv;
+                for (let i = 0; i < 15; i++) {
+                    setTimeout(() => {
+                        const particle = document.createElement('div');
+                        particle.className = 'success-particles';
+                        particle.style.left = Math.random() * 100 + '%';
+                        particle.style.top = Math.random() * 100 + '%';
+                        particle.style.width = Math.random() * 6 + 4 + 'px';
+                        particle.style.height = particle.style.width;
+                        particle.style.background = this.getRandomColor();
+                        particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                        container.appendChild(particle);
+
+                        setTimeout(() => {
+                            particle.remove();
+                        }, 2000);
+                    }, i * 100);
+                }
+            }
+
+            closePopup() {
+                this.popup.style.display = 'none';
+
+                // Schowaj wskaźnik zwycięzcy
+                this.winnerIndicator.classList.add('hidden');
+
+                // Usuń podświetlenie segmentu
+                if (this.winnerSegment) {
+                    this.winnerSegment.classList.remove('winner');
+                    // Ukryj ikonę drinka
+                    const drinkIcon = this.winnerSegment.querySelector('.drink-icon');
+                    if (drinkIcon) {
+                        drinkIcon.style.display = 'none';
+                    }
+                    this.winnerSegment = null;
+                }
+
+                // Schowaj wynik
+                this.resultDiv.classList.add('hidden');
+            }
+
+            showPopup() {
+                this.popup.style.display = 'flex';
+            }
+        }
+
+        // Uruchom tylko loading screen
+        document.addEventListener('DOMContentLoaded', () => {
+            // Oryginalna funkcja startLoadingScreen
+            startLoadingScreen();
+
+            // Obsługa dużego przycisku koła fortuny
+            const drinkWheelButton = document.getElementById('drink-wheel-button');
+            let wheelOfFortune = null;
+
+            drinkWheelButton.addEventListener('click', () => {
+                if (!wheelOfFortune) {
+                    wheelOfFortune = new WheelOfFortune();
+                }
+                wheelOfFortune.showPopup();
+            });
+        });
     </script>
 </body>
 </html>
