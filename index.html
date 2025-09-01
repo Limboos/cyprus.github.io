@@ -188,17 +188,143 @@
             background: #5a6fd8;
         }
 
+        /* Itinerary Styles */
+        .itinerary {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 30px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .itinerary-days {
+            display: grid;
+            gap: 25px;
+        }
+
+        .day-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .day-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .day-header h3 {
+            color: #333;
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .day-date {
+            color: #667eea;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .day-content p {
+            margin: 8px 0;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .day-content strong {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .day-content em {
+            color: #667eea;
+            font-style: normal;
+            font-size: 0.9rem;
+            display: block;
+            margin-top: 10px;
+        }
+
+        .itinerary-tips {
+            margin-top: 40px;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .itinerary-tips h3 {
+            color: white !important;
+            margin-bottom: 15px;
+        }
+
+        .itinerary-tips ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .itinerary-tips li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .itinerary-tips li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
             }
-            
+
             .header h1 {
                 font-size: 2rem;
             }
-            
+
             #map {
                 height: 60vh;
+            }
+
+            .itinerary {
+                padding: 20px;
+                margin: 20px auto;
+            }
+
+            .day-card {
+                padding: 20px;
+            }
+
+            .day-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .day-header h3 {
+                font-size: 1.2rem;
             }
         }
     </style>
@@ -237,6 +363,127 @@
                     <div class="stat-number">13</div>
                     <div class="stat-label">Lokalnych klimatów</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- 7-Day Cyprus Itinerary -->
+        <div class="itinerary">
+            <h2 style="text-align: center; color: #667eea; margin: 40px 0 20px 0; font-size: 2rem;">🏝️ 7-Dniowy Plan Zwiedzania Cypru</h2>
+
+            <div class="itinerary-days">
+                <div class="day-card">
+                    <div class="day-header">
+                        <h3>Dzień 1: Przylot i relaks basenowy</h3>
+                        <span class="day-date">(Przylot ~15:00)</span>
+                    </div>
+                    <div class="day-content">
+                        <p><strong>Popołudnie:</strong> Przylot na Cypr (Larnaka), transfer do Protaras (~1h)</p>
+                        <p><strong>Popołudnie/wieczór:</strong> Zameldowanie w hotelu</p>
+                        <p><strong>Wieczór:</strong> Wypoczynek przy hotelowym basenie, drinki, lekka kolacja</p>
+                        <p><strong>Noc:</strong> Relaks i aklimatyzacja</p>
+                        <p><em>🏊‍♂️ Dzień typowo basenowy - odpoczynek po podróży</em></p>
+                    </div>
+                </div>
+
+                <div class="day-card">
+                    <div class="day-header">
+                        <h3>Dzień 2: Basen i zwiedzanie Protaras</h3>
+                        <span class="day-date">(Relaks + lokalne zwiedzanie)</span>
+                    </div>
+                    <div class="day-content">
+                        <p><strong>Rano:</strong> Śniadanie w hotelu, leniwy poranek przy basenie</p>
+                        <p><strong>Rano/południe:</strong> Kąpiel w basenie, drinki, lektura</p>
+                        <p><strong>Popołudnie:</strong> Krótkie zwiedzanie Protaras - spacer promenadą, sklepy z pamiątkami</p>
+                        <p><strong>Wieczór:</strong> Kolacja w lokalnej tawernie, Magic Dancing Waters show</p>
+                        <p><em>🏖️ Dzień basenowo-zwiedzający - połączenie relaksu i odkrywania</em></p>
+                    </div>
+                </div>
+
+                <div class="day-card">
+                    <div class="day-header">
+                        <h3>Dzień 3: Dłuższa podróż - Famagusta</h3>
+                        <span class="day-date">(Wynajem auta)</span>
+                    </div>
+                    <div class="day-content">
+                        <p><strong>Rano:</strong> Odbiór wypożyczonego samochodu w Protaras</p>
+                        <p><strong>Rano/południe:</strong> Przejazd przez granicę do Famagusty (~1.5h)</p>
+                        <p><strong>Południe:</strong> Ruiny Salaminy i Klasztor Apostoła Barnaby</p>
+                        <p><strong>Popołudnie:</strong> Stare Miasto Famagusta - mury obronne, Wieża Otella</p>
+                        <p><strong>Wieczór:</strong> Kolacja w tureckiej restauracji, powrót do Protaras</p>
+                        <p><em>🚗 Dzień z wynajmem auta - dłuższa podróż i historia</em></p>
+                    </div>
+                </div>
+
+                <div class="day-card">
+                    <div class="day-header">
+                        <h3>Dzień 4: Dłuższa podróż - Góry Troodos</h3>
+                        <span class="day-date">(Wynajem auta)</span>
+                    </div>
+                    <div class="day-content">
+                        <p><strong>Rano:</strong> Wyprawa samochodem do gór Troodos (~2h)</p>
+                        <p><strong>Rano/południe:</strong> Tradycyjne wioski - Lefkara (koronki, filigran)</p>
+                        <p><strong>Południe:</strong> Klasztor św. Krzyża w Omodos, degustacja win</p>
+                        <p><strong>Popołudnie:</strong> Spacer po malowniczych wioskach górskich</p>
+                        <p><strong>Wieczór:</strong> Kolacja w tawernie (kleftiko), powrót do Protaras</p>
+                        <p><em>🚗 Dzień z wynajmem auta - góry i kultura</em></p>
+                    </div>
+                </div>
+
+                <div class="day-card">
+                    <div class="day-header">
+                        <h3>Dzień 5: Ayia Napa</h3>
+                        <span class="day-date">(Imprezowa stolica)</span>
+                    </div>
+                    <div class="day-content">
+                        <p><strong>Rano:</strong> Przejazd do Ayia Napa (autobusem ~15-20 min)</p>
+                        <p><strong>Rano/południe:</strong> Plaża Nissi - jedna z najpiękniejszych plaż Cypru</p>
+                        <p><strong>Południe:</strong> Park Rzeźb na świeżym powietrzu</p>
+                        <p><strong>Popołudnie:</strong> Spacer po marinie, sklepy, kawiarnie</p>
+                        <p><strong>Wieczór:</strong> Życie nocne Ayia Napa, kolacja w porcie</p>
+                        <p><em>🎉 Dzień w Ayia Napa - plaże i rozrywka</em></p>
+                    </div>
+                </div>
+
+                <div class="day-card">
+                    <div class="day-header">
+                        <h3>Dzień 6: Odpoczynek basenowy</h3>
+                        <span class="day-date">(Relaks i drinki)</span>
+                    </div>
+                    <div class="day-content">
+                        <p><strong>Rano:</strong> Późne śniadanie w hotelu</p>
+                        <p><strong>Rano/południe:</strong> Wypoczynek przy basenie, drinki, lektura</p>
+                        <p><strong>Południe:</strong> Lunch w hotelowej restauracji lub room service</p>
+                        <p><strong>Popołudnie:</strong> SPA, masaż lub leniwe drzemki</p>
+                        <p><strong>Wieczór:</strong> Wieczór z drinkami przy basenie, muzyka, relaks</p>
+                        <p><em>🍹 Dzień czystego relaksu - basen, drinki i odpoczynek</em></p>
+                    </div>
+                </div>
+
+                <div class="day-card">
+                    <div class="day-header">
+                        <h3>Dzień 7: Wylot</h3>
+                        <span class="day-date">(Wylot o 6:00)</span>
+                    </div>
+                    <div class="day-content">
+                        <p><strong>Wcześnie rano:</strong> Pobudka o 4:00-4:30, przygotowanie do wyjazdu</p>
+                        <p><strong>5:00:</strong> Transfer na lotnisko w Larnace (~1h)</p>
+                        <p><strong>6:00:</strong> Wylot z lotniska w Larnace</p>
+                        <p><strong>Przed wylotem:</strong> Oddanie pokoju, ewentualne ostatnie zakupy</p>
+                        <p><em>✈️ Dzień wyjazdu - wczesny poranek i powrót do domu</em></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="itinerary-tips">
+                <h3 style="color: #667eea; margin: 30px 0 15px 0;">💡 Wskazówki praktyczne:</h3>
+                <ul style="color: #555; line-height: 1.6;">
+                    <li><strong>Transport:</strong> Dni 1-2: lokalny transport • Dni 3-4: wynajem samochodu (~40-50€/dzień) • Dzień 5: autobus • Dni 6-7: lokalny transport</li>
+                    <li><strong>Pogoda:</strong> Wrzesień idealny - ciepło (25-30°C) bez ekstremalnych upałów</li>
+                    <li><strong>Budżet:</strong> ~200-250€/osoba (noclegi, jedzenie, transport) + koszty atrakcji + wynajem auta</li>
+                    <li><strong>Wskazówki:</strong> Rezerwuj hotele i wynajem auta z wyprzedzeniem, zabieraj krem z wysokim filtrem UV</li>
+                    <li><strong>Kuchnia:</strong> Spróbuj meze, halloumi, kleftiko, Commandaria i lokalne wina</li>
+                    <li><strong>Auto:</strong> Dni 3-4 wymagają prawa jazdy, ubezpieczenia granicznego dla północnego Cypru</li>
+                </ul>
             </div>
         </div>
     </div>
