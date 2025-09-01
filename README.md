@@ -1,2 +1,0 @@
-# cyprus.github.io
-Cyprus

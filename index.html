@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atrakcje Cypru - Interaktywna Mapa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .map-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        #map {
+            height: 70vh;
+            min-height: 500px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .legend {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        .legend h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .legend-item:hover {
+            background: #f8f9fa;
+        }
+
+        .legend-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .natura {
+            background-color: #28a745;
+        }
+
+        .zabytek {
+            background-color: #dc3545;
+        }
+
+        .lokalny {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .hotel {
+            background-color: #007bff;
+        }
+
+        .legend-text {
+            font-size: 1.1rem;
+            color: #555;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .popup-content {
+            max-width: 250px;
+        }
+
+        .popup-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .popup-type {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .popup-description {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .popup-link {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: background 0.3s ease;
+        }
+
+        .popup-link:hover {
+            background: #5a6fd8;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            #map {
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏝️ Atrakcje Cypru</h1>
+            <p>Odkryj najpiękniejsze miejsca na wyspie Afrodyty</p>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+
+        <div class="legend">
+            <h3>Legenda</h3>
+            <div class="legend-item">
+                <div class="legend-icon natura">🌿</div>
+                <div class="legend-text">Atrakcje przyrodnicze</div>
+            </div>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number">40</div>
+                    <div class="stat-label">Atrakcji do odwiedzenia</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">15</div>
+                    <div class="stat-label">Atrakcji przyrodniczych</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Zabytków historycznych</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">13</div>
+                    <div class="stat-label">Lokalnych klimatów</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script>
+        // Inicjalizacja mapy
+        const map = L.map('map').setView([35.0, 33.3], 9);
+        
+        // Dodanie warstwy mapy
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Definicja ikon dla różnych typów
+        function createIcon(type) {
+            let color, symbol;
+            
+            switch(type) {
+                case 'Natura':
+                    color = '#28a745';
+                    symbol = '🌿';
+                    break;
+                case 'Zabytek':
+                    color = '#dc3545';
+                    symbol = '🏛️';
+                    break;
+                case 'Zabytek/Lokalny klimat':
+                    color = '#ffc107';
+                    symbol = '🍷';
+                    break;
+                case 'Lokalny klimat':
+                    color = '#17a2b8';
+                    symbol = '🏘️';
+                    break;
+                case 'Lokalny klimat/Kulinarne':
+                    color = '#fd7e14';
+                    symbol = '🍯';
+                    break;
+                case 'Natura/Lokalny klimat':
+                    color = '#20c997';
+                    symbol = '🏔️';
+                    break;
+                case 'Natura/Widok':
+                    color = '#6f42c1';
+                    symbol = '🌅';
+                    break;
+                case 'Natura/Legenda':
+                    color = '#e83e8c';
+                    symbol = '💫';
+                    break;
+                case 'Natura/Plaża':
+                    color = '#20c997';
+                    symbol = '🏖️';
+                    break;
+                case 'Podwodna atrakcja':
+                    color = '#0dcaf0';
+                    symbol = '🤿';
+                    break;
+                case 'Natura/Aktywność':
+                    color = '#198754';
+                    symbol = '🚢';
+                    break;
+                case 'Natura/Zabytek':
+                    color = '#6610f2';
+                    symbol = '🦩';
+                    break;
+                case 'Natura/Miejska':
+                    color = '#495057';
+                    symbol = '🌴';
+                    break;
+                case 'Zabytek/Widok':
+                    color = '#d63384';
+                    symbol = '⛪';
+                    break;
+                case 'Zabytek/Natura':
+                    color = '#6f42c1';
+                    symbol = '🏰';
+                    break;
+                case 'Sztuka/Lokalny klimat':
+                    color = '#f8765c';
+                    symbol = '🎨';
+                    break;
+                case 'Hotel':
+                    color = '#007bff';
+                    symbol = '🏨';
+                    break;
+                default:
+                    color = '#6c757d';
+                    symbol = '📍';
+            }
+            
+            return L.divIcon({
+                html: `<div style="
+                    background-color: ${color};
+                    width: 35px;
+                    height: 35px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 16px;
+                    border: 3px solid white;
+                    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+                ">${symbol}</div>`,
+                className: 'custom-marker',
+                iconSize: [35, 35],
+                iconAnchor: [17, 35]
+            });
+        }
+
+        // Dane atrakcji z dokładnymi współrzędnymi
+        const attractions = [
+            // Oryginalne atrakcje
+            {
+                name: "Cape Greco",
+                description: "Park narodowy z klifami, jaskiniami, mostami skalnymi i szlakami pieszymi.",
+                type: "Natura",
+                coords: [34.9584, 34.0806],
+                link: "https://goo.gl/maps/ikb9Vv3U6r2e7szk8"
+            },
+            {
+                name: "Blue Lagoon (Akamas)",
+                description: "Turkusowa zatoka, idealna na rejs łodzią i kąpiele, dostęp z portu Latchi.",
+                type: "Natura",
+                coords: [35.0500, 32.3400],
+                link: "https://goo.gl/maps/VkvMZKJt7i7v7VQN8"
+            },
+            {
+                name: "Wąwóz Avakas",
+                description: "Wąski kanion z wysokimi ścianami i bujną roślinnością na półwyspie Akamas.",
+                type: "Natura",
+                coords: [34.9800, 32.3300],
+                link: "https://goo.gl/maps/6wbyc3uHwVbbV9Pq7"
+            },
+            {
+                name: "Góry Troodos",
+                description: "Zielone serce Cypru z szlakami, wodospadami i tradycyjnymi wioskami.",
+                type: "Natura",
+                coords: [34.9200, 32.8600],
+                link: "https://goo.gl/maps/GF1o6sVQwqBKZ8Xn7"
+            },
+            {
+                name: "Plaża Lara",
+                description: "Dzika plaża w rezerwacie Akamas, miejsce lęgowe żółwi morskich.",
+                type: "Natura",
+                coords: [35.0300, 32.2800],
+                link: "https://goo.gl/maps/4PMKhYtd5cXq4qaw5"
+            },
+            {
+                name: "Nissi Beach",
+                description: "Słynna plaża w Ayia Napa, biały piasek i płytka laguna z wysepką Nissi.",
+                type: "Natura",
+                coords: [34.9889, 33.9775],
+                link: "https://goo.gl/maps/7SNoZg4y13oGzU2P9"
+            },
+            {
+                name: "Fig Tree Bay",
+                description: "Popularna plaża w Protaras z krystaliczną wodą i złotym piaskiem.",
+                type: "Natura",
+                coords: [35.0170, 34.0620],
+                link: "https://goo.gl/maps/NAg6R4dLW8L2"
+            },
+            {
+                name: "Agia Thekla Beach",
+                description: "Spokojna plaża z białym kościółkiem i małą grotą obok.",
+                type: "Natura",
+                coords: [35.0020, 34.0100],
+                link: "https://goo.gl/maps/qSdvmbZx2MSJkXkP9"
+            },
+            {
+                name: "Salt Lake Larnaca",
+                description: "Słone jezioro, zimą z flamingami, obok meczet Hala Sultan Tekke.",
+                type: "Natura",
+                coords: [34.8890, 33.6200],
+                link: "https://goo.gl/maps/Df8m2a2R4sv"
+            },
+            {
+                name: "Salt Lake Akrotiri",
+                description: "Laguna słona, zimą flamingi, w pobliżu klasztor św. Mikołaja od Kotów.",
+                type: "Natura",
+                coords: [34.5900, 32.9700],
+                link: "https://goo.gl/maps/1RPVxMbGvVt"
+            },
+            {
+                name: "Park Archeologiczny Kato Pafos",
+                description: "Ruiny wpisane na UNESCO – mozaiki, teatry, Grobowce Królów.",
+                type: "Zabytek",
+                coords: [34.7567, 32.4086],
+                link: "https://goo.gl/maps/Yc5b8Rz2g6y"
+            },
+            {
+                name: "Ruiny Kurion (Kourion)",
+                description: "Antyczne miasto na klifie z teatrem i mozaikami.",
+                type: "Zabytek",
+                coords: [34.6744, 32.8744],
+                link: "https://goo.gl/maps/qkPqzE8bdhr"
+            },
+            {
+                name: "Nikozja (południowa)",
+                description: "Stolica z weneckimi murami, Laiki Geitonia i Muzeum Cypru.",
+                type: "Zabytek",
+                coords: [35.1856, 33.3823],
+                link: "https://goo.gl/maps/9n3D2MBdLQF2"
+            },
+            {
+                name: "Lefkara",
+                description: "Wioska w górach Troodos znana z koronek i srebra.",
+                type: "Zabytek/Lokalny klimat",
+                coords: [34.8669, 33.3044],
+                link: "https://goo.gl/maps/5RydW1jX3g82"
+            },
+            {
+                name: "Omodos",
+                description: "Wioska winiarska z klasztorem Świętego Krzyża i winiarniami.",
+                type: "Zabytek/Lokalny klimat",
+                coords: [34.8456, 32.8089],
+                link: "https://goo.gl/maps/dGR9P12rYF42"
+            },
+            {
+                name: "Klasztor Kykkos",
+                description: "Najbogatszy klasztor Cypru, z ikoną Matki Boskiej.",
+                type: "Zabytek",
+                coords: [34.9806, 32.7381],
+                link: "https://goo.gl/maps/6BLsF9H5L7m"
+            },
+            {
+                name: "Klasztor Św. Mikołaja od Kotów",
+                description: "Historyczny klasztor na półwyspie Akrotiri, związany z legendą o kotach.",
+                type: "Zabytek",
+                coords: [34.5958, 32.9642],
+                link: "https://goo.gl/maps/Q1e1VoXydD42"
+            },
+            {
+                name: "Casale Panayiotis (Kalopanayiotis)",
+                description: "Spa i hotel w tradycyjnej górskiej wiosce Troodos.",
+                type: "Lokalny klimat",
+                coords: [35.0000, 32.8200],
+                link: "https://goo.gl/maps/UMi8XrPTFgA2"
+            },
+            {
+                name: "Agios Ioannis Lambadistis",
+                description: "Kompleks trzech bizantyjskich kościołów z freskami UNESCO.",
+                type: "Zabytek",
+                coords: [35.0050, 32.8180],
+                link: "https://goo.gl/maps/Atbyf9rxi4T2"
+            },
+            {
+                name: "Tsolakis Rose Factory (Agros)",
+                description: "Wioska różana, produkty z róży damasceńskiej, festiwale.",
+                type: "Lokalny klimat",
+                coords: [34.9150, 32.9400],
+                link: "https://goo.gl/maps/rMZhR4M1uN92"
+            },
+            {
+                name: "Oenou Yi Winery (koło Omodos)",
+                description: "Nowoczesna winnica z degustacjami i widokiem na góry.",
+                type: "Lokalny klimat",
+                coords: [34.8500, 32.8150],
+                link: "https://goo.gl/maps/ezKyk1Wxq5q"
+            },
+            {
+                name: "Troodos Square",
+                description: "Centrum turystyczne gór Troodos z tawernami i szlakami.",
+                type: "Natura/Lokalny klimat",
+                coords: [34.9264, 32.8653],
+                link: "https://goo.gl/maps/5GiC91rjEot"
+            },
+            {
+                name: "Pedoulas Village",
+                description: "Górska wioska z freskami w kościele Archaniołów.",
+                type: "Zabytek/Lokalny klimat",
+                coords: [34.9700, 32.8300],
+                link: "https://goo.gl/maps/CTN3Y4TQjcu"
+            },
+            {
+                name: "Pano Platres + Caledonia Waterfalls",
+                description: "Literacka wioska i wodospad Caledonia (12m).",
+                type: "Natura/Lokalny klimat",
+                coords: [34.9100, 32.8500],
+                link: "https://goo.gl/maps/f9YcWZT1XfT2"
+            },
+            {
+                name: "Choirokoitia",
+                description: "Neolityczna osada UNESCO i tradycyjna wieś.",
+                type: "Zabytek",
+                coords: [34.7969, 33.3436],
+                link: "https://goo.gl/maps/EaQbMBCfM3s"
+            },
+            {
+                name: "Karseras Winery (Doros)",
+                description: "Rodzinna winnica produkująca Commandarię.",
+                type: "Lokalny klimat",
+                coords: [34.7500, 32.9200],
+                link: "https://goo.gl/maps/DdPXVJ9YV7v"
+            },
+            {
+                name: "Kakopetria",
+                description: "Klimatyczna górska wioska z tradycyjną architekturą.",
+                type: "Lokalny klimat",
+                coords: [34.9889, 32.9056],
+                link: "https://goo.gl/maps/88S5KwEr6tE2"
+            },
+            {
+                name: "Zenobia Shipwreck (Larnaka)",
+                description: "Słynny wrak promu, jedno z najlepszych miejsc nurkowych świata.",
+                type: "Podwodna atrakcja",
+                coords: [34.9167, 33.6333],
+                link: "https://goo.gl/maps/mGr1LwJXMN72"
+            },
+            {
+                name: "Troodos Painted Churches",
+                description: "Kościoły z freskami z XI–XVI w., wpisane na UNESCO.",
+                type: "Zabytek",
+                coords: [34.9300, 32.8700],
+                link: "https://goo.gl/maps/t8oWd3A5qbp"
+            },
+            {
+                name: "Kayak Sea Caves (Ayia Napa)",
+                description: "Kajakowanie przez morskie jaskinie i łuki skalne.",
+                type: "Natura",
+                coords: [34.9900, 34.0000],
+                link: "https://goo.gl/maps/3X8kCfkq8vu"
+            },
+            {
+                name: "House of Dionysus (Pafos)",
+                description: "Rzymska willa z mitologicznymi mozaikami.",
+                type: "Zabytek",
+                coords: [34.7580, 32.4100],
+                link: "https://goo.gl/maps/LBL6t7sY7eP2"
+            },
+            {
+                name: "Viklari – The Last Castle (Akamas)",
+                description: "Rustykalna tawerna z grillem i widokiem na Akamas.",
+                type: "Lokalny klimat/Kulinarne",
+                coords: [35.0200, 32.3500],
+                link: "https://goo.gl/maps/FZ5vPcPFFu62"
+            },
+            {
+                name: "Cape Aspro Trail (Akamas)",
+                description: "Widokowa trasa piesza wzdłuż klifów.",
+                type: "Natura",
+                coords: [35.0400, 32.3200],
+                link: "https://goo.gl/maps/g4u8ik3jGbs"
+            },
+            {
+                name: "Fairytale Museum (Nikozja)",
+                description: "Muzeum bajek i sztuki ludowej w stolicy.",
+                type: "Zabytek/Lokalny klimat",
+                coords: [35.1750, 33.3650],
+                link: "https://goo.gl/maps/81uFWsUpNNz"
+            },
+            {
+                name: "Vasa Village (Limassol region)",
+                description: "Spokojna wioska z winnicami i dobrą kuchnią.",
+                type: "Lokalny klimat",
+                coords: [34.7800, 32.9500],
+                link: "https://goo.gl/maps/FG5sN2NT6nM2"
+            },
+            {
+                name: "Agios Sozomenos (ruiny wsi)",
+                description: "Opuszczona wieś z ruinami XVI-wiecznego kościoła.",
+                type: "Zabytek",
+                coords: [35.0500, 33.4500],
+                link: "https://goo.gl/maps/K5x2tNoxVzn"
+            },
+            {
+                name: "Souskiou Village (ruiny)",
+                description: "Opuszczona wieś z malowniczymi ruinami i dziką atmosferą.",
+                type: "Zabytek/Lokalny klimat",
+                coords: [34.7200, 32.5800],
+                link: "https://goo.gl/maps/y6DjUUm93jS2"
+            },
+            {
+                name: "Terra Oliva (Lefkara)",
+                description: "Doświadczenia oliwkowe – degustacje oliwy, likieru i produktów rzemieślniczych.",
+                type: "Lokalny klimat/Kulinarne",
+                coords: [34.8700, 33.3100],
+                link: "https://goo.gl/maps/tBqL9HDQkkm"
+            },
+            {
+                name: "Royal Goat Farm (okolice Nikozji)",
+                description: "Rodzinna farma z degustacjami serów i tradycyjną kuchnią.",
+                type: "Lokalny klimat/Kulinarne",
+                coords: [35.1200, 33.2500],
+                link: "https://goo.gl/maps/aog5RihW5Zo"
+            },
+            {
+                name: "Papouis Protaras Hotel",
+                description: "Twój hotel w Protaras",
+                type: "Hotel",
+                coords: [35.025362, 34.040899],
+                link: "https://www.google.com/maps/place/Papouis+Protaras+Hotel/@35.0258981,34.0379742,783m"
+            },
+            {
+                name: "Agios Ioannis Lambadistis",
+                description: "Kompleks trzech bizantyjskich kościołów z freskami UNESCO.",
+                type: "Zabytek",
+                coords: [35.0050, 32.8180],
+                link: "https://goo.gl/maps/Atbyf9rxi4T2"
+            },
+            {
+                name: "Tsolakis Rose Factory (Agros)",
+                description: "Wioska różana, produkty z róży damasceńskiej, festiwale.",
+                type: "Lokalny klimat",
+                coords: [34.9150, 32.9400],
+                link: "https://goo.gl/maps/rMZhR4M1uN92"
+            },
+            {
+                name: "Oenou Yi Winery (koło Omodos)",
+                description: "Nowoczesna winnica z degustacjami i widokiem na góry.",
+                type: "Lokalny klimat",
+                coords: [34.8500, 32.8150],
+                link: "https://goo.gl/maps/ezKyk1Wxq5q"
+            },
+            {
+                name: "Troodos Square",
+                description: "Centrum turystyczne gór Troodos z tawernami i szlakami.",
+                type: "Natura/Lokalny klimat",
+                coords: [34.9264, 32.8653],
+                link: "https://goo.gl/maps/5GiC91rjEot"
+            },
+            {
+                name: "Pedoulas Village",
+                description: "Górska wioska z freskami w kościele Archaniołów.",
+                type: "Zabytek/Lokalny klimat",
+                coords: [34.9700, 32.8300],
+                link: "https://goo.gl/maps/CTN3Y4TQjcu"
+            },
+            {
+                name: "Pano Platres + Caledonia Waterfalls",
+                description: "Literacka wioska i wodospad Caledonia (12m).",
+                type: "Natura/Lokalny klimat",
+                coords: [34.9100, 32.8500],
+                link: "https://goo.gl/maps/f9YcWZT1XfT2"
+            },
+            {
+                name: "Choirokoitia",
+                description: "Neolityczna osada UNESCO i tradycyjna wieś.",
+                type: "Zabytek",
+                coords: [34.7969, 33.3436],
+                link: "https://goo.gl/maps/EaQbMBCfM3s"
+            },
+            {
+                name: "Aphrodite's Rock (Petra tou Romiou)",
+                description: "Legendarne miejsce narodzin Afrodyty, punkt widokowy.",
+                type: "Natura",
+                coords: [34.6644, 32.6278],
+                link: "https://goo.gl/maps/4xqEjxX9K4J2"
+            },
+            {
+                name: "Karseras Winery (Doros)",
+                description: "Rodzinna winnica produkująca Commandarię.",
+                type: "Lokalny klimat",
+                coords: [34.7500, 32.9200],
+                link: "https://goo.gl/maps/DdPXVJ9YV7v"
+            },
+            {
+                name: "Kakopetria",
+                description: "Klimatyczna górska wioska z tradycyjną architekturą.",
+                type: "Lokalny klimat",
+                coords: [34.9889, 32.9056],
+                link: "https://goo.gl/maps/88S5KwEr6tE2"
+            },
+            {
+                name: "Zenobia Shipwreck (Larnaka)",
+                description: "Słynny wrak promu, jedno z najlepszych miejsc nurkowych świata.",
+                type: "Podwodna atrakcja",
+                coords: [34.9167, 33.6333],
+                link: "https://goo.gl/maps/mGr1LwJXMN72"
+            },
+            {
+                name: "Troodos Painted Churches",
+                description: "Kościoły z freskami z XI–XVI w., wpisane na UNESCO.",
+                type: "Zabytek",
+                coords: [34.9300, 32.8700],
+                link: "https://goo.gl/maps/t8oWd3A5qbp"
+            },
+            {
+                name: "Kayak Sea Caves (Ayia Napa)",
+                description: "Kajakowanie przez morskie jaskinie i łuki skalne.",
+                type: "Natura",
+                coords: [34.9900, 34.0000],
+                link: "https://goo.gl/maps/3X8kCfkq8vu"
+            },
+            {
+                name: "House of Dionysus (Pafos)",
+                description: "Rzymska willa z mitologicznymi mozaikami.",
+                type: "Zabytek",
+                coords: [34.7580, 32.4100],
+                link: "https://goo.gl/maps/LBL6t7sY7eP2"
+            },
+            {
+                name: "Viklari – The Last Castle (Akamas)",
+                description: "Rustykalna tawerna z grillem i widokiem na Akamas.",
+                type: "Lokalny klimat/Kulinarne",
+                coords: [35.0200, 32.3500],
+                link: "https://goo.gl/maps/FZ5vPcPFFu62"
+            },
+            {
+                name: "Cape Aspro Trail (Akamas)",
+                description: "Widokowa trasa piesza wzdłuż klifów.",
+                type: "Natura",
+                coords: [35.0400, 32.3200],
+                link: "https://goo.gl/maps/g4u8ik3jGbs"
+            },
+            {
+                name: "Fairytale Museum (Nikozja)",
+                description: "Muzeum bajek i sztuki ludowej w stolicy.",
+                type: "Zabytek/Lokalny klimat",
+                coords: [35.1750, 33.3650],
+                link: "https://goo.gl/maps/81uFWsUpNNz"
+            },
+            {
+                name: "Vasa Village (Limassol region)",
+                description: "Spokojna wioska z winnicami i dobrą kuchnią.",
+                type: "Lokalny klimat",
+                coords: [34.7800, 32.9500],
+                link: "https://goo.gl/maps/FG5sN2NT6nM2"
+            },
+            {
+                name: "Agios Sozomenos (ruiny wsi)",
+                description: "Opuszczona wieś z ruinami XVI-wiecznego kościoła.",
+                type: "Zabytek",
+                coords: [35.0500, 33.4500],
+                link: "https://goo.gl/maps/K5x2tNoxVzn"
+            },
+            {
+                name: "Souskiou Village (ruiny)",
+                description: "Opuszczona wieś z malowniczymi ruinami i dziką atmosferą.",
+                type: "Zabytek/Lokalny klimat",
+                coords: [34.7200, 32.5800],
+                link: "https://goo.gl/maps/y6DjUUm93jS2"
+            },
+            {
+                name: "Terra Oliva (Lefkara)",
+                description: "Doświadczenia oliwkowe – degustacje oliwy, likieru i produktów rzemieślniczych.",
+                type: "Lokalny klimat/Kulinarne",
+                coords: [34.8700, 33.3100],
+                link: "https://goo.gl/maps/tBqL9HDQkkm"
+            },
+            {
+                name: "Royal Goat Farm (okolice Nikozji)",
+                description: "Rodzinna farma z degustacjami serów i tradycyjną kuchnią.",
+                type: "Lokalny klimat/Kulinarne",
+                coords: [35.1200, 33.2500],
+                link: "https://goo.gl/maps/aog5RihW5Zo"
+            },
+            // Nowe atrakcje
+            {
+                name: "Grobowce Królów (Pafos)",
+                description: "Ogromne grobowce wykute w skale, największe tego typu na Cyprze.",
+                type: "Zabytek",
+                coords: [34.7656, 32.4069],
+                link: "https://goo.gl/maps/U7JPmXv3Y3XgDiV68"
+            },
+            {
+                name: "Petra tou Romiou (Skała Afrodyty)",
+                description: "Legendarna skała, miejsce narodzin Afrodyty, z piękną plażą i parkingiem.",
+                type: "Natura/Widok",
+                coords: [34.6644, 32.6278],
+                link: "https://goo.gl/maps/1r7L9xV47WnJCGrz9"
+            },
+            {
+                name: "Łaźnie Adonisa (Baths of Aphrodite)",
+                description: "Miejsce, gdzie Afrodyta kąpała się po spotkaniu z Adonisem; piękne i spokojne.",
+                type: "Natura/Legenda",
+                coords: [35.0578, 32.3456],
+                link: "https://goo.gl/maps/E3qK3aLzLc5SrVqd7"
+            },
+            {
+                name: "Coral Bay (Plaża)",
+                description: "Piaszczysta plaża niedaleko Pafos, z palmami, leżakami i sportami wodnymi.",
+                type: "Natura/Plaża",
+                coords: [34.7767, 32.3889],
+                link: "https://goo.gl/maps/HJ2MSv5kCLsQAPouv"
+            },
+            {
+                name: "Wrak Edro III",
+                description: "Statek osiadły przy zachodnim wybrzeżu — popularny punkt do nurkowania i fotografii.",
+                type: "Podwodna atrakcja",
+                coords: [35.0167, 32.2833],
+                link: "https://goo.gl/maps/9T4fB3x4jvG65r2Q7"
+            },
+            {
+                name: "Rejs statkiem (Paralimni)",
+                description: "Rejs z Paralimni z przystankami na kąpiel, łódź z barem i toaletą.",
+                type: "Natura/Aktywność",
+                coords: [35.0403, 33.9853],
+                link: "https://goo.gl/maps/pR1UPn9LxX4hqTjYA"
+            },
+            {
+                name: "Larnaka – Słone Jezioro + Hala Sultan",
+                description: "Flamingi (zimą) przy słonym jeziorze i historyczny meczet obok.",
+                type: "Natura/Zabytek",
+                coords: [34.8847, 33.6106],
+                link: "https://goo.gl/maps/hC2iXuzN6oFgtZbE6"
+            },
+            {
+                name: "Promenada Foinikoudes (Larnaka)",
+                description: "Piękna nadmorska promenada z palmami, knajpkami i sportami wodnymi.",
+                type: "Natura/Miejska",
+                coords: [34.9139, 33.6347],
+                link: "https://goo.gl/maps/dFp7H9Ny8DK6y7he7"
+            },
+            {
+                name: "Cerkiew św. Łazarza (Larnaka)",
+                description: "Świątynia z grobem św. Łazarza, jeden z najważniejszych zabytków miasta.",
+                type: "Zabytek",
+                coords: [34.9133, 33.6364],
+                link: "https://goo.gl/maps/Yn8Z8qV4kXj5N8zE9"
+            },
+            {
+                name: "Zamek w Larnace",
+                description: "Twierdza nad morzem z muzeum, zakładana w średniowieczu, z pięknym widokiem.",
+                type: "Zabytek",
+                coords: [34.9119, 33.6381],
+                link: "https://goo.gl/maps/3M2qX9p4z8hLgKZ28"
+            },
+            {
+                name: "Klasztor Stawrowouni",
+                description: "Klasztor na wzgórzu z IV w., z niesamowitym widokiem na okolice.",
+                type: "Zabytek/Widok",
+                coords: [34.8706, 33.4158],
+                link: "https://goo.gl/maps/aK8Vz6jMwR8q8gB49"
+            },
+            {
+                name: "Monastyr Kykkos (Troodos)",
+                description: "Najbogatszy klasztor Cypru, źródło słynnej ikony; w górskim krajobrazie Troodos.",
+                type: "Zabytek/Lokalny klimat",
+                coords: [34.9800, 32.7400],
+                link: "https://goo.gl/maps/8P7aL5zR3KWRqMhA8"
+            },
+            {
+                name: "Limassol – Zamek Kolossi i Kurion",
+                description: "Średniowieczna twierdza i ruiny antycznego miasta na klifie z widokiem na morze.",
+                type: "Zabytek/Natura",
+                coords: [34.6711, 32.8742],
+                link: "https://goo.gl/maps/Xp2L4x7tNwM5bHGL8"
+            },
+            {
+                name: "Ayia Napa – Park Rzeźb",
+                description: "Park z dziełami europejskich artystów – fotogeniczny i nowoczesny.",
+                type: "Sztuka/Lokalny klimat",
+                coords: [34.9833, 33.9989],
+                link: "https://goo.gl/maps/6R9L2s5xXBhKp9pX7"
+            },
+            {
+                name: "Love Bridge (Most Miłości)",
+                description: "Naturalny most skalny – romantyczne miejsce idealne na zdjęcia.",
+                type: "Natura/Widok",
+                coords: [34.9600, 34.0750],
+                link: "https://goo.gl/maps/5N7M1x6cYCpLqkQz6"
+            },
+            {
+                name: "Plaża Nissi (Ayia Napa)",
+                description: "Jedna z najpiękniejszych plaż na Cyprze z płytką laguną i beach barami.",
+                type: "Natura/Plaża",
+                coords: [34.9856, 33.9775],
+                link: "https://goo.gl/maps/Tq3M9W7sXDv9rLjz8"
+            },
+            {
+                name: "Paralimni (miejsce lokalne)",
+                description: "Spokojne miasteczko z lokalnymi piekarniami (Zorbas), targiem Derinia i beach barem Tulum.",
+                type: "Lokalny klimat/Kulinarne",
+                coords: [35.0403, 33.9853],
+                link: "https://goo.gl/maps/jR2L4t5mKCxXpPjR8"
+            },
+            {
+                name: "Papouis Protaras Hotel",
+                description: "Twój hotel w Protaras",
+                type: "Hotel",
+                coords: [35.025362, 34.040899],
+                link: "https://www.google.com/maps/place/Papouis+Protaras+Hotel/@35.0258981,34.0379742,783m"
+            }
+        ];
+
+        // Przechowywanie markerów w tablicy
+        const markers = [];
+
+        // Dodanie markerów na mapę
+        attractions.forEach((attraction, index) => {
+            const marker = L.marker(attraction.coords, {
+                icon: createIcon(attraction.type)
+            });
+            
+            // Styl popup na podstawie typu
+            let popupClass = '';
+            switch(attraction.type) {
+                case 'Natura':
+                    popupClass = 'natura';
+                    break;
+                case 'Zabytek':
+                    popupClass = 'zabytek';
+                    break;
+                case 'Zabytek/Lokalny klimat':
+                    popupClass = 'lokalny';
+                    break;
+                case 'Hotel':
+                    popupClass = 'hotel';
+                    break;
+            }
+            
+            const popupContent = `
+                <div class="popup-content">
+                    <div class="popup-title">${attraction.name}</div>
+                    <div class="popup-type ${popupClass}">${attraction.type}</div>
+                    <div class="popup-description">${attraction.description}</div>
+                    <a href="${attraction.link}" target="_blank" class="popup-link">
+                        Zobacz na mapie Google
+                    </a>
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+            
+            // Dodanie markera do mapy i tablicy
+            marker.addTo(map);
+            markers.push(marker);
+        });
+
+        // Sprawdzenie czy markery są na mapie po załadowaniu
+        map.whenReady(function() {
+            console.log(`Dodano ${markers.length} markerów na mapę`);
+            
+            // Upewnienie się, że wszystkie markery są widoczne
+            markers.forEach(marker => {
+                if (!map.hasLayer(marker)) {
+                    marker.addTo(map);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
