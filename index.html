@@ -2343,26 +2343,50 @@
         }
     </script>
 
-    <!-- Popup z kołem fortuny -->
-    <div id="wheel-popup" class="wheel-popup">
+    <!-- Popup z kołem fortuny - osoby -->
+    <div id="people-wheel-popup" class="wheel-popup">
         <div class="wheel-container">
-            <div class="wheel-close">&times;</div>
-            <h2 id="wheel-title" class="wheel-title">🎰 KOŁO FORTUNY - KTO LECI PO DRINKI? 🍺</h2>
+            <div class="wheel-close people-wheel-close">&times;</div>
+            <h2 id="people-wheel-title" class="wheel-title">🎰 KOŁO FORTUNY - KTO LECI PO DRINKI? 🍺</h2>
             <div class="wheel-wrapper">
-                <div id="winner-indicator" class="winner-indicator hidden">
-                    <div id="winner-name" class="winner-name"></div>
-                    <div id="winner-emoji" class="winner-emoji"></div>
+                <div id="people-winner-indicator" class="winner-indicator hidden">
+                    <div id="people-winner-name" class="winner-name"></div>
+                    <div id="people-winner-emoji" class="winner-emoji"></div>
                 </div>
-                <div id="wheel" class="wheel">
+                <div id="people-wheel" class="wheel">
                     <div class="wheel-center">
                         <div class="wheel-pointer">▼</div>
                     </div>
                 </div>
-                <button id="spin-button" class="spin-button">KRĘĆ KOŁEM! 🎲</button>
+                <button id="people-spin-button" class="spin-button">KRĘĆ KOŁEM! 🎲</button>
             </div>
-            <div id="result" class="result hidden">
-                <h3 id="result-text"></h3>
-                <p id="result-emoji"></p>
+            <div id="people-result" class="result hidden">
+                <h3 id="people-result-text"></h3>
+                <p id="people-result-emoji"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup z kołem fortuny - drinki -->
+    <div id="drinks-wheel-popup" class="wheel-popup">
+        <div class="wheel-container">
+            <div class="wheel-close drinks-wheel-close">&times;</div>
+            <h2 id="drinks-wheel-title" class="wheel-title">🥂 KOŁO DRINKÓW - CZYM SIĘ UPIJEMY? 🥃</h2>
+            <div class="wheel-wrapper">
+                <div id="drinks-winner-indicator" class="winner-indicator hidden">
+                    <div id="drinks-winner-name" class="winner-name"></div>
+                    <div id="drinks-winner-emoji" class="winner-emoji"></div>
+                </div>
+                <div id="drinks-wheel" class="wheel">
+                    <div class="wheel-center">
+                        <div class="wheel-pointer">▼</div>
+                    </div>
+                </div>
+                <button id="drinks-spin-button" class="spin-button">KRĘĆ KOŁEM! 🎲</button>
+            </div>
+            <div id="drinks-result" class="result hidden">
+                <h3 id="drinks-result-text"></h3>
+                <p id="drinks-result-emoji"></p>
             </div>
         </div>
     </div>
@@ -2372,47 +2396,61 @@
         class WheelOfFortune {
             constructor() {
                 this.names = [
-                    { name: "Patryk", chance: 0, emoji: "😴" },
-                    { name: "Ola", chance: 1, emoji: "🍸" },
-                    { name: "Kami", chance: 1, emoji: "🍺" },
-                    { name: "Młody", chance: 1, emoji: "🥃" },
-                    { name: "Kuba", chance: 1, emoji: "🍻" },
-                    { name: "Kasia", chance: 1, emoji: "🍹" },
-                    { name: "Bartas", chance: 1, emoji: "🍶" },
-                    { name: "Karolina", chance: 1, emoji: "🍷" },
-                    { name: "Eryk", chance: 9, emoji: "🥂" } // 90% szans
+                    { name: "Patryk", chance: 1, emoji: "😴" },
+                    { name: "Ola", chance: 2, emoji: "🍸" },
+                    { name: "Kami", chance: 2, emoji: "🍺" },
+                    { name: "Młody", chance: 2, emoji: "🥃" },
+                    { name: "Kuba", chance: 2, emoji: "🍻" },
+                    { name: "Kasia", chance: 2, emoji: "🍹" },
+                    { name: "Bartas", chance: 2, emoji: "🍶" },
+                    { name: "Karolina", chance: 2, emoji: "🍷" },
+                    { name: "Eryk", chance: 6, emoji: "🥂" } // 35% szans
                 ];
 
-                this.wheel = document.getElementById('wheel');
-                this.spinButton = document.getElementById('spin-button');
-                this.resultDiv = document.getElementById('result');
-                this.resultText = document.getElementById('result-text');
-                this.resultEmoji = document.getElementById('result-emoji');
-                this.popup = document.getElementById('wheel-popup');
-                this.closeBtn = document.querySelector('.wheel-close');
-                this.winnerIndicator = document.getElementById('winner-indicator');
-                this.winnerName = document.getElementById('winner-name');
-                this.winnerEmoji = document.getElementById('winner-emoji');
-                this.titleElement = document.getElementById('wheel-title');
+                this.wheel = document.getElementById('people-wheel');
+                this.spinButton = document.getElementById('people-spin-button');
+                this.resultDiv = document.getElementById('people-result');
+                this.resultText = document.getElementById('people-result-text');
+                this.resultEmoji = document.getElementById('people-result-emoji');
+                this.popup = document.getElementById('people-wheel-popup');
+                this.closeBtn = document.querySelector('.people-wheel-close');
+                this.winnerIndicator = document.getElementById('people-winner-indicator');
+                this.winnerName = document.getElementById('people-winner-name');
+                this.winnerEmoji = document.getElementById('people-winner-emoji');
+                this.titleElement = document.getElementById('people-wheel-title');
 
                 this.isSpinning = false;
                 this.angle = 0;
                 this.winnerSegment = null;
 
-                this.init();
                 this.createWheel();
             }
 
             init() {
-                this.spinButton.addEventListener('click', () => this.spin());
-                this.closeBtn.addEventListener('click', () => this.closePopup());
+                // Ponownie pobierz elementy z DOM aby mieć świeże referencje
+                this.spinButton = document.getElementById('people-spin-button');
+                this.closeBtn = document.querySelector('.people-wheel-close');
+                this.popup = document.getElementById('people-wheel-popup');
 
-                // Zamykanie na kliknięcie poza popup
-                this.popup.addEventListener('click', (e) => {
-                    if (e.target === this.popup) {
-                        this.closePopup();
-                    }
-                });
+                // Dodaj event listenery z unikalnymi nazwami funkcji aby uniknąć duplikatów
+                if (!this.spinButton.hasSpinListener) {
+                    this.spinButton.addEventListener('click', () => this.spin());
+                    this.spinButton.hasSpinListener = true;
+                }
+
+                if (!this.closeBtn.hasCloseListener) {
+                    this.closeBtn.addEventListener('click', () => this.closePopup());
+                    this.closeBtn.hasCloseListener = true;
+                }
+
+                if (!this.popup.hasPopupListener) {
+                    this.popup.addEventListener('click', (e) => {
+                        if (e.target === this.popup) {
+                            this.closePopup();
+                        }
+                    });
+                    this.popup.hasPopupListener = true;
+                }
             }
 
             createWheel() {
@@ -2437,16 +2475,9 @@
                     text.className = 'wheel-text';
                     text.textContent = person.name;
 
-                    // Dodaj kontener na ikonę drinka (ukrytą na początku)
-                    const drinkIcon = document.createElement('div');
-                    drinkIcon.className = 'drink-icon';
-                    drinkIcon.textContent = '🍺';
-                    drinkIcon.style.display = 'none';
-
                     console.log(`Adding segment ${index}: ${person.name}`); // Debug
 
                     segment.appendChild(text);
-                    segment.appendChild(drinkIcon);
                     this.wheel.appendChild(segment);
 
                     currentAngle += segmentAngle;
@@ -2496,11 +2527,7 @@
                 // Usuń podświetlenie poprzedniego segmentu
                 if (this.winnerSegment) {
                     this.winnerSegment.classList.remove('winner');
-                    // Ukryj ikonę drinka
-                    const drinkIcon = this.winnerSegment.querySelector('.drink-icon');
-                    if (drinkIcon) {
-                        drinkIcon.style.display = 'none';
-                    }
+
                 }
 
                 // Dodaj efekt świetlny podczas obrotu
@@ -2571,29 +2598,16 @@
                 // Usuń efekt świetlny
                 this.wheel.classList.remove('spinning');
 
-                // Pokaż wskaźnik zwycięzcy nad kołem
-                this.winnerName.textContent = winner.name;
-                this.winnerEmoji.textContent = winner.emoji;
-                this.winnerIndicator.classList.remove('hidden');
-
                 // Podświetl zwycięski segment
                 const segments = this.wheel.querySelectorAll('.wheel-segment');
                 if (this.winnerSegment) {
                     this.winnerSegment.classList.remove('winner');
-                    // Ukryj poprzednią ikonę drinka
-                    const oldDrinkIcon = this.winnerSegment.querySelector('.drink-icon');
-                    if (oldDrinkIcon) {
-                        oldDrinkIcon.style.display = 'none';
-                    }
+
                 }
                 this.winnerSegment = segments[this.winnerIndex];
                 if (this.winnerSegment) {
                     this.winnerSegment.classList.add('winner');
-                    // Pokaż ikonę drinka w zwycięskim segmencie
-                    const drinkIcon = this.winnerSegment.querySelector('.drink-icon');
-                    if (drinkIcon) {
-                        drinkIcon.style.display = 'block';
-                    }
+
                 }
 
                 this.resultText.textContent = `${winner.name} LECI PO DRINKI!`;
@@ -2659,11 +2673,7 @@
                 // Usuń podświetlenie segmentu
                 if (this.winnerSegment) {
                     this.winnerSegment.classList.remove('winner');
-                    // Ukryj ikonę drinka
-                    const drinkIcon = this.winnerSegment.querySelector('.drink-icon');
-                    if (drinkIcon) {
-                        drinkIcon.style.display = 'none';
-                    }
+
                     this.winnerSegment = null;
                 }
 
@@ -2672,6 +2682,21 @@
             }
 
             showPopup() {
+                // Wyczyść poprzednie wyniki
+                this.resultDiv.classList.add('hidden');
+                this.winnerIndicator.classList.add('hidden');
+                this.resultText.textContent = '';
+                this.resultEmoji.textContent = '';
+
+                // Zresetuj stan zwycięzcy
+                if (this.winnerSegment) {
+                    this.winnerSegment.classList.remove('winner');
+                    this.winnerSegment = null;
+                }
+
+                // Zainicjalizuj event listenery
+                this.init();
+
                 this.titleElement.textContent = '🎰 KOŁO FORTUNY - KTO LECI PO DRINKI? 🍺';
                 this.popup.style.display = 'flex';
             }
@@ -2681,50 +2706,64 @@
         class DrinksWheel {
             constructor() {
                 this.names = [
-                    { name: "Wódka", chance: 2, emoji: "🥃" },
+                    { name: "Margarita", chance: 2, emoji: "🍹" },
                     { name: "Piwo", chance: 1, emoji: "🍺" },
-                    { name: "Whisky", chance: 2, emoji: "🥃" },
+                    { name: "Mojito", chance: 2, emoji: "🍸" },
                     { name: "Gin & Tonic", chance: 1, emoji: "🍸" },
                     { name: "Wino", chance: 1, emoji: "🍷" },
-                    { name: "Wódka", chance: 2, emoji: "🥃" },
-                    { name: "Whisky", chance: 2, emoji: "🥃" },
+                    { name: "Margarita", chance: 2, emoji: "🍹" },
+                    { name: "Mojito", chance: 2, emoji: "🍸" },
                     { name: "Gin", chance: 1, emoji: "🍸" },
                     { name: "Rum", chance: 1, emoji: "🍹" },
                     { name: "Tequila", chance: 1, emoji: "🥂" },
-                    { name: "Wódka", chance: 2, emoji: "🥃" },
-                    { name: "Whisky", chance: 2, emoji: "🥃" }
+                    { name: "Margarita", chance: 2, emoji: "🍹" },
+                    { name: "Mojito", chance: 2, emoji: "🍸" }
                 ];
 
-                this.wheel = document.getElementById('wheel');
-                this.spinButton = document.getElementById('spin-button');
-                this.resultDiv = document.getElementById('result');
-                this.resultText = document.getElementById('result-text');
-                this.resultEmoji = document.getElementById('result-emoji');
-                this.popup = document.getElementById('wheel-popup');
-                this.closeBtn = document.querySelector('.wheel-close');
-                this.winnerIndicator = document.getElementById('winner-indicator');
-                this.winnerName = document.getElementById('winner-name');
-                this.winnerEmoji = document.getElementById('winner-emoji');
-                this.titleElement = document.getElementById('wheel-title');
+                this.wheel = document.getElementById('drinks-wheel');
+                this.spinButton = document.getElementById('drinks-spin-button');
+                this.resultDiv = document.getElementById('drinks-result');
+                this.resultText = document.getElementById('drinks-result-text');
+                this.resultEmoji = document.getElementById('drinks-result-emoji');
+                this.popup = document.getElementById('drinks-wheel-popup');
+                this.closeBtn = document.querySelector('.drinks-wheel-close');
+                this.winnerIndicator = document.getElementById('drinks-winner-indicator');
+                this.winnerName = document.getElementById('drinks-winner-name');
+                this.winnerEmoji = document.getElementById('drinks-winner-emoji');
+                this.titleElement = document.getElementById('drinks-wheel-title');
 
                 this.isSpinning = false;
                 this.angle = 0;
                 this.winnerSegment = null;
 
-                this.init();
                 this.createWheel();
             }
 
             init() {
-                this.spinButton.addEventListener('click', () => this.spin());
-                this.closeBtn.addEventListener('click', () => this.closePopup());
+                // Ponownie pobierz elementy z DOM aby mieć świeże referencje
+                this.spinButton = document.getElementById('drinks-spin-button');
+                this.closeBtn = document.querySelector('.drinks-wheel-close');
+                this.popup = document.getElementById('drinks-wheel-popup');
 
-                // Zamykanie na kliknięcie poza popup
-                this.popup.addEventListener('click', (e) => {
-                    if (e.target === this.popup) {
-                        this.closePopup();
-                    }
-                });
+                // Dodaj event listenery z unikalnymi nazwami funkcji aby uniknąć duplikatów
+                if (!this.spinButton.hasSpinListener) {
+                    this.spinButton.addEventListener('click', () => this.spin());
+                    this.spinButton.hasSpinListener = true;
+                }
+
+                if (!this.closeBtn.hasCloseListener) {
+                    this.closeBtn.addEventListener('click', () => this.closePopup());
+                    this.closeBtn.hasCloseListener = true;
+                }
+
+                if (!this.popup.hasPopupListener) {
+                    this.popup.addEventListener('click', (e) => {
+                        if (e.target === this.popup) {
+                            this.closePopup();
+                        }
+                    });
+                    this.popup.hasPopupListener = true;
+                }
             }
 
             createWheel() {
@@ -2807,11 +2846,7 @@
                 // Usuń podświetlenie poprzedniego segmentu
                 if (this.winnerSegment) {
                     this.winnerSegment.classList.remove('winner');
-                    // Ukryj ikonę drinka
-                    const drinkIcon = this.winnerSegment.querySelector('.drink-icon');
-                    if (drinkIcon) {
-                        drinkIcon.style.display = 'none';
-                    }
+
                 }
 
                 // Dodaj efekt świetlny podczas obrotu
@@ -2882,29 +2917,16 @@
                 // Usuń efekt świetlny
                 this.wheel.classList.remove('spinning');
 
-                // Pokaż wskaźnik zwycięzcy nad kołem
-                this.winnerName.textContent = winner.name;
-                this.winnerEmoji.textContent = winner.emoji;
-                this.winnerIndicator.classList.remove('hidden');
-
                 // Podświetl zwycięski segment
                 const segments = this.wheel.querySelectorAll('.wheel-segment');
                 if (this.winnerSegment) {
                     this.winnerSegment.classList.remove('winner');
-                    // Ukryj poprzednią ikonę drinka
-                    const oldDrinkIcon = this.winnerSegment.querySelector('.drink-icon');
-                    if (oldDrinkIcon) {
-                        oldDrinkIcon.style.display = 'none';
-                    }
+
                 }
                 this.winnerSegment = segments[this.winnerIndex];
                 if (this.winnerSegment) {
                     this.winnerSegment.classList.add('winner');
-                    // Pokaż ikonę drinka w zwycięskim segmencie
-                    const drinkIcon = this.winnerSegment.querySelector('.drink-icon');
-                    if (drinkIcon) {
-                        drinkIcon.style.display = 'block';
-                    }
+
                 }
 
                 this.resultText.textContent = `WYGRANA: ${winner.name}!`;
@@ -2970,11 +2992,7 @@
                 // Usuń podświetlenie segmentu
                 if (this.winnerSegment) {
                     this.winnerSegment.classList.remove('winner');
-                    // Ukryj ikonę drinka
-                    const drinkIcon = this.winnerSegment.querySelector('.drink-icon');
-                    if (drinkIcon) {
-                        drinkIcon.style.display = 'none';
-                    }
+
                     this.winnerSegment = null;
                 }
 
@@ -2983,6 +3001,21 @@
             }
 
             showPopup() {
+                // Wyczyść poprzednie wyniki
+                this.resultDiv.classList.add('hidden');
+                this.winnerIndicator.classList.add('hidden');
+                this.resultText.textContent = '';
+                this.resultEmoji.textContent = '';
+
+                // Zresetuj stan zwycięzcy
+                if (this.winnerSegment) {
+                    this.winnerSegment.classList.remove('winner');
+                    this.winnerSegment = null;
+                }
+
+                // Zainicjalizuj event listenery
+                this.init();
+
                 this.titleElement.textContent = '🥂 KOŁO DRINKÓW - CZYM SIĘ UPIJEMY? 🥃';
                 this.popup.style.display = 'flex';
             }
