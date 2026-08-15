@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0b2545">
-<meta name="description" content="Interaktywna mapa atrakcji Chorwacji, 7-dniowy plan wyjazdu i koła fortuny: kto leci po drinki i jaki drink wypada.">
+<meta name="description" content="Interaktywna mapa atrakcji Chorwacji, 7-dniowy plan wyjazdu i koła fortuny: kto robi drinki i jaki drink wypada.">
 <title>Chorwacja - Interaktywna Mapa</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇭🇷</text></svg>">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
@@ -187,8 +187,10 @@ section { padding-block: clamp(1.75rem, 6vw, 3rem); }
   background: var(--card);
 }
 #map {
-  /* dvh, żeby pasek adresu na mobile nie ucinał mapy */
-  height: clamp(340px, 65dvh, 620px);
+  /* Fallback MUSI być pierwszy: gdy przeglądarka nie zna dvh, cały clamp()
+     jest nieprawidłowy i wysokość spada do auto, czyli mapa znika. */
+  height: clamp(340px, 65vh, 620px);
+  height: clamp(340px, 65dvh, 620px);   /* dvh: pasek adresu nie ucina mapy */
   width: 100%;
   background: #dfe9f3;
 }
@@ -626,7 +628,7 @@ footer {
           <span class="ico">🎰</span>
           <span class="txt">
             <strong>KOŁO FORTUNY</strong>
-            <small>Kto leci po drinki? 🍺</small>
+            <small>Kto robi drinki? 🍺</small>
           </span>
           <span class="arw">🎲</span>
         </button>
@@ -1199,12 +1201,27 @@ class Wheel {
     this.dom.wheel.style.transitionDuration = `${duration}ms`;
     this.dom.wheel.style.transform = `rotate(${this.rotation}deg)`;
 
+    // Bezpiecznik: gdyby transitionend nie dotarł (przerwana tranzycja, karta
+    // w tle, zerowy czas animacji), przycisk zostałby zablokowany na zawsze.
+    clearTimeout(this.guard);
+    this.guard = setTimeout(() => this.finish(), duration + 400);
+
     if (navigator.vibrate) navigator.vibrate(35);
   }
 
   /** Wynik pokazujemy dopiero, gdy koło faktycznie stanie. */
   onEnd(e) {
-    if (e.propertyName !== "transform" || !this.spinning) return;
+    // e.target musi być samym kołem. Przy prefers-reduced-motion reguła
+    // `* { transition-duration: .01ms !important }` daje tranzycje także
+    // etykietom w środku, a ich transitionend bąbelkuje tutaj i pokazałby
+    // wynik zanim koło ruszy.
+    if (e.target !== this.dom.wheel || e.propertyName !== "transform") return;
+    this.finish();
+  }
+
+  finish() {
+    if (!this.spinning) return;
+    clearTimeout(this.guard);
 
     this.spinning = false;
     this.dom.spin.disabled = false;
@@ -1220,6 +1237,7 @@ class Wheel {
   }
 
   reset() {
+    clearTimeout(this.guard);
     this.spinning = false;
     this.dom.result.hidden = true;
     this.dom.spin.disabled = false;
@@ -1255,7 +1273,7 @@ function setupModal(wheel) {
   };
 
   document.getElementById("open-people").addEventListener("click", () =>
-    open(PEOPLE, "🎰 Kto leci po drinki?", "🍺"));
+    open(PEOPLE, "🎰 Kto robi drinki?", "🍺"));
 
   document.getElementById("open-drinks").addEventListener("click", () =>
     open(DRINKS, "🥂 Czym się dziś trujemy?", "🍹"));
