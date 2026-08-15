@@ -460,13 +460,15 @@ section { padding-block: clamp(1.75rem, 6vw, 3rem); }
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 50%;
+  width: 50%;              /* od środka do krawędzi = promień */
   transform-origin: 0 50%;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: .3rem;
-  padding-right: 10%;
+  /* Lewy padding odsuwa tekst od piasty (ma 21% szerokości koła, czyli 21%
+     długości etykiety) — bez tego dłuższe nazwy wchodziły pod środek i były ucinane. */
+  padding-left: 22%;
+  padding-right: 9%;
   font-size: clamp(.62rem, 2.6vw, .82rem);
   font-weight: 700;
   color: #fff;
@@ -474,6 +476,18 @@ section { padding-block: clamp(1.75rem, 6vw, 3rem); }
   pointer-events: none;
   white-space: nowrap;
 }
+.wheel .label .txt {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  /* Bez tego flexbox ściska napis do dostępnej szerokości, a `nowrap` i tak
+     nie pozwala mu się zwęzić — treść wylewała się poza obręb koła.
+     Z flex-shrink:0 nadmiar idzie do środka, gdzie chowa go piasta. */
+  flex-shrink: 0;
+}
+/* Etykiety na lewej połowie koła (środek segmentu > 180°) są obrócone o więcej
+   niż 90°, więc tekst stałby na głowie. Obracamy sam napis o kolejne 180°. */
+.wheel .label.flip .txt { transform: rotate(180deg); }
 .wheel .label .em { font-size: 1.15em; }
 
 .hub {
@@ -1148,10 +1162,16 @@ class Wheel {
     this.dom.wheel.style.background = `conic-gradient(from 0deg, ${stops})`;
 
     // Etykiety: obrót do środka segmentu, minus 90° bo element leży poziomo.
-    this.dom.wheel.innerHTML = this.items.map((item, i) => `
-      <div class="label" style="transform: rotate(${this.center(i) - 90}deg)">
-        <span>${item.name}</span><span class="em">${item.emoji}</span>
-      </div>`).join("");
+    // Powyżej 180° etykieta trafia na lewą połowę i tekst stanąłby na głowie,
+    // więc dostaje klasę .flip, która obraca sam napis o kolejne 180°.
+    this.dom.wheel.innerHTML = this.items.map((item, i) => {
+      const angle = this.center(i);
+      const flip = angle > 180 ? " flip" : "";
+      return `
+      <div class="label${flip}" style="transform: rotate(${angle - 90}deg)">
+        <span class="txt"><span>${item.name}</span><span class="em">${item.emoji}</span></span>
+      </div>`;
+    }).join("");
   }
 
   renderOdds() {
