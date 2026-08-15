@@ -656,7 +656,7 @@ footer {
   <!-- ============ Plan ============ -->
   <section>
     <div class="wrap">
-      <h2 class="section-title">🗓️ 7-dniowy plan — baza w Splicie</h2>
+      <h2 class="section-title">🗓️ 7-dniowy plan — baza koło Zadaru</h2>
       <div class="days" id="days"></div>
 
       <div class="panel tips">
@@ -726,48 +726,67 @@ const ATTRACTIONS = [
   // --- Split i okolice (baza) ---
   { name: "Pałac Dioklecjana (Split)", cat: "zabytek", coords: [43.5081, 16.4402],
     desc: "Rzymski pałac z IV w., dziś żywe centrum Splitu — bary i restauracje wprost w antycznych murach.",
-    link: "https://pl.wikipedia.org/wiki/Pa%C5%82ac_Dioklecjana" },
+    link: "https://pl.wikipedia.org/wiki/Pa%C5%82ac_Dioklecjana_w_Splicie" },
   { name: "Katedra św. Domniusa", cat: "zabytek", coords: [43.5084, 16.4407],
     desc: "Najstarsza katedra świata w użyciu — dawne mauzoleum Dioklecjana. Wejście na dzwonnicę = widok na całe miasto.",
-    link: "https://pl.wikipedia.org/wiki/Katedra_%C5%9Bw._Domniusa_w_Splicie" },
+    link: "https://pl.wikipedia.org/wiki/Katedra_w_Splicie" },
   { name: "Wzgórze Marjan", cat: "widok", coords: [43.5089, 16.4180],
     desc: "Leśny park nad Splitem, ścieżki i tarasy widokowe. Najlepiej o zachodzie słońca.",
-    link: "https://pl.wikipedia.org/wiki/Marjan" },
+    link: "https://pl.wikipedia.org/wiki/Split" },
   { name: "Plaża Bačvice", cat: "plaza", coords: [43.5019, 16.4514],
     desc: "Piaszczysta, płytka plaża w mieście. Wieczorem zmienia się w strefę barów.",
     link: "https://www.visitsplit.com/" },
   { name: "Riva (Split)", cat: "klimat", coords: [43.5074, 16.4380],
     desc: "Nadmorska promenada — kawa, ludzie, punkt zborny całej ekipy.",
     link: "https://www.visitsplit.com/" },
-  { name: "Baza: Split", cat: "baza", coords: [43.5100, 16.4400],
-    desc: "Nocleg i punkt wypadowy. Stąd promy na wyspy i auto w głąb lądu.",
-    link: "https://www.visitsplit.com/" },
+  // --- Zadar i okolice (BAZA) ---
+  { name: "Baza: okolice Zadaru", cat: "baza", coords: [44.1167, 15.2333],
+    desc: "Nocleg i punkt wypadowy. Stąd blisko na Plitwice, Krkę, Pag i rejsy po Kornatach.",
+    link: "https://pl.wikipedia.org/wiki/Zadar" },
+  { name: "Zadar — Stare Miasto", cat: "zabytek", coords: [44.1150, 15.2270],
+    desc: "Rzymskie Forum, kościół św. Donata i marmurowe uliczki na półwyspie. Wszystko na piechotę.",
+    link: "https://pl.wikipedia.org/wiki/Zadar" },
+  { name: "Telašćica (Dugi otok)", cat: "natura", coords: [43.8900, 15.1750],
+    desc: "Park przyrody: 160-metrowe klify od strony otwartego morza i słone jezioro Mir tuż za nimi.",
+    link: "https://pl.wikipedia.org/wiki/Dugi_Otok" },
+  { name: "Plaża Sakarun (Dugi otok)", cat: "plaza", coords: [44.1160, 14.8650],
+    desc: "Biały piasek i turkusowa płycizna — najbliższa karaibskiemu widokowi rzecz w Chorwacji.",
+    link: "https://pl.wikipedia.org/wiki/Dugi_Otok" },
+  { name: "Zrće (Novalja, Pag)", cat: "impreza", coords: [44.5395, 14.8925],
+    desc: "Plaża klubowa czynna 24 h — Papaya, Aquarius, Kalypso. Chorwackie Ibiza w wersji żwirowej.",
+    link: "https://pl.wikipedia.org/wiki/Novalja" },
+  { name: "Pag — miasto i krajobraz księżycowy", cat: "widok", coords: [44.4442, 15.0533],
+    desc: "Wyspa wyjałowiona przez wiatr bura, wygląda jak Księżyc. Do tego ser paški sir i koronki.",
+    link: "https://pl.wikipedia.org/wiki/Pag" },
+  { name: "Jezioro Vransko", cat: "natura", coords: [43.9050, 15.5600],
+    desc: "Największe naturalne jezioro Chorwacji, rezerwat ptaków tuż przy morzu. Rowery i taras widokowy Kamenjak.",
+    link: "https://pl.wikipedia.org/wiki/Vransko_jezero" },
 
   // --- Wyspy ---
   { name: "Hvar — miasto", cat: "impreza", coords: [43.1729, 16.4413],
     desc: "Stolica imprez Adriatyku. Marina, bary, kluby do rana.",
     link: "https://pl.wikipedia.org/wiki/Hvar" },
   { name: "Twierdza Fortica (Hvar)", cat: "widok", coords: [43.1750, 16.4419],
-    desc: "Forteca nad miastem z panoramą na Wyspy Pakleńskie. Wejście ok. 20 min pod górę.",
+    desc: "Forteca nad miastem z panoramą na Wyspy Paklińskie. Wejście ok. 20 min pod górę.",
     link: "https://pl.wikipedia.org/wiki/Hvar" },
-  { name: "Wyspy Pakleńskie", cat: "wyspa", coords: [43.1580, 16.3900],
+  { name: "Wyspy Paklińskie", cat: "wyspa", coords: [43.1580, 16.3900],
     desc: "Archipelag tuż przy Hvarze — zatoczki, beach bary, taxi-boat z portu.",
-    link: "https://pl.wikipedia.org/wiki/Wyspy_Pakle%C5%84skie" },
+    link: "https://pl.wikipedia.org/wiki/Wyspy_Pakli%C5%84skie" },
   { name: "Zlatni Rat (Bol, Brač)", cat: "plaza", coords: [43.2570, 16.6360],
     desc: "Najsłynniejsza plaża Chorwacji — żwirowy cypel zmieniający kształt z wiatrem.",
-    link: "https://pl.wikipedia.org/wiki/Zlatni_Rat" },
+    link: "https://pl.wikipedia.org/wiki/Zlatni_rat" },
   { name: "Zatoka Stiniva (Vis)", cat: "plaza", coords: [43.0300, 16.1650],
     desc: "Zatoka zamknięta ścianami klifu, wejście wąską szczeliną. Dojazd łodzią albo stromym zejściem.",
     link: "https://pl.wikipedia.org/wiki/Vis_(wyspa)" },
   { name: "Błękitna Grota (Biševo)", cat: "woda", coords: [42.9903, 16.0136],
     desc: "Jaskinia, w której woda świeci na niebiesko w południe. Tylko z przewodnikiem, rejs z Visu lub Splitu.",
-    link: "https://pl.wikipedia.org/wiki/B%C5%82%C4%99kitna_Grota_(Bi%C5%A1evo)" },
+    link: "https://pl.wikipedia.org/wiki/Bi%C5%A1evo" },
   { name: "Korčula — Stare Miasto", cat: "zabytek", coords: [42.9600, 17.1360],
     desc: "Miniaturowe miasto-forteca o układzie rybiej ości. Podobno urodził się tu Marco Polo.",
     link: "https://pl.wikipedia.org/wiki/Kor%C4%8Dula" },
   { name: "Park Narodowy Mljet", cat: "natura", coords: [42.7800, 17.3500],
     desc: "Wyspa z dwoma słonymi jeziorami i wysepką z klasztorem. Rowery i kajaki na miejscu.",
-    link: "https://pl.wikipedia.org/wiki/Mljet_(park_narodowy)" },
+    link: "https://pl.wikipedia.org/wiki/Park_Narodowy_Mljet" },
 
   // --- Parki narodowe ---
   { name: "Jeziora Plitwickie", cat: "natura", coords: [44.8654, 15.5820],
@@ -775,19 +794,19 @@ const ATTRACTIONS = [
     link: "https://pl.wikipedia.org/wiki/Park_Narodowy_Jezior_Plitwickich" },
   { name: "Skradinski Buk (NP Krka)", cat: "woda", coords: [43.8060, 15.9640],
     desc: "Największa kaskada Krki — 17 progów wodnych. Najbliższy duży park od Splitu.",
-    link: "https://pl.wikipedia.org/wiki/Krka_(park_narodowy)" },
+    link: "https://pl.wikipedia.org/wiki/Park_Narodowy_Krka" },
   { name: "Roški Slap (NP Krka)", cat: "woda", coords: [43.9050, 15.9750],
     desc: "Spokojniejsza część Krki — kaskady i stare młyny wodne, mniej tłumów niż Skradinski Buk.",
-    link: "https://pl.wikipedia.org/wiki/Krka_(park_narodowy)" },
+    link: "https://pl.wikipedia.org/wiki/Park_Narodowy_Krka" },
   { name: "Park Narodowy Kornati", cat: "wyspa", coords: [43.8000, 15.3300],
     desc: "89 wysp i skał na pustkowiu Adriatyku. Tylko rejsem — jednodniowe wycieczki z Zadaru i Šibenika.",
     link: "https://pl.wikipedia.org/wiki/Kornati" },
   { name: "Park Narodowy Paklenica", cat: "natura", coords: [44.3010, 15.4600],
     desc: "Dwa kaniony wcięte w Velebit — raj wspinaczy i szlaki na każdy poziom.",
-    link: "https://pl.wikipedia.org/wiki/Paklenica" },
+    link: "https://pl.wikipedia.org/wiki/Park_Narodowy_Paklenica" },
   { name: "Park Narodowy Sjeverni Velebit", cat: "natura", coords: [44.7800, 14.9700],
     desc: "Dzikie pasmo nad morzem, ścieżka Premužicia i widoki na wyspy Kvarneru.",
-    link: "https://pl.wikipedia.org/wiki/Sjeverni_Velebit" },
+    link: "https://pl.wikipedia.org/wiki/Park_Narodowy_Welebitu_P%C3%B3%C5%82nocnego" },
   { name: "Park Narodowy Risnjak", cat: "natura", coords: [45.4300, 14.6300],
     desc: "Górski, leśny park w Gorskim Kotarze. Rysie, niedźwiedzie i źródło rzeki Kupy.",
     link: "https://pl.wikipedia.org/wiki/Risnjak" },
@@ -801,7 +820,7 @@ const ATTRACTIONS = [
     link: "https://pl.wikipedia.org/wiki/Dubrownik" },
   { name: "Mury Dubrownika", cat: "widok", coords: [42.6415, 18.1070],
     desc: "2 km murów obronnych wokół starówki. Idź rano — cienia brak, a upał daje w kość.",
-    link: "https://pl.wikipedia.org/wiki/Mury_miejskie_Dubrownika" },
+    link: "https://pl.wikipedia.org/wiki/Dubrownik" },
   { name: "Wyspa Lokrum", cat: "wyspa", coords: [42.6269, 18.1197],
     desc: "15 minut promem z Dubrownika. Pawie, ogród botaniczny i słone Martwe Morze.",
     link: "https://pl.wikipedia.org/wiki/Lokrum" },
@@ -824,19 +843,19 @@ const ATTRACTIONS = [
   // --- Šibenik / Zadar ---
   { name: "Katedra św. Jakuba (Šibenik)", cat: "zabytek", coords: [43.7360, 15.8890],
     desc: "Zbudowana wyłącznie z kamienia, bez zaprawy. Fryz z 71 głowami mieszkańców z XV w.",
-    link: "https://pl.wikipedia.org/wiki/Katedra_%C5%9Bw._Jakuba_w_%C5%A0ibeniku" },
+    link: "https://pl.wikipedia.org/wiki/Katedra_%C5%9Awi%C4%99tego_Jakuba_w_Szybeniku" },
   { name: "Twierdza św. Michała (Šibenik)", cat: "widok", coords: [43.7370, 15.8880],
     desc: "Forteca nad miastem, dziś scena koncertowa z panoramą na kanał św. Antoniego.",
-    link: "https://pl.wikipedia.org/wiki/%C5%A0ibenik" },
+    link: "https://pl.wikipedia.org/wiki/Szybenik" },
   { name: "Organy Morskie (Zadar)", cat: "klimat", coords: [44.1190, 15.2210],
     desc: "Instrument grany przez fale — schody na nabrzeżu wydają dźwięk z rur pod spodem.",
-    link: "https://pl.wikipedia.org/wiki/Organy_morskie_w_Zadarze" },
+    link: "https://pl.wikipedia.org/wiki/Morskie_organy" },
   { name: "Pozdrav Suncu (Zadar)", cat: "klimat", coords: [44.1185, 15.2205],
     desc: "Solarny krąg świetlny obok Organów. Zachód słońca w Zadarze Hitchcock nazwał najpiękniejszym na świecie.",
     link: "https://pl.wikipedia.org/wiki/Zadar" },
   { name: "Nin — Plaża Królowej", cat: "plaza", coords: [44.2420, 15.1780],
     desc: "3 km piasku i płycizny — rzadkość na kamienistym wybrzeżu. Obok lecznicze błoto.",
-    link: "https://pl.wikipedia.org/wiki/Nin_(Chorwacja)" },
+    link: "https://pl.wikipedia.org/wiki/Nin" },
 
   // --- Istria i Kvarner ---
   { name: "Amfiteatr w Puli", cat: "zabytek", coords: [44.8737, 13.8500],
@@ -850,10 +869,10 @@ const ATTRACTIONS = [
     link: "https://pl.wikipedia.org/wiki/Motovun" },
   { name: "Bazylika Eufrazjusza (Poreč)", cat: "zabytek", coords: [45.2280, 13.5940],
     desc: "Bizantyjskie mozaiki z VI wieku, jedne z najlepiej zachowanych w Europie. UNESCO.",
-    link: "https://pl.wikipedia.org/wiki/Bazylika_Eufrazjusza" },
+    link: "https://pl.wikipedia.org/wiki/Bazylika_Eufrazjusza_w_Pore%C4%8Du" },
   { name: "Przylądek Kamenjak", cat: "plaza", coords: [44.7580, 13.9080],
     desc: "Dziki park na południowym cyplu Istrii — skalne zatoczki, klify do skakania, zero zabudowy.",
-    link: "https://pl.wikipedia.org/wiki/Kamenjak" },
+    link: "https://pl.wikipedia.org/wiki/Premantura" },
   { name: "Jaskinia Baredine", cat: "woda", coords: [45.2760, 13.6440],
     desc: "Pięć podziemnych sal ze stalaktytami i endemiczną odmieńcem jaskiniowym.",
     link: "https://pl.wikipedia.org/wiki/Pore%C4%8D" },
@@ -876,76 +895,75 @@ const ATTRACTIONS = [
 const ITINERARY = [
   { title: "Dzień 1: Przylot i rozruch", when: "Przylot ~15:00",
     rows: [
-      ["Popołudnie", "Lądowanie w Splicie, transfer do bazy (~30 min z lotniska)"],
+      ["Popołudnie", "Lądowanie w Zadarze, transfer do bazy"],
       ["Późne popołudnie", "Zameldowanie, rozpakowanie, pierwsze piwo na tarasie"],
-      ["Wieczór", "Spacer po Rivie, lekka kolacja, rekonesans barów"],
-      ["Noc", "Wcześnie spać. Teoretycznie."]
+      ["Wieczór", "Zadar: Organy Morskie i Pozdrav Suncu o zachodzie słońca"],
+      ["Noc", "Kolacja na starówce. Wcześnie spać — teoretycznie"]
     ],
-    note: "🛬 Dzień aklimatyzacyjny — nie planujcie nic ambitnego." },
+    note: "🛬 Dzień aklimatyzacyjny. Zachód słońca w Zadarze to obowiązkowy punkt programu." },
 
-  { title: "Dzień 2: Split na piechotę", when: "Zero auta, zero promów",
+  { title: "Dzień 2: Zadar i Nin", when: "Blisko, bez trasy",
     rows: [
-      ["Rano", "Pałac Dioklecjana — piwnice, perystyl, katedra św. Domniusa"],
-      ["Południe", "Wejście na dzwonnicę, potem lunch w mieście"],
-      ["Popołudnie", "Wzgórze Marjan — punkty widokowe, kąpiel w drodze powrotnej"],
-      ["Wieczór", "Bačvice — plaża zmienia się w bary. Start sezonu towarzyskiego"]
+      ["Rano", "Starówka Zadaru: Forum, kościół św. Donata, mury weneckie"],
+      ["Południe", "Lunch na targu, kawa na Kalelardze"],
+      ["Popołudnie", "Nin — Plaża Królowej, 3 km piasku i płycizny (20 min autem)"],
+      ["Wieczór", "Powrót do bazy, grill albo tawerna"]
     ],
-    note: "🚶 Wszystko w zasięgu spaceru — idealny dzień na kaca po przylocie." },
+    note: "🚶 Najlżejszy dzień — idealny na kaca po przylocie." },
 
-  { title: "Dzień 3: Krka i Šibenik", when: "Wynajem auta, ~1h drogi",
+  { title: "Dzień 3: Jeziora Plitwickie", when: "Wynajem auta, ~1,5 h",
     rows: [
-      ["Rano", "Odbiór auta, wyjazd do Parku Narodowego Krka"],
-      ["Przedpołudnie", "Skradinski Buk — kaskady, ścieżki, młyny wodne"],
+      ["Wcześnie rano", "Odbiór auta, wyjazd ok. 7:00 — inaczej wjedziecie w tłum"],
+      ["Przedpołudnie", "Plitwice: dolne i górne jeziora, kładki nad wodą, łódka"],
+      ["Popołudnie", "Postój w Rastoke — wioska zbudowana na wodospadach"],
+      ["Wieczór", "Powrót do bazy, kolacja po drodze"]
+    ],
+    note: "🎟️ Bilety rezerwujcie online — limity wejść są realne, w sezonie schodzą z wyprzedzeniem." },
+
+  { title: "Dzień 4: Krka i Šibenik", when: "Auto, ~1 h",
+    rows: [
+      ["Rano", "Park Narodowy Krka — Skradinski Buk, kaskady i młyny"],
+      ["Południe", "Opcjonalnie rejs do Roški Slap, mniej tłoczno"],
       ["Popołudnie", "Šibenik: katedra św. Jakuba i twierdza św. Michała"],
-      ["Wieczór", "Kolacja w Šibeniku, powrót do Splitu"]
+      ["Wieczór", "Kolacja w Šibeniku, powrót do bazy"]
     ],
     note: "🚗 Kierowca wyłączony z picia — ustalcie go rano, nie po fakcie." },
 
-  { title: "Dzień 4: Jeziora Plitwickie", when: "Najdłuższa trasa, ~3h w jedną stronę",
+  { title: "Dzień 5: Kornati i Dugi otok", when: "Całodniowy rejs",
     rows: [
-      ["Wcześnie rano", "Wyjazd o 6:00 — inaczej wjedziecie w tłum i upał"],
-      ["Przedpołudnie", "Plitwice: trasa dolnych i górnych jezior, kładki, łódka"],
-      ["Popołudnie", "Postój w Rastoke — wioska na wodospadach"],
-      ["Wieczór", "Powrót do Splitu, kolacja po drodze"]
+      ["Rano", "Wypłynięcie z portu w Zadarze lub Biogradzie"],
+      ["Przedpołudnie", "Archipelag Kornati — 89 wysp, postoje na kąpiel"],
+      ["Popołudnie", "Telašćica: klify i słone jezioro Mir, plaża Sakarun"],
+      ["Wieczór", "Powrót do portu, kolacja z rybą"]
     ],
-    note: "🎟️ Bilety rezerwujcie online z wyprzedzeniem — limity wejść są realne." },
+    note: "⛵ Rejs rezerwujcie dzień wcześniej. Krem z filtrem i woda — na łodzi nie ma cienia." },
 
-  { title: "Dzień 5: Hvar", when: "Prom ze Splitu, ~1h",
+  { title: "Dzień 6: Pag i Zrće", when: "Auto, ~1 h",
     rows: [
-      ["Rano", "Katamaran do miasta Hvar"],
-      ["Przedpołudnie", "Podejście na twierdzę Fortica — panorama Wysp Pakleńskich"],
-      ["Popołudnie", "Taxi-boat na Pakleny — zatoczki i beach bary"],
-      ["Wieczór/noc", "Hvar po zmroku. Ostatni prom albo nocleg na miejscu"]
+      ["Rano", "Przejazd przez most na Pag — krajobraz księżycowy"],
+      ["Południe", "Miasto Pag: koronki, ser paški sir, solniska"],
+      ["Popołudnie", "Plaża Zrće — kluby na plaży czynne od południa"],
+      ["Noc", "Zrće do rana albo odwrót na własną odpowiedzialność"]
     ],
-    note: "🎉 Dzień imprezowy. Sprawdźcie godzinę ostatniego promu ZANIM zaczniecie." },
-
-  { title: "Dzień 6: Trogir i regeneracja", when: "Luźny dzień",
-    rows: [
-      ["Rano", "Późne śniadanie, basen, zero planów"],
-      ["Popołudnie", "Trogir — starówka UNESCO, 30 min od Splitu"],
-      ["Późne popołudnie", "Kąpiel, ostatnie zakupy i pamiątki"],
-      ["Wieczór", "Pożegnalna kolacja, pakowanie na trzeźwo"]
-    ],
-    note: "🍹 Dzień odpoczynku — po Plitwicach i Hvarze będzie potrzebny." },
+    note: "🎉 Dzień imprezowy. Kierowca na sucho albo taksówka — na Pagu policja stoi na moście." },
 
   { title: "Dzień 7: Wylot", when: "Wylot o 6:00",
     rows: [
       ["4:00", "Pobudka, ostatnie sprawdzenie pokoju"],
-      ["4:30", "Transfer na lotnisko (~30 min)"],
-      ["6:00", "Wylot ze Splitu"],
-      ["Uwaga", "Zwrot auta dzień wcześniej — o 4 rano wypożyczalnia nie działa"]
+      ["4:30", "Transfer na lotnisko w Zemuniku (~20 min od Zadaru)"],
+      ["6:00", "Wylot"],
+      ["Uwaga", "Auto oddajcie dzień wcześniej — o 4 rano wypożyczalnia nie działa"]
     ],
-    note: "✈️ Kto zaśnie, ten leci sam na własny koszt." }
+    note: "✈️ Kto zaśnie, ten leci sam i na własny koszt." }
 ];
-
 const TIPS = [
   ["🍻 Strategia przetrwania", "Przy 30°C nawodnienie to nie żart — woda między drinkami, inaczej dzień 4 nie istnieje. Kto pierwszy padnie, stawia kolejkę."],
-  ["🚗 Auto i promy", "Dni 3–4 auto (kierowca na sucho), dzień 5 prom, reszta pieszo. Promy Jadrolinija rezerwujcie online w sezonie, bo na miejscu bywa komplet."],
+  ["🚗 Auto i promy", "Auto bierzcie na dni 3–4 i 6 (kierowca na sucho). Dzień 5 to rejs — rezerwacja dzień wcześniej. Z Zadaru wszędzie blisko: Plitwice 1,5 h, Krka 1 h, Pag 1 h."],
   ["💸 Budżet", "Chorwacja jest w strefie euro. Licz 90–130 € dziennie na osobę: nocleg, jedzenie, wstępy (Plitwice 40 €, Krka 20 €) i paliwo."],
   ["🏖️ Plaże", "Wybrzeże jest kamieniste — buty do wody to nie fanaberia, tylko warunek chodzenia następnego dnia. Filtr 50+ obowiązkowo."],
-  ["🍽️ Jedzenie", "Peka (mięso spod żelaznego klosza) zamawia się z kilkugodzinnym wyprzedzeniem. Do tego črni rižot, ostrygi ze Stonu i rakija na koniec."],
-  ["📵 Praktyczne", "Bura potrafi zamknąć promy i mosty z dnia na dzień — sprawdzajcie prognozę. Power bank obowiązkowy, zdjęcia z kaca to najlepsza pamiątka."],
-  ["⚠️ Uwaga", "Za picie alkoholu w miejscach publicznych w Splicie i Dubrowniku są mandaty (do 150 €). Bary tak, deptak nie."]
+  ["🍽️ Jedzenie", "Peka (mięso spod żelaznego klosza) zamawia się z kilkugodzinnym wyprzedzeniem. Do tego črni rižot, ser paški sir z Pagu i rakija na koniec."],
+  ["📵 Praktyczne", "Bura potrafi zamknąć most na Pag i odwołać rejsy z dnia na dzień — sprawdzajcie prognozę rano. Power bank obowiązkowy, zdjęcia z kaca to najlepsza pamiątka."],
+  ["⚠️ Uwaga", "Za picie alkoholu w miejscach publicznych w Zadarze są mandaty. Bary i plaże klubowe tak, starówka i deptak nie. Na moście na Pag policja stoi regularnie."]
 ];
 
 const PEOPLE = [
