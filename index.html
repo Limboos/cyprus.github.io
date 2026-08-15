@@ -1,3051 +1,1364 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atrakcje Cypru - Interaktywna Mapa</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .map-container {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            margin-bottom: 30px;
-        }
-
-        #map {
-            height: 70vh;
-            min-height: 500px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .legend {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        }
-
-        .legend h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 1.3rem;
-            text-align: center;
-        }
-
-        .legend-items {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0;
-            padding: 8px;
-            border-radius: 8px;
-            transition: background 0.3s ease;
-        }
-
-        .legend-item:hover {
-            background: #f8f9fa;
-        }
-
-        .legend-icon {
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            margin-right: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 12px;
-            flex-shrink: 0;
-        }
-
-        .natura {
-            background-color: #28a745;
-        }
-
-        .zabytek {
-            background-color: #dc3545;
-        }
-
-        .lokalny {
-            background-color: #ffc107;
-            color: #000;
-        }
-
-        .hotel {
-            background-color: #007bff;
-        }
-
-        .natura-widok {
-            background-color: #6f42c1;
-        }
-
-        .natura-plaza {
-            background-color: #20c997;
-        }
-
-        .podwodna {
-            background-color: #0dcaf0;
-        }
-
-        .natura-legenda {
-            background-color: #e83e8c;
-        }
-
-        .natura-zabytek {
-            background-color: #6610f2;
-        }
-
-        .zabytek-widok {
-            background-color: #d63384;
-        }
-
-        .sztuka-lokalny {
-            background-color: #f8765c;
-        }
-
-        .natura-aktywnosc {
-            background-color: #198754;
-        }
-
-        .natura-miejska {
-            background-color: #495057;
-        }
-
-        .legend-text {
-            font-size: 1.1rem;
-            color: #555;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-card {
-            background: rgba(255,255,255,0.9);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .popup-content {
-            max-width: 250px;
-        }
-
-        .popup-title {
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .popup-type {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .popup-description {
-            font-size: 0.9rem;
-            line-height: 1.4;
-            color: #555;
-            margin-bottom: 10px;
-        }
-
-        .popup-link {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 0.8rem;
-            transition: background 0.3s ease;
-        }
-
-        .popup-link:hover {
-            background: #5a6fd8;
-        }
-
-        /* Itinerary Styles */
-        .itinerary {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 30px;
-            background: rgba(255,255,255,0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .itinerary-days {
-            display: grid;
-            gap: 25px;
-        }
-
-        .day-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-            border-radius: 15px;
-            padding: 25px;
-            border-left: 5px solid #667eea;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .day-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.12);
-        }
-
-        .day-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .day-header h3 {
-            color: #333;
-            margin: 0;
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-
-        .day-date {
-            color: #667eea;
-            font-size: 0.9rem;
-            font-weight: 500;
-            background: rgba(102, 126, 234, 0.1);
-            padding: 5px 12px;
-            border-radius: 20px;
-        }
-
-        .day-content p {
-            margin: 8px 0;
-            color: #555;
-            line-height: 1.6;
-        }
-
-        .day-content strong {
-            color: #333;
-            font-weight: 600;
-        }
-
-        .day-content em {
-            color: #667eea;
-            font-style: normal;
-            font-size: 0.9rem;
-            display: block;
-            margin-top: 10px;
-        }
-
-        .itinerary-tips {
-            margin-top: 40px;
-            padding: 25px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            color: white;
-        }
-
-        .itinerary-tips h3 {
-            color: white !important;
-            margin-bottom: 15px;
-        }
-
-        .itinerary-tips ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .itinerary-tips li {
-            margin-bottom: 10px;
-            padding-left: 20px;
-            position: relative;
-        }
-
-        .itinerary-tips li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #ffd700;
-            font-weight: bold;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            #map {
-                height: 60vh;
-            }
-
-            .legend-items {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .legend-text {
-                font-size: 0.9rem;
-            }
-
-            .itinerary {
-                padding: 20px;
-                margin: 20px auto;
-            }
-
-            .day-card {
-                padding: 20px;
-            }
-
-            .day-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-
-            .day-header h3 {
-                font-size: 1.2rem;
-            }
-        }
-
-        /* Animacja spadających piw */
-        .beer-falling {
-            position: fixed;
-            top: -50px;
-            z-index: 1000;
-            pointer-events: none;
-            font-size: 30px;
-            animation: fall linear infinite;
-        }
-
-        .beer-falling:nth-child(odd) {
-            animation-duration: 3s;
-        }
-
-        .beer-falling:nth-child(even) {
-            animation-duration: 4s;
-        }
-
-        .beer-falling:nth-child(3n) {
-            animation-duration: 2.5s;
-        }
-
-        @keyframes fall {
-            0% {
-                transform: translateX(0) rotate(0deg);
-                opacity: 1;
-            }
-            25% {
-                transform: translateX(20px) rotate(90deg);
-            }
-            50% {
-                transform: translateX(-20px) rotate(180deg);
-            }
-            75% {
-                transform: translateX(10px) rotate(270deg);
-            }
-            100% {
-                transform: translateX(0) rotate(360deg);
-                opacity: 0;
-                top: 100vh;
-            }
-        }
-
-        /* Kontener na piwa */
-        .beer-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 999;
-        }
-
-        /* Loading Screen */
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            transition: opacity 0.5s ease-out;
-        }
-
-        .loading-content {
-            text-align: center;
-            color: white;
-            max-width: 500px;
-            padding: 40px;
-        }
-
-        .loading-logo h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
-            animation: pulse 2s infinite;
-        }
-
-        .loading-subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            margin-bottom: 30px;
-            font-weight: 300;
-        }
-
-        .loading-progress {
-            margin: 30px 0;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 15px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ffd700, #ff6b6b);
-            border-radius: 4px;
-            width: 0%;
-            transition: width 0.1s linear;
-            box-shadow: 0 0 10px rgba(255,215,0,0.5);
-        }
-
-        .loading-text {
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin-bottom: 20px;
-        }
-
-        .loading-tips {
-            margin: 20px 0;
-        }
-
-        .tip {
-            opacity: 0.7;
-            margin: 8px 0;
-            font-size: 0.9rem;
-            transition: opacity 0.3s ease;
-        }
-
-        .tip.active {
-            opacity: 1;
-            color: #ffd700;
-            font-weight: 500;
-        }
-
-        .loading-stats {
-            margin-top: 30px;
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .stat {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        .stat span {
-            color: #ffd700;
-            font-weight: bold;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-        }
-
-        /* Ukrywanie loading screen */
-        .loading-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        /* Koło fortuny popup */
-        .wheel-popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            backdrop-filter: blur(10px);
-            animation: backgroundPulse 3s ease-in-out infinite;
-        }
-
-        @keyframes backgroundPulse {
-            0%, 100% {
-                background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
-            }
-            50% {
-                background: linear-gradient(135deg, rgba(138, 43, 226, 0.9), rgba(75, 0, 130, 0.9));
-            }
-        }
-
-        .wheel-container {
-            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-            border-radius: 40px;
-            padding: 50px;
-            max-width: 700px;
-            width: 90%;
-            position: relative;
-            box-shadow:
-                0 25px 80px rgba(0,0,0,0.3),
-                0 0 0 1px rgba(255,255,255,0.2),
-                inset 0 1px 0 rgba(255,255,255,0.6);
-            text-align: center;
-            animation: containerGlow 0.8s ease-out;
-            border: 2px solid transparent;
-            background-clip: padding-box;
-        }
-
-        .wheel-container::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #667eea, #764ba2, #8a2be2, #4b0082);
-            border-radius: 42px;
-            z-index: -1;
-            animation: borderRotate 3s linear infinite;
-        }
-
-        @keyframes borderRotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes containerGlow {
-            from {
-                transform: scale(0.9) translateY(20px);
-                opacity: 0;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            }
-            to {
-                transform: scale(1) translateY(0);
-                opacity: 1;
-                box-shadow:
-                    0 25px 80px rgba(0,0,0,0.3),
-                    0 0 0 1px rgba(255,255,255,0.2),
-                    inset 0 1px 0 rgba(255,255,255,0.6);
-            }
-        }
-
-        .wheel-close {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            font-size: 28px;
-            color: #666;
-            cursor: pointer;
-            background: linear-gradient(45deg, #ff6b6b, #ff4757);
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
-            border: 2px solid rgba(255,255,255,0.2);
-        }
-
-        .wheel-close:hover {
-            background: linear-gradient(45deg, #ff4757, #ff3838);
-            transform: scale(1.1) rotate(90deg);
-            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
-        }
-
-        .wheel-title {
-            color: #2c3e50;
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 40px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: titleShine 2s ease-in-out infinite;
-            letter-spacing: 1px;
-        }
-
-        @keyframes titleShine {
-            0%, 100% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-        }
-
-        .wheel-wrapper {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 40px;
-            filter: drop-shadow(0 15px 35px rgba(0,0,0,0.2));
-        }
-
-        .wheel {
-            width: 350px;
-            height: 350px;
-            border-radius: 50%;
-            position: relative;
-            overflow: visible;
-            background: linear-gradient(45deg, #f8f9fa 0%, #e9ecef 100%);
-            box-shadow:
-                0 20px 60px rgba(0,0,0,0.3),
-                inset 0 5px 15px rgba(255,255,255,0.8),
-                inset 0 -5px 15px rgba(0,0,0,0.1);
-            transition: transform 4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            border: 3px solid rgba(255,255,255,0.8);
-        }
-
-        .wheel::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 320px;
-            height: 320px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.02) 100%);
-            transform: translate(-50%, -50%);
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .wheel-segment {
-            position: absolute;
-            width: 50%;
-            height: 50%;
-            transform-origin: 100% 100%;
-            clip-path: polygon(0 0, 100% 0, 50% 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            border-right: 1px solid rgba(255,255,255,0.3);
-            z-index: 5;
-            overflow: visible;
-            box-sizing: border-box;
-        }
-
-        .wheel-segment:hover {
-            filter: brightness(1.1);
-        }
-
-        .wheel-segment.winner {
-            filter: brightness(1.3) contrast(1.2);
-            animation: winnerPulse 1.5s ease-in-out infinite;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
-        }
-
-        @keyframes winnerPulse {
-            0%, 100% {
-                filter: brightness(1.3) contrast(1.2);
-                box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
-            }
-            50% {
-                filter: brightness(1.5) contrast(1.4);
-                box-shadow: 0 0 50px rgba(255, 215, 0, 1);
-            }
-        }
-
-        .wheel-text {
-            color: #1a1a1a !important;
-            font-weight: 900 !important;
-            font-size: 14px !important;
-            text-shadow:
-                0 1px 2px rgba(255,255,255,0.9),
-                0 0 3px rgba(255,255,255,0.7),
-                1px 1px 0 rgba(255,255,255,1),
-                -1px -1px 0 rgba(255,255,255,1);
-            letter-spacing: 0.5px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-            z-index: 100 !important;
-            position: relative !important;
-            background: rgba(255,255,255,0.95) !important;
-            padding: 3px 6px !important;
-            border-radius: 4px !important;
-            border: 1px solid rgba(0,0,0,0.3) !important;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.15) !important;
-            display: block !important;
-            min-width: 45px !important;
-            text-align: center !important;
-            margin: 0 auto !important;
-            transform: none !important;
-        }
-
-        .wheel-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            color: white;
-            z-index: 2000;
-            box-shadow:
-                0 8px 25px rgba(102, 126, 234, 0.4),
-                inset 0 2px 5px rgba(255,255,255,0.3);
-            border: 3px solid rgba(255,255,255,0.8);
-        }
-
-        .wheel-pointer {
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #ff4757;
-            font-size: 45px;
-            z-index: 3000;
-            filter: drop-shadow(0 6px 15px rgba(255, 71, 87, 0.8));
-            animation: pointerGlow 2s ease-in-out infinite;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .winner-indicator {
-            position: absolute;
-            top: -80px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2500;
-            text-align: center;
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            pointer-events: none;
-        }
-
-        .winner-indicator.hidden {
-            opacity: 0;
-            transform: translateX(-50%) translateY(-20px);
-        }
-
-        .winner-name {
-            font-size: 24px;
-            font-weight: 900;
-            color: #2c3e50;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-        }
-
-        .winner-emoji {
-            font-size: 40px;
-            animation: bounce 1s ease-in-out infinite;
-        }
-
-        .drink-icon {
-            position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 24px;
-            z-index: 100;
-            animation: drinkFloat 2s ease-in-out infinite;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-        }
-
-        @keyframes drinkFloat {
-            0%, 100% {
-                transform: translateX(-50%) translateY(0) scale(1);
-            }
-            25% {
-                transform: translateX(-50%) translateY(-3px) scale(1.1);
-            }
-            50% {
-                transform: translateX(-50%) translateY(0) scale(1.05);
-            }
-            75% {
-                transform: translateX(-50%) translateY(-2px) scale(1.08);
-            }
-        }
-
-        @keyframes pointerGlow {
-            0%, 100% {
-                filter: drop-shadow(0 4px 8px rgba(255, 107, 107, 0.5));
-            }
-            50% {
-                filter: drop-shadow(0 4px 12px rgba(255, 107, 107, 0.8));
-            }
-        }
-
-        .spin-button {
-            background: linear-gradient(45deg, #667eea 0%, #764ba2 50%, #8a2be2 100%);
-            color: white;
-            border: none;
-            padding: 18px 40px;
-            font-size: 1.3rem;
-            font-weight: 700;
-            border-radius: 30px;
-            cursor: pointer;
-            margin-top: 45px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow:
-                0 10px 30px rgba(102, 126, 234, 0.4),
-                0 4px 15px rgba(138, 43, 226, 0.2),
-                inset 0 1px 0 rgba(255,255,255,0.2);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            position: relative;
-            overflow: hidden;
-            border: 2px solid rgba(255,255,255,0.1);
-        }
-
-        .spin-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.6s ease;
-        }
-
-        .spin-button:hover:not(:disabled) {
-            transform: translateY(-4px) scale(1.05);
-            box-shadow:
-                0 15px 40px rgba(102, 126, 234, 0.6),
-                0 8px 25px rgba(138, 43, 226, 0.4),
-                inset 0 1px 0 rgba(255,255,255,0.3);
-        }
-
-        .spin-button:hover::before {
-            left: 100%;
-        }
-
-        .spin-button:active:not(:disabled) {
-            transform: translateY(-2px) scale(1.02);
-        }
-
-        .spin-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            filter: grayscale(50%);
-        }
-
-        .result {
-            margin-top: 35px;
-            padding: 30px;
-            background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(248,249,250,0.9) 100%);
-            border-radius: 25px;
-            animation: resultAppear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow:
-                0 15px 35px rgba(0,0,0,0.1),
-                inset 0 1px 0 rgba(255,255,255,0.8);
-            border: 1px solid rgba(255,255,255,0.3);
-            backdrop-filter: blur(10px);
-        }
-
-        .result.hidden {
-            display: none;
-        }
-
-        @keyframes resultAppear {
-            from {
-                transform: scale(0.7) translateY(30px) rotate(-5deg);
-                opacity: 0;
-                filter: blur(10px);
-            }
-            to {
-                transform: scale(1) translateY(0) rotate(0deg);
-                opacity: 1;
-                filter: blur(0px);
-            }
-        }
-
-        #result-text {
-            color: #2c3e50;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 0.5px;
-        }
-
-        #result-emoji {
-            font-size: 4rem;
-            animation: emojiBounce 1.2s ease-in-out infinite;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
-            margin-top: 10px;
-        }
-
-        @keyframes emojiBounce {
-            0%, 100% {
-                transform: translateY(0) scale(1);
-            }
-            25% {
-                transform: translateY(-8px) scale(1.1);
-            }
-            50% {
-                transform: translateY(0) scale(1.05);
-            }
-            75% {
-                transform: translateY(-4px) scale(1.08);
-            }
-        }
-
-        /* Confetti animation */
-        .confetti {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            animation: fall 3.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-            top: -10px;
-            border-radius: 50%;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        @keyframes fall {
-            0% {
-                transform: translateY(-10px) rotate(0deg) scale(1);
-                opacity: 1;
-            }
-            10% {
-                transform: translateY(10vh) rotate(36deg) scale(1.1);
-                opacity: 0.9;
-            }
-            50% {
-                transform: translateY(50vh) rotate(180deg) scale(0.9);
-                opacity: 0.7;
-            }
-            80% {
-                transform: translateY(80vh) rotate(360deg) scale(1.2);
-                opacity: 0.4;
-            }
-            100% {
-                transform: translateY(110vh) rotate(720deg) scale(0.8);
-                opacity: 0;
-            }
-        }
-
-        /* Segment colors for better visibility */
-        .segment-0 { background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,249,250,0.9) 100%); }
-        .segment-1 { background: linear-gradient(135deg, rgba(240,248,255,0.95) 0%, rgba(230,240,255,0.9) 100%); }
-        .segment-2 { background: linear-gradient(135deg, rgba(255,250,240,0.95) 0%, rgba(255,245,230,0.9) 100%); }
-        .segment-3 { background: linear-gradient(135deg, rgba(248,255,248,0.95) 0%, rgba(240,255,240,0.9) 100%); }
-        .segment-4 { background: linear-gradient(135deg, rgba(255,248,248,0.95) 0%, rgba(255,240,240,0.9) 100%); }
-        .segment-5 { background: linear-gradient(135deg, rgba(250,250,255,0.95) 0%, rgba(245,245,255,0.9) 100%); }
-        .segment-6 { background: linear-gradient(135deg, rgba(255,255,248,0.95) 0%, rgba(255,255,240,0.9) 100%); }
-        .segment-7 { background: linear-gradient(135deg, rgba(248,255,255,0.95) 0%, rgba(240,255,255,0.9) 100%); }
-
-        /* Glow effect for wheel during spin */
-        .wheel.spinning {
-            animation: wheelGlow 4s ease-out;
-        }
-
-        @keyframes wheelGlow {
-            0% {
-                filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.3));
-            }
-            25% {
-                filter: drop-shadow(0 0 40px rgba(102, 126, 234, 0.6));
-            }
-            50% {
-                filter: drop-shadow(0 0 60px rgba(138, 43, 226, 0.8));
-            }
-            75% {
-                filter: drop-shadow(0 0 40px rgba(102, 126, 234, 0.6));
-            }
-            100% {
-                filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.3));
-            }
-        }
-
-        /* Modern success particles */
-        .success-particles {
-            position: absolute;
-            pointer-events: none;
-            animation: particlesFloat 2s ease-out forwards;
-        }
-
-        @keyframes particlesFloat {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-50px) scale(0.8);
-            }
-        }
-
-        /* Responsive design with modern breakpoints */
-        @media (max-width: 1024px) {
-            .wheel-container {
-                padding: 40px;
-                max-width: 600px;
-            }
-
-            .wheel {
-                width: 300px;
-                height: 300px;
-            }
-
-            .wheel::before {
-                width: 270px;
-                height: 270px;
-            }
-
-            .wheel-center {
-                width: 45px;
-                height: 45px;
-                font-size: 20px;
-            }
-
-            .winner-indicator {
-                top: -75px;
-            }
-
-            .winner-name {
-                font-size: 22px;
-            }
-
-            .winner-emoji {
-                font-size: 38px;
-            }
-
-            .drink-icon {
-                font-size: 22px;
-                top: 14px;
-            }
-
-            .wheel-text {
-                font-size: 14px;
-                padding: 3px 6px !important;
-                min-width: 45px !important;
-            }
-
-            .wheel-segment {
-                padding: 10px;
-            }
-
-            .wheel-title {
-                font-size: 1.9rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .wheel-container {
-                padding: 30px;
-                margin: 15px;
-                max-width: 95%;
-            }
-
-            .wheel {
-                width: 280px;
-                height: 280px;
-            }
-
-            .wheel::before {
-                width: 250px;
-                height: 250px;
-            }
-
-            .wheel-center {
-                width: 40px;
-                height: 40px;
-                font-size: 18px;
-            }
-
-            .wheel-pointer {
-                font-size: 30px;
-                top: -18px;
-            }
-
-            .winner-indicator {
-                top: -70px;
-            }
-
-            .winner-name {
-                font-size: 20px;
-            }
-
-            .winner-emoji {
-                font-size: 35px;
-            }
-
-            .drink-icon {
-                font-size: 20px;
-                top: 12px;
-            }
-
-            .wheel-text {
-                font-size: 13px;
-                padding: 2px 5px !important;
-                min-width: 42px !important;
-            }
-
-            .wheel-segment {
-                padding: 8px;
-            }
-
-            .wheel-title {
-                font-size: 1.6rem;
-                margin-bottom: 30px;
-            }
-
-            .spin-button {
-                padding: 16px 35px;
-                font-size: 1.1rem;
-                letter-spacing: 1px;
-                margin-top: 40px;
-            }
-
-            .result {
-                padding: 25px;
-                margin-top: 25px;
-            }
-
-            #result-text {
-                font-size: 1.5rem;
-            }
-
-            #result-emoji {
-                font-size: 3.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .wheel-container {
-                padding: 20px;
-            }
-
-            .wheel {
-                width: 240px;
-                height: 240px;
-            }
-
-            .wheel::before {
-                width: 210px;
-                height: 210px;
-            }
-
-            .wheel-center {
-                width: 35px;
-                height: 35px;
-                font-size: 16px;
-            }
-
-            .wheel-pointer {
-                font-size: 25px;
-                top: -15px;
-            }
-
-            .winner-indicator {
-                top: -60px;
-            }
-
-            .winner-name {
-                font-size: 18px;
-            }
-
-            .winner-emoji {
-                font-size: 30px;
-            }
-
-            .drink-icon {
-                font-size: 18px;
-                top: 10px;
-            }
-
-            .wheel-text {
-                font-size: 12px;
-                padding: 2px 4px !important;
-                min-width: 40px !important;
-            }
-
-            .wheel-segment {
-                padding: 5px;
-            }
-
-            .wheel-title {
-                font-size: 1.3rem;
-                margin-bottom: 25px;
-            }
-
-            .spin-button {
-                padding: 14px 28px;
-                font-size: 1rem;
-                margin-top: 35px;
-            }
-
-            .wheel-close {
-                width: 40px;
-                height: 40px;
-                font-size: 24px;
-                top: 20px;
-                right: 20px;
-            }
-        }
-
-        /* Duży przycisk drinkowe koło fortuny */
-        .wheel-buttons-container {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 60px 0 40px 0;
-            position: relative;
-            flex-wrap: wrap;
-        }
-
-        .wheel-button-wrapper {
-            flex: 1;
-            max-width: 400px;
-            min-width: 300px;
-        }
-
-        .wheel-button-container {
-            text-align: center;
-            margin: 60px 0 40px 0;
-            position: relative;
-        }
-
-        .drink-wheel-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8a2be2 100%);
-            border: none;
-            border-radius: 25px;
-            padding: 30px 50px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            box-shadow:
-                0 15px 35px rgba(102, 126, 234, 0.4),
-                0 8px 20px rgba(138, 43, 226, 0.2),
-                inset 0 1px 0 rgba(255,255,255,0.2);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            min-width: 400px;
-            max-width: 600px;
-            width: 90%;
-            margin: 0 auto;
-        }
-
-        .drink-wheel-button:hover {
-            transform: translateY(-8px) scale(1.05);
-            box-shadow:
-                0 25px 50px rgba(102, 126, 234, 0.6),
-                0 15px 30px rgba(138, 43, 226, 0.4),
-                inset 0 1px 0 rgba(255,255,255,0.3);
-        }
-
-        .drink-wheel-button:active {
-            transform: translateY(-4px) scale(1.02);
-        }
-
-        .drinks-wheel-button {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 50%, #ff4757 100%);
-        }
-
-        .drinks-wheel-button:hover {
-            background: linear-gradient(135deg, #ff5252 0%, #d84315 50%, #ff3838 100%);
-            transform: translateY(-5px);
-            box-shadow:
-                0 15px 35px rgba(255, 107, 107, 0.4),
-                0 8px 20px rgba(238, 90, 36, 0.2),
-                inset 0 1px 0 rgba(255,255,255,0.2);
-        }
-
-        .drinks-wheel-button:active {
-            transform: translateY(2px);
-            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
-        }
-
-        .button-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
-            z-index: 2;
-        }
-
-        .button-icon {
-            font-size: 3rem;
-            animation: spin 3s linear infinite;
-            margin-right: 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .button-text {
-            flex: 1;
-            text-align: center;
-        }
-
-        .button-text h2 {
-            color: white;
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin: 0 0 10px 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            letter-spacing: 2px;
-        }
-
-        .button-text p {
-            color: rgba(255,255,255,0.9);
-            font-size: 1.2rem;
-            font-weight: 500;
-            margin: 0;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-
-        .button-arrow {
-            font-size: 2.5rem;
-            animation: bounce 2s ease-in-out infinite;
-            margin-left: 20px;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-8px);
-            }
-            60% {
-                transform: translateY(-4px);
-            }
-        }
-
-        .button-glow {
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.8s ease;
-        }
-
-        .drink-wheel-button:hover .button-glow {
-            left: 100%;
-        }
-
-        /* Responsive dla dużego przycisku */
-        @media (max-width: 768px) {
-            .wheel-buttons-container {
-                flex-direction: column;
-                gap: 20px;
-                margin: 40px 0 30px 0;
-            }
-
-            .wheel-button-wrapper {
-                max-width: 100%;
-                min-width: 280px;
-            }
-
-            .wheel-button-container {
-                margin: 40px 0 30px 0;
-            }
-
-            .drink-wheel-button {
-                padding: 25px 30px;
-                min-width: 320px;
-            }
-
-            .button-content {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .button-icon {
-                font-size: 2.5rem;
-                margin-right: 0;
-            }
-
-            .button-text h2 {
-                font-size: 1.8rem;
-            }
-
-            .button-text p {
-                font-size: 1rem;
-            }
-
-            .button-arrow {
-                font-size: 2rem;
-                margin-left: 0;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .drink-wheel-button {
-                padding: 20px 25px;
-                min-width: 280px;
-            }
-
-            .button-text h2 {
-                font-size: 1.5rem;
-            }
-
-            .button-text p {
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .legend-items {
-                grid-template-columns: 1fr;
-            }
-
-            .legend-text {
-                font-size: 0.85rem;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b2545">
+<meta name="description" content="Interaktywna mapa atrakcji Chorwacji, 7-dniowy plan wyjazdu i koła fortuny: kto leci po drinki i jaki drink wypada.">
+<title>Chorwacja - Interaktywna Mapa</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇭🇷</text></svg>">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+/* ---------- Fundament ---------- */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --sea-900: #041c32;
+  --sea-800: #0b2545;
+  --sea-700: #13395e;
+  --sea-500: #1b6ca8;
+  --sea-300: #2fa8e0;
+  --sea-100: #a8e0ff;
+  --sun: #ffb703;
+  --sun-deep: #fb8500;
+  --coral: #ef476f;
+  --mint: #06d6a0;
+  --ink: #0d1b2a;
+  --paper: #f7fafc;
+  --card: #ffffff;
+  --muted: #5a6b7d;
+  --line: rgba(13, 27, 42, 0.1);
+  --shadow-sm: 0 2px 8px rgba(4, 28, 50, 0.08);
+  --shadow-md: 0 8px 28px rgba(4, 28, 50, 0.14);
+  --shadow-lg: 0 24px 60px rgba(4, 28, 50, 0.28);
+  --radius: 18px;
+  --tap: 48px;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Nic w tej stronie nie ma prawa rozpychać widoku w poziomie */
+img, svg { max-width: 100%; height: auto; }
+
+.wrap {
+  width: min(1200px, 100% - 2rem);
+  margin-inline: auto;
+}
+
+/* ---------- Ekran ładowania ---------- */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: radial-gradient(circle at 30% 20%, var(--sea-700), var(--sea-900) 70%);
+  color: #fff;
+  text-align: center;
+  transition: opacity .5s ease, visibility .5s ease;
+}
+.loader[hidden] { display: none; }
+.loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.loader h1 {
+  font-size: clamp(1.4rem, 6vw, 2.6rem);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+.loader .sub {
+  margin-top: .5rem;
+  color: var(--sea-100);
+  font-size: clamp(.85rem, 3.5vw, 1rem);
+}
+
+.bar {
+  width: min(420px, 100%);
+  height: 12px;
+  margin: 1.75rem auto .75rem;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, .16);
+  overflow: hidden;
+}
+.bar span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--sun), var(--sun-deep));
+  transition: width .3s ease;
+}
+.loader .status {
+  min-height: 1.5em;
+  font-size: clamp(.8rem, 3.2vw, .95rem);
+  color: var(--sea-100);
+}
+
+.loader .counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1.25rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+  font-size: clamp(.8rem, 3.2vw, .95rem);
+  color: #fff;
+}
+.loader .counts b { color: var(--sun); font-variant-numeric: tabular-nums; }
+
+/* ---------- Deszcz emoji ---------- */
+.rain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9500;
+  overflow: hidden;
+}
+.rain i {
+  position: absolute;
+  top: -8vh;
+  font-size: 1.7rem;
+  font-style: normal;
+  will-change: transform;
+  animation: fall linear forwards;
+}
+@keyframes fall {
+  from { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 1; }
+  to   { transform: translate3d(0, 112vh, 0) rotate(540deg); opacity: .15; }
+}
+
+/* ---------- Nagłówek ---------- */
+.hero {
+  position: relative;
+  padding: clamp(2rem, 8vw, 4rem) 0 clamp(2.5rem, 9vw, 4.5rem);
+  background: linear-gradient(160deg, var(--sea-800), var(--sea-500) 60%, var(--sea-300));
+  color: #fff;
+  text-align: center;
+  overflow: hidden;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  left: -5%;
+  right: -5%;
+  bottom: -1px;
+  height: 60px;
+  background: var(--paper);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+.hero h1 {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(1.9rem, 8vw, 3.4rem);
+  line-height: 1.1;
+  letter-spacing: -1px;
+}
+.hero p {
+  position: relative;
+  z-index: 1;
+  margin-top: .75rem;
+  font-size: clamp(.95rem, 4vw, 1.2rem);
+  color: var(--sea-100);
+}
+
+/* ---------- Sekcje ---------- */
+section { padding-block: clamp(1.75rem, 6vw, 3rem); }
+.section-title {
+  font-size: clamp(1.3rem, 5.5vw, 2rem);
+  text-align: center;
+  color: var(--sea-800);
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.5px;
+}
+
+/* ---------- Mapa ---------- */
+.map-shell {
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  background: var(--card);
+}
+#map {
+  /* dvh, żeby pasek adresu na mobile nie ucinał mapy */
+  height: clamp(340px, 65dvh, 620px);
+  width: 100%;
+  background: #dfe9f3;
+}
+.map-hint {
+  padding: .75rem 1rem;
+  font-size: .85rem;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+
+/* Popup Leaflet */
+.leaflet-popup-content-wrapper { border-radius: 14px; box-shadow: var(--shadow-md); }
+.leaflet-popup-content { margin: 0; width: 250px !important; }
+.pop { padding: .9rem 1rem 1rem; }
+.pop h4 { font-size: 1rem; color: var(--sea-800); line-height: 1.3; }
+.pop .tag {
+  display: inline-block;
+  margin: .45rem 0;
+  padding: .15rem .6rem;
+  border-radius: 99px;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--muted);
+}
+.pop p { font-size: .87rem; color: var(--muted); line-height: 1.5; }
+.pop a {
+  display: inline-block;
+  margin-top: .7rem;
+  padding: .5rem .9rem;
+  border-radius: 10px;
+  background: var(--sea-500);
+  color: #fff;
+  font-size: .82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.pop a:hover { background: var(--sea-700); }
+
+/* Marker */
+.pin {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  font-size: 17px;
+  border-radius: 50% 50% 50% 6px;
+  transform: rotate(-45deg);
+  border: 2px solid #fff;
+  box-shadow: var(--shadow-sm);
+}
+.pin span { transform: rotate(45deg); }
+
+/* ---------- Przyciski kół ---------- */
+.wheel-cta {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+}
+.cta {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 96px;
+  padding: 1.1rem 1.25rem;
+  border: 0;
+  border-radius: var(--radius);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  box-shadow: var(--shadow-md);
+  transition: transform .18s ease, box-shadow .18s ease;
+  overflow: hidden;
+}
+.cta:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.cta:active { transform: translateY(0) scale(.99); }
+.cta:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
+.cta--people { background: linear-gradient(135deg, var(--coral), #b5179e); }
+.cta--drinks { background: linear-gradient(135deg, var(--sun-deep), var(--sun)); color: var(--ink); }
+.cta .ico { font-size: clamp(2rem, 8vw, 2.6rem); flex-shrink: 0; }
+.cta .txt { flex: 1; min-width: 0; }
+.cta .txt strong { display: block; font-size: clamp(1rem, 4.2vw, 1.25rem); letter-spacing: .3px; }
+.cta .txt small { display: block; font-size: clamp(.78rem, 3.4vw, .9rem); opacity: .9; }
+.cta .arw { font-size: 1.5rem; flex-shrink: 0; }
+
+/* ---------- Legenda i statystyki ---------- */
+.panel {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: clamp(1.25rem, 5vw, 2rem);
+  box-shadow: var(--shadow-sm);
+}
+.legend {
+  display: grid;
+  gap: .6rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
+  margin-top: 1rem;
+}
+.legend div { display: flex; align-items: center; gap: .6rem; font-size: .88rem; }
+.legend .dot {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.stats {
+  display: grid;
+  gap: .75rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  margin-top: 1.5rem;
+}
+.stat {
+  padding: 1rem .75rem;
+  border-radius: 14px;
+  text-align: center;
+  background: linear-gradient(135deg, var(--sea-500), var(--sea-300));
+  color: #fff;
+}
+.stat b { display: block; font-size: clamp(1.5rem, 6vw, 2rem); font-variant-numeric: tabular-nums; }
+.stat small { font-size: .78rem; opacity: .92; }
+
+/* ---------- Plan dni ---------- */
+.days {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+}
+.day {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  border-top: 4px solid var(--sea-300);
+}
+.day header {
+  padding: 1rem 1.25rem .75rem;
+  background: linear-gradient(135deg, rgba(47, 168, 224, .12), transparent);
+}
+.day h3 { font-size: 1.05rem; color: var(--sea-800); line-height: 1.3; }
+.day .when { font-size: .8rem; color: var(--muted); }
+.day .body { padding: .25rem 1.25rem 1.25rem; }
+.day .body p { font-size: .88rem; margin-top: .5rem; color: #33465a; }
+.day .body p strong { color: var(--sea-700); }
+.day .body .note {
+  margin-top: .85rem;
+  padding: .6rem .75rem;
+  border-radius: 10px;
+  background: rgba(255, 183, 3, .13);
+  font-size: .84rem;
+  color: #7a5200;
+}
+
+.tips { margin-top: 1.5rem; }
+.tips li {
+  margin-bottom: .75rem;
+  padding-left: .25rem;
+  font-size: .9rem;
+  color: #33465a;
+  line-height: 1.6;
+}
+.tips li strong { color: var(--sea-700); }
+
+/* ---------- Modal koła ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9800;
+  display: none;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(4, 28, 50, .72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.modal.open { display: grid; }
+
+.modal .box {
+  position: relative;
+  width: min(460px, 100%);
+  margin: auto;
+  padding: 1.5rem 1.25rem 1.75rem;
+  border-radius: 24px;
+  background: linear-gradient(165deg, #fff, #eef5fb);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  animation: pop .32s cubic-bezier(.2, .9, .3, 1.2);
+}
+@keyframes pop {
+  from { transform: scale(.86) translateY(24px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.modal .x {
+  position: absolute;
+  top: .5rem;
+  right: .5rem;
+  width: var(--tap);
+  height: var(--tap);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.9rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.modal .x:hover { background: rgba(13, 27, 42, .07); color: var(--ink); }
+
+.modal h2 {
+  font-size: clamp(1.05rem, 4.6vw, 1.35rem);
+  color: var(--sea-800);
+  line-height: 1.3;
+  padding-inline: 2rem;
+}
+
+/* ---------- Koło ---------- */
+.stage {
+  position: relative;
+  width: min(340px, 82vw);
+  margin: 1.5rem auto 0;
+  aspect-ratio: 1;
+  /* Blokuje przewijanie strony przy dotknięciu koła - kluczowe na telefonie */
+  touch-action: manipulation;
+}
+
+/* Wskaźnik jest RODZEŃSTWEM koła, nie dzieckiem. Nie obraca się razem z nim. */
+.needle {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  z-index: 5;
+  width: 0;
+  height: 0;
+  transform: translateX(-50%);
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-top: 30px solid var(--coral);
+  filter: drop-shadow(0 3px 6px rgba(239, 71, 111, .55));
+}
+
+.wheel {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 6px solid #fff;
+  box-shadow: 0 12px 40px rgba(4, 28, 50, .32), inset 0 0 0 2px rgba(4, 28, 50, .06);
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(.16, .84, .28, 1);
+  transition-duration: 0s;
+  will-change: transform;
+}
+
+.wheel .label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  transform-origin: 0 50%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .3rem;
+  padding-right: 10%;
+  font-size: clamp(.62rem, 2.6vw, .82rem);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .55);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.wheel .label .em { font-size: 1.15em; }
+
+.hub {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 21%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(4, 28, 50, .3);
+  font-size: clamp(1.1rem, 5vw, 1.6rem);
+  pointer-events: none;
+}
+
+.spin {
+  display: block;
+  width: 100%;
+  min-height: var(--tap);
+  margin-top: 1.5rem;
+  padding: .9rem 1.25rem;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--mint), #059669);
+  color: #fff;
+  font: inherit;
+  font-size: clamp(.95rem, 4vw, 1.1rem);
+  font-weight: 800;
+  letter-spacing: .5px;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(6, 214, 160, .38);
+  transition: transform .16s ease, filter .16s ease;
+}
+.spin:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.06); }
+.spin:active:not(:disabled) { transform: translateY(0) scale(.98); }
+.spin:disabled { opacity: .6; cursor: not-allowed; }
+.spin:focus-visible { outline: 3px solid var(--sea-800); outline-offset: 3px; }
+
+.result {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--sun), var(--sun-deep));
+  color: #3b2600;
+  box-shadow: var(--shadow-md);
+  animation: pop .35s cubic-bezier(.2, .9, .3, 1.2);
+}
+.result[hidden] { display: none; }
+.result .big { font-size: clamp(1.3rem, 6vw, 1.8rem); font-weight: 900; line-height: 1.2; }
+.result .em { font-size: clamp(2rem, 9vw, 2.8rem); line-height: 1.2; }
+.result .odds { font-size: .8rem; opacity: .8; }
+
+.odds-table {
+  margin-top: 1.25rem;
+  font-size: .78rem;
+  color: var(--muted);
+  text-align: left;
+}
+.odds-table summary {
+  cursor: pointer;
+  text-align: center;
+  color: var(--sea-500);
+  font-weight: 600;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.odds-table ul { margin-top: .5rem; list-style: none; columns: 2; column-gap: 1rem; }
+.odds-table li {
+  display: flex;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .2rem 0;
+  break-inside: avoid;
+}
+.odds-table b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* ---------- Stopka ---------- */
+footer {
+  padding: 2rem 0 3rem;
+  text-align: center;
+  font-size: .85rem;
+  color: var(--muted);
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 480px) {
+  .wrap { width: calc(100% - 1.5rem); }
+  .cta { min-height: 84px; padding: 1rem; gap: .75rem; }
+  .odds-table ul { columns: 1; }
+  .modal { padding: .5rem; }
+  .modal .box { padding: 1.25rem .9rem 1.5rem; border-radius: 20px; }
+}
+
+/* Szanuj systemowe wyłączenie animacji - i oszczędzaj baterię */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  .rain { display: none; }
+}
+</style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen">
-        <div class="loading-content">
-            <div class="loading-logo">
-                <h1>🏝️🍻 CYPRUS ADVENTURE 🍻🏝️</h1>
-                <p class="loading-subtitle">Ładowanie protokołu alkoholowego...</p>
-            </div>
 
-            <div class="loading-progress">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-                <div class="loading-text" id="loading-text">Inicjalizacja systemu...</div>
-            </div>
+<!-- ============ Ekran ładowania ============ -->
+<div class="loader" id="loader">
+  <div>
+    <h1>🇭🇷 CHORWACJA ADVENTURE 🍻</h1>
+    <p class="sub">Ładowanie protokołu alkoholowego...</p>
+    <div class="bar"><span id="bar-fill"></span></div>
+    <p class="status" id="loader-status">Inicjalizacja systemu...</p>
+    <div class="counts">
+      <span>🍺 Piw: <b id="c-beer">0</b></span>
+      <span>🏖️ Plaż: <b id="c-beach">0</b></span>
+      <span>🎉 Ekipa: <b id="c-crew">0</b></span>
+    </div>
+  </div>
+</div>
 
-            <div class="loading-tips">
-                <div class="tip" id="tip-1">Ładowanie bazy danych piw...</div>
-                <div class="tip" id="tip-2">Sprawdzanie poziomu alkoholu we krwi...</div>
-                <div class="tip" id="tip-3">Kalibracja kompasu na najbliższy bar...</div>
-                <div class="tip" id="tip-4">Ładowanie mapy plaż i atrakcji...</div>
-                <div class="tip" id="tip-5">Przygotowanie playlisty imprezowej...</div>
-                <div class="tip" id="tip-6">Synchronizacja z lokalnymi tawernami...</div>
-            </div>
+<div class="rain" id="rain" aria-hidden="true"></div>
 
-            <div class="loading-stats">
-                <div class="stat">🍺 Piwa załadowanych: <span id="beer-count">0</span></div>
-                <div class="stat">🏖️ Plaż sprawdzonych: <span id="beach-count">0</span></div>
-                <div class="stat">🎉 Przyjaciół gotowych: <span id="friend-count">0</span></div>
-            </div>
-        </div>
+<!-- ============ Nagłówek ============ -->
+<header class="hero">
+  <h1>🇭🇷 Atrakcje Chorwacji</h1>
+  <p>Adriatyk, mury, wodospady i wyspy — wszystko na jednej mapie</p>
+</header>
+
+<main>
+  <!-- ============ Mapa ============ -->
+  <section>
+    <div class="wrap">
+      <div class="map-shell">
+        <div id="map"></div>
+        <p class="map-hint">Kliknij pinezkę, żeby zobaczyć szczegóły. Mapę przesuwasz palcem, zoom szczypnięciem.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Koła ============ -->
+  <section>
+    <div class="wrap">
+      <div class="wheel-cta">
+        <button class="cta cta--people" id="open-people">
+          <span class="ico">🎰</span>
+          <span class="txt">
+            <strong>KOŁO FORTUNY</strong>
+            <small>Kto leci po drinki? 🍺</small>
+          </span>
+          <span class="arw">🎲</span>
+        </button>
+        <button class="cta cta--drinks" id="open-drinks">
+          <span class="ico">🥂</span>
+          <span class="txt">
+            <strong>KOŁO DRINKÓW</strong>
+            <small>Czym się dziś trujemy? 🥃</small>
+          </span>
+          <span class="arw">🍹</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Legenda ============ -->
+  <section>
+    <div class="wrap">
+      <div class="panel">
+        <h2 class="section-title" style="margin-bottom:.5rem">Legenda</h2>
+        <div class="legend" id="legend"></div>
+        <div class="stats" id="stats"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Plan ============ -->
+  <section>
+    <div class="wrap">
+      <h2 class="section-title">🗓️ 7-dniowy plan — baza w Splicie</h2>
+      <div class="days" id="days"></div>
+
+      <div class="panel tips">
+        <h3 style="color:var(--sea-700);margin-bottom:.75rem">💡 Wskazówki praktyczne</h3>
+        <ul id="tips"></ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    Zrobione na wyjazd ekipy · dane atrakcji do własnej weryfikacji przed wyjazdem
+  </div>
+</footer>
+
+<!-- ============ Modal koła ============ -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="box">
+    <button class="x" id="modal-close" aria-label="Zamknij">&times;</button>
+    <h2 id="modal-title"></h2>
+
+    <div class="stage">
+      <div class="needle"></div>
+      <div class="wheel" id="wheel"></div>
+      <div class="hub" id="hub">🎯</div>
     </div>
 
-    <!-- Kontener na spadające piwa -->
-    <div class="beer-container" id="beer-container"></div>
+    <button class="spin" id="spin-btn">KRĘĆ KOŁEM! 🎲</button>
 
-    <div class="container">
-        <div class="header">
-            <h1>🏝️ Atrakcje Cypru</h1>
-            <p>Odkryj najpiękniejsze miejsca na wyspie Afrodyty</p>
-        </div>
-
-        <div class="map-container">
-            <div id="map"></div>
-        </div>
-
-        <!-- Duże przyciski drinkowe koła fortuny -->
-        <div class="wheel-buttons-container">
-            <div class="wheel-button-wrapper">
-                <button id="drink-wheel-button" class="drink-wheel-button">
-                    <div class="button-content">
-                        <div class="button-icon">🎰</div>
-                        <div class="button-text">
-                            <h2>KOŁO FORTUNY</h2>
-                            <p>KTO LECI PO DRINKI? 🍺</p>
-                        </div>
-                        <div class="button-arrow">🎲</div>
-                    </div>
-                    <div class="button-glow"></div>
-                </button>
-            </div>
-
-            <div class="wheel-button-wrapper">
-                <button id="drinks-wheel-button" class="drink-wheel-button drinks-wheel-button">
-                    <div class="button-content">
-                        <div class="button-icon">🥂</div>
-                        <div class="button-text">
-                            <h2>KOŁO DRINKÓW</h2>
-                            <p>JAKI DRINK WYGRASZ? 🥃</p>
-                        </div>
-                        <div class="button-arrow">🍹</div>
-                    </div>
-                    <div class="button-glow"></div>
-                </button>
-            </div>
-        </div>
-
-        <div class="legend">
-            <h3>Legenda</h3>
-            <div class="legend-items">
-                <div class="legend-item">
-                    <div class="legend-icon natura">🌿</div>
-                    <div class="legend-text">Atrakcje przyrodnicze</div>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon zabytek">🏛️</div>
-                    <div class="legend-text">Zabytki historyczne</div>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon lokalny">🍷</div>
-                    <div class="legend-text">Lokalny klimat</div>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon natura-widok">🌅</div>
-                    <div class="legend-text">Widoki przyrodnicze</div>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon natura-plaza">🏖️</div>
-                    <div class="legend-text">Plaże i atrakcje wodne</div>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon podwodna">🤿</div>
-                    <div class="legend-text">Atrakcje podwodne</div>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon natura-legenda">💫</div>
-                    <div class="legend-text">Miejsca legendarne</div>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon hotel">🏨</div>
-                    <div class="legend-text">Hotele i noclegi</div>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon zabytek-widok">⛪</div>
-                    <div class="legend-text">Zabytki z widokami</div>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon sztuka-lokalny">🎨</div>
-                    <div class="legend-text">Sztuka i lokalna kultura</div>
-                </div>
-            </div>
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-number">40</div>
-                    <div class="stat-label">Atrakcji do odwiedzenia</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">15</div>
-                    <div class="stat-label">Atrakcji przyrodniczych</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">12</div>
-                    <div class="stat-label">Zabytków historycznych</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">13</div>
-                    <div class="stat-label">Lokalnych klimatów</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 7-Day Cyprus Itinerary -->
-        <div class="itinerary">
-            <h2 style="text-align: center; color: #667eea; margin: 40px 0 20px 0; font-size: 2rem;">🏝️ 7-Dniowy Plan Zwiedzania Cypru</h2>
-
-            <div class="itinerary-days">
-                <div class="day-card">
-                    <div class="day-header">
-                        <h3>Dzień 1: Przylot i relaks basenowy</h3>
-                        <span class="day-date">(Przylot ~15:00)</span>
-            </div>
-                    <div class="day-content">
-                        <p><strong>Popołudnie:</strong> Przylot na Cypr (Larnaka), transfer do Protaras (~1h)</p>
-                        <p><strong>Popołudnie/wieczór:</strong> Zameldowanie w hotelu</p>
-                        <p><strong>Wieczór:</strong> Wypoczynek przy hotelowym basenie, drinki, lekka kolacja</p>
-                        <p><strong>Noc:</strong> Relaks i aklimatyzacja</p>
-                        <p><em>🏊‍♂️ Dzień typowo basenowy - odpoczynek po podróży</em></p>
-            </div>
-            </div>
-
-                <div class="day-card">
-                    <div class="day-header">
-                        <h3>Dzień 2: Basen i zwiedzanie Protaras</h3>
-                        <span class="day-date">(Relaks + lokalne zwiedzanie)</span>
-                </div>
-                    <div class="day-content">
-                        <p><strong>Rano:</strong> Śniadanie w hotelu, leniwy poranek przy basenie</p>
-                        <p><strong>Rano/południe:</strong> Kąpiel w basenie, drinki, lektura</p>
-                        <p><strong>Popołudnie:</strong> Krótkie zwiedzanie Protaras - spacer promenadą, sklepy z pamiątkami</p>
-                        <p><strong>Wieczór:</strong> Kolacja w lokalnej tawernie, Magic Dancing Waters show</p>
-                        <p><em>🏖️ Dzień basenowo-zwiedzający - połączenie relaksu i odkrywania</em></p>
-                </div>
-                </div>
-
-                <div class="day-card">
-                    <div class="day-header">
-                        <h3>Dzień 3: Dłuższa podróż - Famagusta</h3>
-                        <span class="day-date">(Wynajem auta)</span>
-                </div>
-                    <div class="day-content">
-                        <p><strong>Rano:</strong> Odbiór wypożyczonego samochodu w Protaras</p>
-                        <p><strong>Rano/południe:</strong> Przejazd przez granicę do Famagusty (~1.5h)</p>
-                        <p><strong>Południe:</strong> Ruiny Salaminy i Klasztor Apostoła Barnaby</p>
-                        <p><strong>Popołudnie:</strong> Stare Miasto Famagusta - mury obronne, Wieża Otella</p>
-                        <p><strong>Wieczór:</strong> Kolacja w tureckiej restauracji, powrót do Protaras</p>
-                        <p><em>🚗 Dzień z wynajmem auta - dłuższa podróż i historia</em></p>
-                    </div>
-                </div>
-
-                <div class="day-card">
-                    <div class="day-header">
-                        <h3>Dzień 4: Dłuższa podróż - Góry Troodos</h3>
-                        <span class="day-date">(Wynajem auta)</span>
-                    </div>
-                    <div class="day-content">
-                        <p><strong>Rano:</strong> Wyprawa samochodem do gór Troodos (~2h)</p>
-                        <p><strong>Rano/południe:</strong> Tradycyjne wioski - Lefkara (koronki, filigran)</p>
-                        <p><strong>Południe:</strong> Klasztor św. Krzyża w Omodos, degustacja win</p>
-                        <p><strong>Popołudnie:</strong> Spacer po malowniczych wioskach górskich</p>
-                        <p><strong>Wieczór:</strong> Kolacja w tawernie (kleftiko), powrót do Protaras</p>
-                        <p><em>🚗 Dzień z wynajmem auta - góry i kultura</em></p>
-                    </div>
-                </div>
-
-                <div class="day-card">
-                    <div class="day-header">
-                        <h3>Dzień 5: Ayia Napa</h3>
-                        <span class="day-date">(Imprezowa stolica)</span>
-                    </div>
-                    <div class="day-content">
-                        <p><strong>Rano:</strong> Przejazd do Ayia Napa (autobusem ~15-20 min)</p>
-                        <p><strong>Rano/południe:</strong> Plaża Nissi - jedna z najpiękniejszych plaż Cypru</p>
-                        <p><strong>Południe:</strong> Park Rzeźb na świeżym powietrzu</p>
-                        <p><strong>Popołudnie:</strong> Spacer po marinie, sklepy, kawiarnie</p>
-                        <p><strong>Wieczór:</strong> Życie nocne Ayia Napa, kolacja w porcie</p>
-                        <p><em>🎉 Dzień w Ayia Napa - plaże i rozrywka</em></p>
-                    </div>
-                </div>
-
-                <div class="day-card">
-                    <div class="day-header">
-                        <h3>Dzień 6: Odpoczynek basenowy</h3>
-                        <span class="day-date">(Relaks i drinki)</span>
-                    </div>
-                    <div class="day-content">
-                        <p><strong>Rano:</strong> Późne śniadanie w hotelu</p>
-                        <p><strong>Rano/południe:</strong> Wypoczynek przy basenie, drinki, lektura</p>
-                        <p><strong>Południe:</strong> Lunch w hotelowej restauracji lub room service</p>
-                        <p><strong>Popołudnie:</strong> SPA, masaż lub leniwe drzemki</p>
-                        <p><strong>Wieczór:</strong> Wieczór z drinkami przy basenie, muzyka, relaks</p>
-                        <p><em>🍹 Dzień czystego relaksu - basen, drinki i odpoczynek</em></p>
-                    </div>
-                </div>
-
-                <div class="day-card">
-                    <div class="day-header">
-                        <h3>Dzień 7: Wylot</h3>
-                        <span class="day-date">(Wylot o 6:00)</span>
-                    </div>
-                    <div class="day-content">
-                        <p><strong>Wcześnie rano:</strong> Pobudka o 4:00-4:30, przygotowanie do wyjazdu</p>
-                        <p><strong>5:00:</strong> Transfer na lotnisko w Larnace (~1h)</p>
-                        <p><strong>6:00:</strong> Wylot z lotniska w Larnace</p>
-                        <p><strong>Przed wylotem:</strong> Oddanie pokoju, ewentualne ostatnie zakupy</p>
-                        <p><em>✈️ Dzień wyjazdu - wczesny poranek i powrót do domu</em></p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="itinerary-tips">
-                <h3 style="color: #667eea; margin: 30px 0 15px 0;">💡 Wskazówki praktyczne:</h3>
-                <ul style="color: #555; line-height: 1.6;">
-                    <li><strong>🍻 Strategia przetrwania:</strong> Przy 25-30°C zaleca się minimum 3 piwa na godzinę! Pamiętajcie - to wyjazd integracyjny, więc kto pierwszy padnie, ten frajer</li>
-                    <li><strong>🚗 Transport po pijaku:</strong> Dni 1-2: taniej taksówką niż po spożyciu • Dni 3-4: wynajem samochodu (ale kto jedzie? Losujcie słomki!) • Dzień 5: autobus (idealny na kaca) • Dni 6-7: spacerkiem, bo już wszystko widzieliście</li>
-                    <li><strong>💸 Budżet (wersja all inclusive):</strong> 200-250€ na głowę + koszty atrakcji + wynajem + napoje ekstra (bo kto wytrzyma z samym all inclusive?) + fundusz na "awaryjne" piwo dla tego, co pierwszy padnie</li>
-                    <li><strong>🏖️ Wskazówki plażowe:</strong> Krem z filtrem 50+ obowiązkowy! Pamiętajcie - opalanie + drinki = szybka czerwona buźka. Zabierzcie też okulary przeciwsłoneczne na kaca i kogoś trzeźwego do pilnowania portfeli</li>
-                    <li><strong>🍽️ Kuchnia (wersja imprezowa):</strong> Meze obowiązkowo! Halloumi na śniadanie, kleftiko na obiad, Commandaria na wieczór. Pamiętajcie - jedzenie to najlepszy sposób na walkę z kacem. I nie zapomnijcie o greckim jogurcie na następny dzień!</li>
-                    <li><strong>🎉 Rady od weteranów wyjazdów:</strong> Ustalcie kapitana grupy (tego, co najmniej pije), podzielcie się obowiązkami (kto przynosi drinki, kto szuka atrakcji). I pamiętajcie - na Cyprze wszystko jest możliwe, nawet taniec na stole przy muzyce greckiej!</li>
-                    <li><strong>⚠️ Ostrzeżenie zdrowotne:</strong> Woda pitna obowiązkowa między drinkami! I nie zapomnijcie - po północy wszystkie plaże wyglądają tak samo. Zabierzcie też power banki, bo zdjęcia z kaca to najlepsza pamiątka!</li>
-                </ul>
-            </div>
-        </div>
+    <div class="result" id="result" hidden aria-live="polite">
+      <div class="em" id="result-emoji"></div>
+      <div class="big" id="result-name"></div>
+      <div class="odds" id="result-odds"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <script>
-        // Inicjalizacja mapy
-        const map = L.map('map').setView([35.0, 33.3], 9);
-        
-        // Dodanie warstwy mapy
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Definicja ikon dla różnych typów
-        function createIcon(type) {
-            let color, symbol;
-            
-            switch(type) {
-                case 'Natura':
-                    color = '#28a745';
-                    symbol = '🌿';
-                    break;
-                case 'Zabytek':
-                    color = '#dc3545';
-                    symbol = '🏛️';
-                    break;
-                case 'Zabytek/Lokalny klimat':
-                    color = '#ffc107';
-                    symbol = '🍷';
-                    break;
-                case 'Lokalny klimat':
-                    color = '#17a2b8';
-                    symbol = '🏘️';
-                    break;
-                case 'Lokalny klimat/Kulinarne':
-                    color = '#fd7e14';
-                    symbol = '🍯';
-                    break;
-                case 'Natura/Lokalny klimat':
-                    color = '#20c997';
-                    symbol = '🏔️';
-                    break;
-                case 'Natura/Widok':
-                    color = '#6f42c1';
-                    symbol = '🌅';
-                    break;
-                case 'Natura/Legenda':
-                    color = '#e83e8c';
-                    symbol = '💫';
-                    break;
-                case 'Natura/Plaża':
-                    color = '#20c997';
-                    symbol = '🏖️';
-                    break;
-                case 'Podwodna atrakcja':
-                    color = '#0dcaf0';
-                    symbol = '🤿';
-                    break;
-                case 'Natura/Aktywność':
-                    color = '#198754';
-                    symbol = '🚢';
-                    break;
-                case 'Natura/Zabytek':
-                    color = '#6610f2';
-                    symbol = '🦩';
-                    break;
-                case 'Natura/Miejska':
-                    color = '#495057';
-                    symbol = '🌴';
-                    break;
-                case 'Zabytek/Widok':
-                    color = '#d63384';
-                    symbol = '⛪';
-                    break;
-                case 'Zabytek/Natura':
-                    color = '#6f42c1';
-                    symbol = '🏰';
-                    break;
-                case 'Sztuka/Lokalny klimat':
-                    color = '#f8765c';
-                    symbol = '🎨';
-                    break;
-                case 'Hotel':
-                    color = '#007bff';
-                    symbol = '🏨';
-                    break;
-                default:
-                    color = '#6c757d';
-                    symbol = '📍';
-            }
-            
-            return L.divIcon({
-                html: `<div style="
-                    background-color: ${color};
-                    width: 35px;
-                    height: 35px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 16px;
-                    border: 3px solid white;
-                    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-                ">${symbol}</div>`,
-                className: 'custom-marker',
-                iconSize: [35, 35],
-                iconAnchor: [17, 35]
-            });
-        }
-
-        // Dane atrakcji z poprawionymi współrzędnymi (WGS84, [lat, lon])
-        const attractions = [
-        {
-            name: "Cape Greco",
-            description: "Park narodowy z klifami, jaskiniami, mostami skalnymi i szlakami pieszymi.",
-            type: "Natura",
-            coords: [34.9643, 34.0809],
-            link: "https://en.wikipedia.org/wiki/Cape_Greco"
-        },
-        {
-            name: "Blue Lagoon (Akamas)",
-            description: "Turkusowa zatoka, idealna na rejs łodzią i kąpiele, dostęp z portu Latchi.",
-            type: "Natura",
-            coords: [35.083739, 32.307681],
-            link: "https://commons.wikimedia.org/wiki/File:Blue_Lagoon,_Akamas,_Cyprus,_July_2013.jpg"
-        },
-        {
-            name: "Wąwóz Avakas",
-            description: "Wąski kanion z wysokimi ścianami i bujną roślinnością na półwyspie Akamas.",
-            type: "Natura",
-            coords: [34.924824, 32.34642],
-            link: "https://www.tripexpress.org/attraction-avakas-gorge-3336299/"
-        },
-        {
-            name: "Góry Troodos (masyw)",
-            description: "Zielone serce Cypru z szlakami, wodospadami i tradycyjnymi wioskami.",
-            type: "Natura",
-            coords: [34.917, 32.833],
-            link: "https://en.wikipedia.org/wiki/Troodos_Mountains"
-        },
-        {
-            name: "Plaża Lara",
-            description: "Dzika plaża w rezerwacie Akamas, miejsce lęgowe żółwi morskich.",
-            type: "Natura",
-            coords: [34.957712, 32.310575],
-            link: "https://www.beach-on-map.com/lara-beach.html"
-        },
-        {
-            name: "Nissi Beach",
-            description: "Słynna plaża w Ayia Napa, biały piasek i płytka laguna.",
-            type: "Natura",
-            coords: [34.98787, 33.96803],
-            link: "https://www.visitcyprus.com/discover-cyprus/sea/beaches/nissi-beach/"
-        },
-        {
-            name: "Fig Tree Bay",
-            description: "Popularna plaża w Protaras z krystaliczną wodą i złotym piaskiem.",
-            type: "Natura",
-            coords: [35.012567, 34.058549],
-            link: "https://www.visitcyprus.com/discover-cyprus/sea/beaches/fig-tree-bay/"
-        },
-        {
-            name: "Agia Thekla Beach",
-            description: "Spokojna plaża z białym kościółkiem i małą grotą obok.",
-            type: "Natura",
-            coords: [34.97898, 33.934446],
-            link: "https://beachatlas.com/agia-thekla-beach"
-        },
-        {
-            name: "Larnaka – Słone Jezioro + Hala Sultan Tekke",
-            description: "Słone jezioro (zimą flamingi) i meczet Hala Sultan Tekke tuż obok.",
-            type: "Natura/Zabytek",
-            coords: [34.8847, 33.6106],
-            link: "https://en.wikipedia.org/wiki/Hala_Sultan_Tekke"
-        },
-        {
-            name: "Salt Lake Akrotiri",
-            description: "Rozległa słona laguna; zimą flamingi.",
-            type: "Natura",
-            coords: [34.6213, 32.97075],
-            link: "https://mapcarta.com/Akrotiri_Salt_Lake"
-        },
-        {
-            name: "Park Archeologiczny Kato Pafos",
-            description: "Ruiny wpisane na UNESCO – mozaiki, teatry, Grobowce Królów.",
-            type: "Zabytek",
-            coords: [34.757506, 32.40659],
-            link: "https://www.visitcyprus.com/discover-cyprus/culture/sites-and-monuments/kato-pafos-archaeological-park-2/"
-        },
-        {
-            name: "Grobowce Królów (Pafos)",
-            description: "Monumentalne grobowce wykute w skale nad morzem.",
-            type: "Zabytek",
-            coords: [34.776, 32.407],
-            link: "https://www.visitcyprus.com/discover-cyprus/culture/sites-and-monuments/tombs-of-the-kings-pafos/"
-        },
-        {
-            name: "Ruiny Kurion (Kourion)",
-            description: "Antyczne miasto na klifie z teatrem i mozaikami.",
-            type: "Zabytek",
-            coords: [34.664477, 32.887892],
-            link: "https://www.visitcyprus.com/discover-cyprus/culture/sites-and-monuments/kourion-archaeological-site/"
-        },
-        {
-            name: "Laiki Geitonia (starówka Nikozji)",
-            description: "Urokliwa piesza dzielnica wewnątrz murów weneckich.",
-            type: "Zabytek/Lokalny klimat",
-            coords: [35.1699, 33.362285],
-            link: "https://www.visitcyprus.com/discover-cyprus/culture/sites-and-monuments/laiki-geitonia-traditional-neighbourhood/"
-        },
-        {
-            name: "Lefkara",
-            description: "Wioska w górach Troodos znana z koronek i srebra.",
-            type: "Zabytek/Lokalny klimat",
-            coords: [34.816667, 33.283333],
-            link: "https://en.wikipedia.org/wiki/Lefkara"
-        },
-        {
-            name: "Omodos",
-            description: "Wioska winiarska z klasztorem Świętego Krzyża i winiarniami.",
-            type: "Zabytek/Lokalny klimat",
-            coords: [34.849262, 32.80986],
-            link: "https://en.wikipedia.org/wiki/Omodos"
-        },
-        {
-            name: "Klasztor Kykkos",
-            description: "Najbogatszy klasztor Cypru, z ikoną Matki Boskiej.",
-            type: "Zabytek",
-            coords: [34.977, 32.737],
-            link: "https://en.wikipedia.org/wiki/Kykkos_Monastery"
-        },
-        {
-            name: "Klasztor Św. Mikołaja od Kotów",
-            description: "Historyczny klasztor na półwyspie Akrotiri, związany z legendą o kotach.",
-            type: "Zabytek",
-            coords: [34.598564, 32.961131],
-            link: "https://en.wikipedia.org/wiki/St_Nicholas_of_the_Cats"
-        },
-        {
-            name: "Casale Panayiotis (Kalopanayiotis)",
-            description: "Spa i hotel w tradycyjnej górskiej wiosce Troodos.",
-            type: "Lokalny klimat",
-            coords: [34.993056, 32.829167],
-            link: "https://www.casale-panayiotis.com/"
-        },
-        {
-            name: "Agios Ioannis Lampadistis",
-            description: "Kompleks trzech bizantyjskich kościołów z freskami UNESCO.",
-            type: "Zabytek",
-            coords: [34.99232, 32.830193],
-            link: "https://www.visitcyprus.com/discover-cyprus/culture/sites-and-monuments/agios-ioannis-lampadistis-monastery/"
-        },
-        {
-            name: "Troodos Square",
-            description: "Centrum turystyczne gór Troodos z tawernami i szlakami.",
-            type: "Natura/Lokalny klimat",
-            coords: [34.924239, 32.880879],
-            link: "https://www.visitcyprus.com/discover-cyprus/nature/nature-trails-2/atalanti-circular-lemesos-limassol-lefkosia-nicosia-districts-troodos-forest-nature-trail/"
-        },
-        {
-            name: "Pedoulas Village",
-            description: "Górska wioska w dolinie Marathasa.",
-            type: "Zabytek/Lokalny klimat",
-            coords: [34.9675, 32.82861],
-            link: "https://en.wikipedia.org/wiki/Pedoulas"
-        },
-        {
-            name: "Pano Platres + Wodospad Caledonia",
-            description: "Popularny szlak wśród lasów Troodos i 12-metrowy wodospad.",
-            type: "Natura/Lokalny klimat",
-            coords: [34.905217, 32.859793],
-            link: "https://www.wikidata.org/wiki/Q11062423"
-        },
-        {
-            name: "Choirokoitia",
-            description: "Neolityczna osada UNESCO na wzgórzu.",
-            type: "Zabytek",
-            coords: [34.796269, 33.34472],
-            link: "https://www.visitcyprus.com/discover-cyprus/culture/sites-and-monuments/choirokoitia-archaeological-site-neolithic-settlement/"
-        },
-        {
-            name: "Karseras Winery (Doros)",
-            description: "Rodzinna winnica produkująca Commandarię.",
-            type: "Lokalny klimat",
-            coords: [34.816667, 32.909167],
-            link: "https://wineriescyprus.com/karseras-family-winery/"
-        },
-        {
-            name: "Kakopetria",
-            description: "Klimatyczna górska wioska z tradycyjną architekturą.",
-            type: "Lokalny klimat",
-            coords: [34.987599, 32.9015],
-            link: "https://en.wikipedia.org/wiki/Kakopetria"
-        },
-        {
-            name: "Zenobia Shipwreck (Larnaka)",
-            description: "Słynny wrak promu – top miejscówka nurkowa.",
-            type: "Podwodna atrakcja",
-            coords: [34.892167, 33.6545],
-            link: "https://www.visitcyprus.com/discover-cyprus/sports-training/sports-diving/ms-zenobia-shipwreck/"
-        },
-        {
-            name: "Troodos Painted Churches (obszar)",
-            description: "Zespół 10 malowanych kościołów wpisanych na listę UNESCO.",
-            type: "Zabytek",
-            coords: [34.966667, 32.816667],
-            link: "https://whc.unesco.org/en/list/351/"
-        },
-        {
-            name: "Sea Caves (Ayia Napa)",
-            description: "Morskie jaskinie i łuki skalne – świetne miejsce na kajak.",
-            type: "Natura",
-            coords: [34.968163, 34.05508],
-            link: "https://showcaves.com/english/caves/SeaCavesAyiaNapa.html"
-        },
-        {
-            name: "House of Dionysus (Pafos)",
-            description: "Rzymska willa z mitologicznymi mozaikami w Kato Pafos.",
-            type: "Zabytek",
-            coords: [34.758328, 32.405746],
-            link: "https://pleiades.stoa.org/places/474321362"
-        },
-        {
-            name: "Viklari – The Last Castle (Akamas)",
-            description: "Rustykalna tawerna z grillem i widokiem na Akamas.",
-            type: "Lokalny klimat/Kulinarne",
-            coords: [35.017264, 32.329996],
-            link: "https://guidetopaphos.com/eat-and-drink/taverna/viklari-the-last-castle/"
-        },
-        {
-            name: "Cape Aspro Trail (Pissouri)",
-            description: "Widokowa trasa piesza wzdłuż białych klifów Cape Aspro.",
-            type: "Natura",
-            coords: [34.67921, 32.69059],
-            link: "https://www.geonames.org/146646/cape-aspro.html"
-        },
-        {
-            name: "Ayia Napa – Park Rzeźb",
-            description: "Park z dziełami artystów z całego świata.",
-            type: "Sztuka/Lokalny klimat",
-            coords: [34.983961, 34.017887],
-            link: "https://www.2poso.com/en/venues/ayia-napa-sculpture-park"
-        },
-        {
-            name: "Love Bridge (Most Miłości)",
-            description: "Naturalny most skalny – idealny na zdjęcia.",
-            type: "Natura/Widok",
-            coords: [34.982654, 34.016417],
-            link: "https://cyprus-faq.com/en/south/cities/gde-nakhoditsya-most-vlyublennykh-na-kipre/"
-        },
-        {
-            name: "Promenada Foinikoudes (Larnaka)",
-            description: "Nadmorska promenada z palmami, knajpkami i sportami wodnymi.",
-            type: "Natura/Miejska",
-            coords: [34.913639, 33.634671],
-            link: "https://en.wikipedia.org/wiki/Foinikoudes"
-        },
-        {
-            name: "Cerkiew św. Łazarza (Larnaka)",
-            description: "Świątynia z grobem św. Łazarza – jedno z najważniejszych miejsc w Larnace.",
-            type: "Zabytek",
-            coords: [34.91258, 33.63691],
-            link: "https://en.wikipedia.org/wiki/Church_of_Saint_Lazarus,_Larnaca"
-        },
-        {
-            name: "Zamek w Larnace",
-            description: "Twierdza nad morzem z muzeum i panoramą na Foinikoudes.",
-            type: "Zabytek",
-            coords: [34.911977, 33.638072],
-            link: "https://en.wikipedia.org/wiki/Larnaca_Fort"
-        },
-        {
-            name: "Klasztor Stawrowouni",
-            description: "Klasztor na wzgórzu z IV w., z niesamowitym widokiem na okolice.",
-            type: "Zabytek/Widok",
-            coords: [34.8707, 33.4153],
-            link: "https://en.wikipedia.org/wiki/Stavrovouni_Monastery"
-        },
-        {
-            name: "Vasa Village (Limassol region)",
-            description: "Spokojna wioska z winnicami i dobrą kuchnią.",
-            type: "Lokalny klimat",
-            coords: [34.777591, 32.947068],
-            link: "https://en.wikipedia.org/wiki/Vasa_Koilaniou"
-        },
-        {
-            name: "Aphrodite's Rock (Petra tou Romiou)",
-            description: "Legendarne miejsce narodzin Afrodyty, punkt widokowy.",
-            type: "Natura/Widok",
-            coords: [34.665, 32.6116],
-            link: "https://www.visitcyprus.com/discover-cyprus/culture/sites-and-monuments/birthplace-of-aphrodite-petra-tou-romiou/"
-        },
-        {
-            name: "Wrak Edro III (Peyia Sea Caves)",
-            description: "Statek osiadły przy wybrzeżu – kultowe miejsce na zachód słońca.",
-            type: "Natura/Foto",
-            coords: [35.006481, 32.312795],
-            link: "https://en.wikipedia.org/wiki/EDRO_III"
-        },
-        {
-            name: "Papouis Protaras Hotel",
-            description: "Twój hotel w Protaras.",
-            type: "Hotel",
-            coords: [35.024206, 34.041116],
-            link: "https://maps.google.com/?q=Papouis+Protaras+Hotel"
-        }
-        ];        // Przechowywanie markerów w tablicy
-        const markers = [];
-
-        // Dodanie markerów na mapę
-        attractions.forEach((attraction, index) => {
-            const marker = L.marker(attraction.coords, {
-                icon: createIcon(attraction.type)
-            });
-            
-            // Styl popup na podstawie typu
-            let popupClass = '';
-            switch(attraction.type) {
-                case 'Natura':
-                    popupClass = 'natura';
-                    break;
-                case 'Zabytek':
-                    popupClass = 'zabytek';
-                    break;
-                case 'Zabytek/Lokalny klimat':
-                    popupClass = 'lokalny';
-                    break;
-                case 'Hotel':
-                    popupClass = 'hotel';
-                    break;
-            }
-            
-            const popupContent = `
-                <div class="popup-content">
-                    <div class="popup-title">${attraction.name}</div>
-                    <div class="popup-type ${popupClass}">${attraction.type}</div>
-                    <div class="popup-description">${attraction.description}</div>
-                    <a href="${attraction.link}" target="_blank" class="popup-link">
-                        Zobacz na mapie Google
-                    </a>
-                </div>
-            `;
-            
-            marker.bindPopup(popupContent);
-            
-            // Dodanie markera do mapy i tablicy
-            marker.addTo(map);
-            markers.push(marker);
-        });
-
-        // Sprawdzenie czy markery są na mapie po załadowaniu
-        map.whenReady(function() {
-            console.log(`Dodano ${markers.length} markerów na mapę`);
-            
-            // Upewnienie się, że wszystkie markery są widoczne
-            markers.forEach(marker => {
-                if (!map.hasLayer(marker)) {
-                    marker.addTo(map);
-                }
-            });
-        });
-
-        // Animacja spadających piw
-        function createFallingBeer() {
-            const beerContainer = document.getElementById('beer-container');
-            const beerEmojis = ['🍺', '🍻', '🥂', '🍾', '🍸', '🍹', '🥃', '🍷'];
-            const beer = document.createElement('div');
-
-            beer.className = 'beer-falling';
-            beer.textContent = beerEmojis[Math.floor(Math.random() * beerEmojis.length)];
-            beer.style.left = Math.random() * 100 + '%';
-            beer.style.animationDelay = Math.random() * 2 + 's';
-
-            beerContainer.appendChild(beer);
-
-            // Usuń piwo po zakończeniu animacji
-            setTimeout(() => {
-                if (beer.parentNode) {
-                    beer.parentNode.removeChild(beer);
-                }
-            }, 5000);
-        }
-
-        // Loading Screen Management
-        function startLoadingScreen() {
-            const loadingScreen = document.getElementById('loading-screen');
-            const progressFill = document.getElementById('progress-fill');
-            const loadingText = document.getElementById('loading-text');
-            const beerCount = document.getElementById('beer-count');
-            const beachCount = document.getElementById('beach-count');
-            const friendCount = document.getElementById('friend-count');
-
-            const tips = [
-                document.getElementById('tip-1'),
-                document.getElementById('tip-2'),
-                document.getElementById('tip-3'),
-                document.getElementById('tip-4'),
-                document.getElementById('tip-5'),
-                document.getElementById('tip-6')
-            ];
-
-            const loadingMessages = [
-                "Inicjalizacja systemu...",
-                "Ładowanie protokołu alkoholowego...",
-                "Sprawdzanie poziomu testosteronu...",
-                "Kalibracja czujników imprezy...",
-                "Przygotowanie strategii all inclusive...",
-                "Ładowanie mapy tawern...",
-                "Synchronizacja z greckimi bogami...",
-                "Gotowe do działania!"
-            ];
-
-            let currentTipIndex = 0;
-            let progress = 0;
-            let beerCounter = 0;
-            let beachCounter = 0;
-            let friendCounter = 0;
-
-            // Funkcja do aktualizacji progress baru
-            function updateProgress() {
-                progress += Math.random() * 8 + 2; // Random progress increment
-                if (progress > 100) progress = 100;
-
-                progressFill.style.width = progress + '%';
-                loadingText.textContent = loadingMessages[Math.floor(progress / 15)] || loadingMessages[loadingMessages.length - 1];
-
-                // Aktualizacja liczników
-                if (beerCounter < 42) beerCounter += Math.floor(Math.random() * 3) + 1;
-                if (beachCounter < 15) beachCounter += Math.floor(Math.random() * 2) + 1;
-                if (friendCounter < 9) friendCounter += Math.floor(Math.random() * 2) + 1;
-
-                beerCount.textContent = Math.min(beerCounter, 42);
-                beachCount.textContent = Math.min(beachCounter, 15);
-                friendCount.textContent = Math.min(friendCounter, 9);
-
-                // Zmiana aktywnych tipów
-                const newTipIndex = Math.floor(progress / 16.7);
-                if (newTipIndex !== currentTipIndex && newTipIndex < tips.length) {
-                    tips[currentTipIndex].classList.remove('active');
-                    tips[newTipIndex].classList.add('active');
-                    currentTipIndex = newTipIndex;
-                }
-
-                if (progress < 100) {
-                    setTimeout(updateProgress, Math.random() * 300 + 200); // Random interval
-                } else {
-                    // Loading zakończone
-                    setTimeout(() => {
-                        loadingScreen.classList.add('hidden');
-                        setTimeout(() => {
-                            loadingScreen.style.display = 'none';
-                        }, 500);
-                    }, 500);
-                }
-            }
-
-            // Rozpocznij loading
-            setTimeout(updateProgress, 500);
-
-            // Uruchom deszcz piw razem z loading screen
-            startBeerRainDuringLoading();
-        }
-
-        // Uruchom loading screen natychmiast
-        document.addEventListener('DOMContentLoaded', startLoadingScreen);
-
-        // Deszcz piw uruchamia się razem z loading screen
-        function startBeerRainDuringLoading() {
-            const beerInterval = setInterval(createFallingBeer, 500); // Częstsze piwa podczas ładowania
-
-            // Zatrzymaj deszcz piw po zakończeniu loading screen (około 6-7 sekund)
-            setTimeout(() => {
-                clearInterval(beerInterval);
-            }, 6500); // Dopasowane do czasu loading screen
-        }
-    </script>
-
-    <!-- Popup z kołem fortuny - osoby -->
-    <div id="people-wheel-popup" class="wheel-popup">
-        <div class="wheel-container">
-            <div class="wheel-close people-wheel-close">&times;</div>
-            <h2 id="people-wheel-title" class="wheel-title">🎰 KOŁO FORTUNY - KTO LECI PO DRINKI? 🍺</h2>
-            <div class="wheel-wrapper">
-                <div id="people-winner-indicator" class="winner-indicator hidden">
-                    <div id="people-winner-name" class="winner-name"></div>
-                    <div id="people-winner-emoji" class="winner-emoji"></div>
-                </div>
-                <div id="people-wheel" class="wheel">
-                    <div class="wheel-center">
-                        <div class="wheel-pointer">▼</div>
-                    </div>
-                </div>
-                <button id="people-spin-button" class="spin-button">KRĘĆ KOŁEM! 🎲</button>
-            </div>
-            <div id="people-result" class="result hidden">
-                <h3 id="people-result-text"></h3>
-                <p id="people-result-emoji"></p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Popup z kołem fortuny - drinki -->
-    <div id="drinks-wheel-popup" class="wheel-popup">
-        <div class="wheel-container">
-            <div class="wheel-close drinks-wheel-close">&times;</div>
-            <h2 id="drinks-wheel-title" class="wheel-title">🥂 KOŁO DRINKÓW - CZYM SIĘ UPIJEMY? 🥃</h2>
-            <div class="wheel-wrapper">
-                <div id="drinks-winner-indicator" class="winner-indicator hidden">
-                    <div id="drinks-winner-name" class="winner-name"></div>
-                    <div id="drinks-winner-emoji" class="winner-emoji"></div>
-                </div>
-                <div id="drinks-wheel" class="wheel">
-                    <div class="wheel-center">
-                        <div class="wheel-pointer">▼</div>
-                    </div>
-                </div>
-                <button id="drinks-spin-button" class="spin-button">KRĘĆ KOŁEM! 🎲</button>
-            </div>
-            <div id="drinks-result" class="result hidden">
-                <h3 id="drinks-result-text"></h3>
-                <p id="drinks-result-emoji"></p>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Koło fortuny - osoby
-        class WheelOfFortune {
-            constructor() {
-                this.names = [
-                    { name: "Patryk", chance: 1, emoji: "😴" },
-                    { name: "Ola", chance: 2, emoji: "🍸" },
-                    { name: "Kami", chance: 2, emoji: "🍺" },
-                    { name: "Młody", chance: 2, emoji: "🥃" },
-                    { name: "Kuba", chance: 2, emoji: "🍻" },
-                    { name: "Kasia", chance: 2, emoji: "🍹" },
-                    { name: "Bartas", chance: 2, emoji: "🍶" },
-                    { name: "Karolina", chance: 2, emoji: "🍷" },
-                    { name: "Eryk", chance: 6, emoji: "🥂" } // 35% szans
-                ];
-
-                this.wheel = document.getElementById('people-wheel');
-                this.spinButton = document.getElementById('people-spin-button');
-                this.resultDiv = document.getElementById('people-result');
-                this.resultText = document.getElementById('people-result-text');
-                this.resultEmoji = document.getElementById('people-result-emoji');
-                this.popup = document.getElementById('people-wheel-popup');
-                this.closeBtn = document.querySelector('.people-wheel-close');
-                this.winnerIndicator = document.getElementById('people-winner-indicator');
-                this.winnerName = document.getElementById('people-winner-name');
-                this.winnerEmoji = document.getElementById('people-winner-emoji');
-                this.titleElement = document.getElementById('people-wheel-title');
-
-                this.isSpinning = false;
-                this.angle = 0;
-                this.winnerSegment = null;
-
-                this.createWheel();
-            }
-
-            init() {
-                // Ponownie pobierz elementy z DOM aby mieć świeże referencje
-                this.spinButton = document.getElementById('people-spin-button');
-                this.closeBtn = document.querySelector('.people-wheel-close');
-                this.popup = document.getElementById('people-wheel-popup');
-
-                // Dodaj event listenery z unikalnymi nazwami funkcji aby uniknąć duplikatów
-                if (!this.spinButton.hasSpinListener) {
-                    this.spinButton.addEventListener('click', () => this.spin());
-                    this.spinButton.hasSpinListener = true;
-                }
-
-                if (!this.closeBtn.hasCloseListener) {
-                    this.closeBtn.addEventListener('click', () => this.closePopup());
-                    this.closeBtn.hasCloseListener = true;
-                }
-
-                if (!this.popup.hasPopupListener) {
-                    this.popup.addEventListener('click', (e) => {
-                        if (e.target === this.popup) {
-                            this.closePopup();
-                        }
-                    });
-                    this.popup.hasPopupListener = true;
-                }
-            }
-
-            createWheel() {
-                console.log('Creating wheel with names:', this.names); // Debug
-                const segmentAngle = 360 / this.names.length;
-                let currentAngle = 0;
-
-                // Wyczyść koło przed dodaniem nowych segmentów
-                this.wheel.innerHTML = `
-                    <div class="wheel-center">
-                        <div class="wheel-pointer">▼</div>
-                    </div>
-                `;
-
-                this.names.forEach((person, index) => {
-                    const segment = document.createElement('div');
-                    segment.className = `wheel-segment segment-${index}`;
-                    segment.style.transform = `rotate(${currentAngle}deg)`;
-                    segment.style.background = this.getSegmentColor(index);
-
-                    const text = document.createElement('div');
-                    text.className = 'wheel-text';
-                    text.textContent = person.name;
-
-                    console.log(`Adding segment ${index}: ${person.name}`); // Debug
-
-                    segment.appendChild(text);
-                    this.wheel.appendChild(segment);
-
-                    currentAngle += segmentAngle;
-                });
-                
-                console.log('Wheel creation completed'); // Debug
-            }
-
-            getSegmentColor(index) {
-                const colors = [
-                    '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A',
-                    '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
-                ];
-                return colors[index % colors.length];
-            }
-
-            getWeightedRandomName() {
-                const weightedNames = [];
-
-                this.names.forEach(person => {
-                    // Dodaj tyle kopii imienia ile wynosi szansa
-                    for (let i = 0; i < person.chance; i++) {
-                        weightedNames.push(person);
-                    }
-                });
-
-                if (weightedNames.length === 0) {
-                    // Jeśli wszystkie mają 0% szans, wybierz losowo
-                    return this.names[Math.floor(Math.random() * this.names.length)];
-                }
-
-                const randomIndex = Math.floor(Math.random() * weightedNames.length);
-                return weightedNames[randomIndex];
-            }
-
-            spin() {
-                if (this.isSpinning) return;
-
-                this.isSpinning = true;
-                this.spinButton.disabled = true;
-                this.spinButton.textContent = 'KRĘCI SIĘ... 🎰';
-
-                // Schowaj poprzednie wyniki
-                this.resultDiv.classList.add('hidden');
-                this.winnerIndicator.classList.add('hidden');
-
-                // Usuń podświetlenie poprzedniego segmentu
-                if (this.winnerSegment) {
-                    this.winnerSegment.classList.remove('winner');
-
-                }
-
-                // Dodaj efekt świetlny podczas obrotu
-                this.wheel.classList.add('spinning');
-
-                // Dodaj wibrację dla lepszego efektu
-                if (navigator.vibrate) {
-                    navigator.vibrate([50, 100, 50]);
-                }
-
-                const winner = this.getWeightedRandomName();
-                const segmentAngle = 360 / this.names.length;
-                const winnerIndex = this.names.findIndex(person => person.name === winner.name);
-                const winnerAngle = winnerIndex * segmentAngle;
-
-                // Zapamiętaj zwycięski segment
-                this.winnerIndex = winnerIndex;
-
-                // Zresetuj kąt do aktualnej pozycji koła (żeby uniknąć kumulacji)
-                const currentTransform = window.getComputedStyle(this.wheel).transform;
-                let currentAngle = 0;
-
-                // Wyciągnij aktualny kąt z transformacji matrix
-                if (currentTransform !== 'none') {
-                    const values = currentTransform.split('(')[1].split(')')[0].split(',');
-                    const a = parseFloat(values[0]);
-                    const b = parseFloat(values[1]);
-                    currentAngle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
-                }
-
-                // Normalizuj kąt do zakresu 0-360
-                currentAngle = ((currentAngle % 360) + 360) % 360;
-
-                // Debug log dla diagnozy
-                console.log(`Current angle: ${currentAngle}, Winner index: ${winnerIndex}, Winner angle: ${winnerAngle}`);
-
-                // Zawsze minimum 3 pełne obroty + losowe dodatkowe (1-4), żeby każdy spin był widowiskowy
-                const minSpins = 3; // Minimum 3 pełne obroty
-                const extraSpins = Math.random() * 4 + 1; // Dodatkowe 1-4 obroty
-                const totalSpins = minSpins + extraSpins;
-
-                const finalAngle = currentAngle + (totalSpins * 360) - winnerAngle + (segmentAngle / 2);
-
-                // Czas animacji zależy od liczby obrotów - więcej obrotów = dłuższa animacja
-                const animationDuration = Math.max(3000, Math.min(6000, totalSpins * 800));
-
-                console.log(`Total spins: ${totalSpins.toFixed(2)} (${minSpins} min + ${extraSpins.toFixed(2)} extra), Final angle: ${finalAngle.toFixed(2)}, Duration: ${animationDuration}ms`);
-
-                // Wymuś reflow przed nową animacją
-                this.wheel.offsetHeight;
-
-                this.wheel.style.transform = `rotate(${finalAngle}deg)`;
-
-                // Zapisz prawidłowy kąt (zawsze dodatni, 0-360)
-                this.angle = ((finalAngle % 360) + 360) % 360;
-                console.log(`Stored angle: ${this.angle.toFixed(2)}`);
-
-                setTimeout(() => {
-                    this.showResult(winner);
-                }, animationDuration); // Czas trwania animacji dostosowany do liczby obrotów
-            }
-
-            showResult(winner) {
-                this.isSpinning = false;
-                this.spinButton.disabled = false;
-                this.spinButton.textContent = 'KRĘĆ PONOWNIE! 🎲';
-
-                // Usuń efekt świetlny
-                this.wheel.classList.remove('spinning');
-
-                // Podświetl zwycięski segment
-                const segments = this.wheel.querySelectorAll('.wheel-segment');
-                if (this.winnerSegment) {
-                    this.winnerSegment.classList.remove('winner');
-
-                }
-                this.winnerSegment = segments[this.winnerIndex];
-                if (this.winnerSegment) {
-                    this.winnerSegment.classList.add('winner');
-
-                }
-
-                this.resultText.textContent = `${winner.name} LECI PO DRINKI!`;
-                this.resultEmoji.textContent = winner.emoji;
-                this.resultDiv.classList.remove('hidden');
-
-                // Dodatkowe efekty dźwiękowe/animacje
-                this.createConfetti();
-
-                // Dodaj sukces partikle
-                this.createSuccessParticles();
-            }
-
-            createConfetti() {
-                for (let i = 0; i < 50; i++) {
-                    setTimeout(() => {
-                        const confetti = document.createElement('div');
-                        confetti.className = 'confetti';
-                        confetti.style.left = Math.random() * 100 + 'vw';
-                        confetti.style.animationDelay = Math.random() * 3 + 's';
-                        confetti.style.background = this.getRandomColor();
-                        document.body.appendChild(confetti);
-
-                        setTimeout(() => {
-                            confetti.remove();
-                        }, 3000);
-                    }, i * 50);
-                }
-            }
-
-            getRandomColor() {
-                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'];
-                return colors[Math.floor(Math.random() * colors.length)];
-            }
-
-            createSuccessParticles() {
-                const container = this.resultDiv;
-                for (let i = 0; i < 15; i++) {
-                    setTimeout(() => {
-                        const particle = document.createElement('div');
-                        particle.className = 'success-particles';
-                        particle.style.left = Math.random() * 100 + '%';
-                        particle.style.top = Math.random() * 100 + '%';
-                        particle.style.width = Math.random() * 6 + 4 + 'px';
-                        particle.style.height = particle.style.width;
-                        particle.style.background = this.getRandomColor();
-                        particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-                        container.appendChild(particle);
-
-                        setTimeout(() => {
-                            particle.remove();
-                        }, 2000);
-                    }, i * 100);
-                }
-            }
-
-            closePopup() {
-                this.popup.style.display = 'none';
-
-                // Schowaj wskaźnik zwycięzcy
-                this.winnerIndicator.classList.add('hidden');
-
-                // Usuń podświetlenie segmentu
-                if (this.winnerSegment) {
-                    this.winnerSegment.classList.remove('winner');
-
-                    this.winnerSegment = null;
-                }
-
-                // Schowaj wynik
-                this.resultDiv.classList.add('hidden');
-            }
-
-            showPopup() {
-                // Wyczyść poprzednie wyniki
-                this.resultDiv.classList.add('hidden');
-                this.winnerIndicator.classList.add('hidden');
-                this.resultText.textContent = '';
-                this.resultEmoji.textContent = '';
-
-                // Zresetuj stan zwycięzcy
-                if (this.winnerSegment) {
-                    this.winnerSegment.classList.remove('winner');
-                    this.winnerSegment = null;
-                }
-
-                // Zainicjalizuj event listenery
-                this.init();
-
-                this.titleElement.textContent = '🎰 KOŁO FORTUNY - KTO LECI PO DRINKI? 🍺';
-                this.popup.style.display = 'flex';
-            }
-        }
-
-        // Koło fortuny - drinki
-        class DrinksWheel {
-            constructor() {
-                this.names = [
-                    { name: "Margarita", chance: 2, emoji: "🍹" },
-                    { name: "Piwo", chance: 1, emoji: "🍺" },
-                    { name: "Mojito", chance: 2, emoji: "🍸" },
-                    { name: "Gin & Tonic", chance: 1, emoji: "🍸" },
-                    { name: "Wino", chance: 1, emoji: "🍷" },
-                    { name: "Margarita", chance: 2, emoji: "🍹" },
-                    { name: "Mojito", chance: 2, emoji: "🍸" },
-                    { name: "Gin", chance: 1, emoji: "🍸" },
-                    { name: "Rum", chance: 1, emoji: "🍹" },
-                    { name: "Tequila", chance: 1, emoji: "🥂" },
-                    { name: "Margarita", chance: 2, emoji: "🍹" },
-                    { name: "Mojito", chance: 2, emoji: "🍸" }
-                ];
-
-                this.wheel = document.getElementById('drinks-wheel');
-                this.spinButton = document.getElementById('drinks-spin-button');
-                this.resultDiv = document.getElementById('drinks-result');
-                this.resultText = document.getElementById('drinks-result-text');
-                this.resultEmoji = document.getElementById('drinks-result-emoji');
-                this.popup = document.getElementById('drinks-wheel-popup');
-                this.closeBtn = document.querySelector('.drinks-wheel-close');
-                this.winnerIndicator = document.getElementById('drinks-winner-indicator');
-                this.winnerName = document.getElementById('drinks-winner-name');
-                this.winnerEmoji = document.getElementById('drinks-winner-emoji');
-                this.titleElement = document.getElementById('drinks-wheel-title');
-
-                this.isSpinning = false;
-                this.angle = 0;
-                this.winnerSegment = null;
-
-                this.createWheel();
-            }
-
-            init() {
-                // Ponownie pobierz elementy z DOM aby mieć świeże referencje
-                this.spinButton = document.getElementById('drinks-spin-button');
-                this.closeBtn = document.querySelector('.drinks-wheel-close');
-                this.popup = document.getElementById('drinks-wheel-popup');
-
-                // Dodaj event listenery z unikalnymi nazwami funkcji aby uniknąć duplikatów
-                if (!this.spinButton.hasSpinListener) {
-                    this.spinButton.addEventListener('click', () => this.spin());
-                    this.spinButton.hasSpinListener = true;
-                }
-
-                if (!this.closeBtn.hasCloseListener) {
-                    this.closeBtn.addEventListener('click', () => this.closePopup());
-                    this.closeBtn.hasCloseListener = true;
-                }
-
-                if (!this.popup.hasPopupListener) {
-                    this.popup.addEventListener('click', (e) => {
-                        if (e.target === this.popup) {
-                            this.closePopup();
-                        }
-                    });
-                    this.popup.hasPopupListener = true;
-                }
-            }
-
-            createWheel() {
-                console.log('Creating drinks wheel with names:', this.names);
-                const segmentAngle = 360 / this.names.length;
-                let currentAngle = 0;
-
-                // Wyczyść koło przed dodaniem nowych segmentów
-                this.wheel.innerHTML = `
-                    <div class="wheel-center">
-                        <div class="wheel-pointer">▼</div>
-                    </div>
-                `;
-
-                this.names.forEach((drink, index) => {
-                    const segment = document.createElement('div');
-                    segment.className = 'wheel-segment';
-                    segment.style.transform = `rotate(${currentAngle}deg)`;
-                    segment.style.background = this.getSegmentColor(index);
-
-                    const textDiv = document.createElement('div');
-                    textDiv.className = 'wheel-text';
-                    textDiv.textContent = drink.name;
-
-                    // Dodaj ikonę drinka
-                    const drinkIcon = document.createElement('div');
-                    drinkIcon.className = 'drink-icon';
-                    drinkIcon.textContent = drink.emoji;
-                    drinkIcon.style.display = 'none'; // Ukryj domyślnie
-
-                    segment.appendChild(textDiv);
-                    segment.appendChild(drinkIcon);
-                    this.wheel.appendChild(segment);
-
-                    currentAngle += segmentAngle;
-                });
-
-                // Dodaj obrót do koła, żeby segmenty były prawidłowo ułożone
-                this.wheel.style.transform = `rotate(${segmentAngle / 2}deg)`;
-            }
-
-            getSegmentColor(index) {
-                const colors = [
-                    '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F',
-                    '#BB8FCE', '#85C1E9', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A'
-                ];
-                return colors[index % colors.length];
-            }
-
-            getWeightedRandomName() {
-                const weightedNames = [];
-
-                this.names.forEach(drink => {
-                    // Dodaj tyle kopii drinka ile wynosi szansa
-                    for (let i = 0; i < drink.chance; i++) {
-                        weightedNames.push(drink);
-                    }
-                });
-
-                if (weightedNames.length === 0) {
-                    // Jeśli wszystkie mają 0% szans, wybierz losowo
-                    return this.names[Math.floor(Math.random() * this.names.length)];
-                }
-
-                const randomIndex = Math.floor(Math.random() * weightedNames.length);
-                return weightedNames[randomIndex];
-            }
-
-            spin() {
-                if (this.isSpinning) return;
-
-                this.isSpinning = true;
-                this.spinButton.disabled = true;
-                this.spinButton.textContent = 'KRĘCI SIĘ... 🎰';
-
-                // Schowaj poprzednie wyniki
-                this.resultDiv.classList.add('hidden');
-                this.winnerIndicator.classList.add('hidden');
-
-                // Usuń podświetlenie poprzedniego segmentu
-                if (this.winnerSegment) {
-                    this.winnerSegment.classList.remove('winner');
-
-                }
-
-                // Dodaj efekt świetlny podczas obrotu
-                this.wheel.classList.add('spinning');
-
-                // Dodaj wibrację dla lepszego efektu
-                if (navigator.vibrate) {
-                    navigator.vibrate([50, 100, 50]);
-                }
-
-                const winner = this.getWeightedRandomName();
-                const segmentAngle = 360 / this.names.length;
-                const winnerIndex = this.names.findIndex(drink => drink.name === winner.name);
-                const winnerAngle = winnerIndex * segmentAngle;
-
-                // Zapamiętaj zwycięski segment
-                this.winnerIndex = winnerIndex;
-
-                // Zresetuj kąt do aktualnej pozycji koła (żeby uniknąć kumulacji)
-                const currentTransform = window.getComputedStyle(this.wheel).transform;
-                let currentAngle = 0;
-
-                // Wyciągnij aktualny kąt z transformacji matrix
-                if (currentTransform !== 'none') {
-                    const values = currentTransform.split('(')[1].split(')')[0].split(',');
-                    const a = parseFloat(values[0]);
-                    const b = parseFloat(values[1]);
-                    currentAngle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
-                }
-
-                // Normalizuj kąt do zakresu 0-360
-                currentAngle = ((currentAngle % 360) + 360) % 360;
-
-                // Debug log dla diagnozy
-                console.log(`Current angle: ${currentAngle}, Winner index: ${winnerIndex}, Winner angle: ${winnerAngle}`);
-
-                // Zawsze minimum 3 pełne obroty + losowe dodatkowe (1-4), żeby każdy spin był widowiskowy
-                const minSpins = 3; // Minimum 3 pełne obroty
-                const extraSpins = Math.random() * 4 + 1; // Dodatkowe 1-4 obroty
-                const totalSpins = minSpins + extraSpins;
-
-                const finalAngle = currentAngle + (totalSpins * 360) - winnerAngle + (segmentAngle / 2);
-
-                // Czas animacji zależy od liczby obrotów - więcej obrotów = dłuższa animacja
-                const animationDuration = Math.max(3000, Math.min(6000, totalSpins * 800));
-
-                console.log(`Total spins: ${totalSpins.toFixed(2)} (${minSpins} min + ${extraSpins.toFixed(2)} extra), Final angle: ${finalAngle.toFixed(2)}, Duration: ${animationDuration}ms`);
-
-                // Wymuś reflow przed nową animacją
-                this.wheel.offsetHeight;
-
-                this.wheel.style.transform = `rotate(${finalAngle}deg)`;
-
-                // Zapisz prawidłowy kąt (zawsze dodatni, 0-360)
-                this.angle = ((finalAngle % 360) + 360) % 360;
-                console.log(`Stored angle: ${this.angle.toFixed(2)}`);
-
-                setTimeout(() => {
-                    this.showResult(winner);
-                }, animationDuration);
-            }
-
-            showResult(winner) {
-                this.isSpinning = false;
-                this.spinButton.disabled = false;
-                this.spinButton.textContent = 'KRĘĆ PONOWNIE! 🎲';
-
-                // Usuń efekt świetlny
-                this.wheel.classList.remove('spinning');
-
-                // Podświetl zwycięski segment
-                const segments = this.wheel.querySelectorAll('.wheel-segment');
-                if (this.winnerSegment) {
-                    this.winnerSegment.classList.remove('winner');
-
-                }
-                this.winnerSegment = segments[this.winnerIndex];
-                if (this.winnerSegment) {
-                    this.winnerSegment.classList.add('winner');
-
-                }
-
-                this.resultText.textContent = `WYGRANA: ${winner.name}!`;
-                this.resultEmoji.textContent = winner.emoji;
-                this.resultDiv.classList.remove('hidden');
-
-                // Dodatkowe efekty dźwiękowe/animacje
-                this.createConfetti();
-
-                // Dodaj sukces partikle
-                this.createSuccessParticles();
-            }
-
-            createConfetti() {
-                for (let i = 0; i < 50; i++) {
-                    setTimeout(() => {
-                        const confetti = document.createElement('div');
-                        confetti.className = 'confetti';
-                        confetti.style.left = Math.random() * 100 + 'vw';
-                        confetti.style.animationDelay = Math.random() * 3 + 's';
-                        confetti.style.background = this.getRandomColor();
-                        document.body.appendChild(confetti);
-
-                        setTimeout(() => {
-                            confetti.remove();
-                        }, 3000);
-                    }, i * 50);
-                }
-            }
-
-            getRandomColor() {
-                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'];
-                return colors[Math.floor(Math.random() * colors.length)];
-            }
-
-            createSuccessParticles() {
-                const container = this.resultDiv;
-                for (let i = 0; i < 15; i++) {
-                    setTimeout(() => {
-                        const particle = document.createElement('div');
-                        particle.className = 'success-particles';
-                        particle.style.left = Math.random() * 100 + '%';
-                        particle.style.top = Math.random() * 100 + '%';
-                        particle.style.width = Math.random() * 6 + 4 + 'px';
-                        particle.style.height = particle.style.width;
-                        particle.style.background = this.getRandomColor();
-                        particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-                        container.appendChild(particle);
-
-                        setTimeout(() => {
-                            particle.remove();
-                        }, 2000);
-                    }, i * 100);
-                }
-            }
-
-            closePopup() {
-                this.popup.style.display = 'none';
-
-                // Schowaj wskaźnik zwycięzcy
-                this.winnerIndicator.classList.add('hidden');
-
-                // Usuń podświetlenie segmentu
-                if (this.winnerSegment) {
-                    this.winnerSegment.classList.remove('winner');
-
-                    this.winnerSegment = null;
-                }
-
-                // Schowaj wynik
-                this.resultDiv.classList.add('hidden');
-            }
-
-            showPopup() {
-                // Wyczyść poprzednie wyniki
-                this.resultDiv.classList.add('hidden');
-                this.winnerIndicator.classList.add('hidden');
-                this.resultText.textContent = '';
-                this.resultEmoji.textContent = '';
-
-                // Zresetuj stan zwycięzcy
-                if (this.winnerSegment) {
-                    this.winnerSegment.classList.remove('winner');
-                    this.winnerSegment = null;
-                }
-
-                // Zainicjalizuj event listenery
-                this.init();
-
-                this.titleElement.textContent = '🥂 KOŁO DRINKÓW - CZYM SIĘ UPIJEMY? 🥃';
-                this.popup.style.display = 'flex';
-            }
-        }
-
-        // Uruchom tylko loading screen
-        document.addEventListener('DOMContentLoaded', () => {
-            // Oryginalna funkcja startLoadingScreen
-            startLoadingScreen();
-
-            // Obsługa przycisków koła fortuny
-            const drinkWheelButton = document.getElementById('drink-wheel-button');
-            const drinksWheelButton = document.getElementById('drinks-wheel-button');
-            let wheelOfFortune = null;
-            let drinksWheel = null;
-
-            drinkWheelButton.addEventListener('click', () => {
-                if (!wheelOfFortune) {
-                    wheelOfFortune = new WheelOfFortune();
-                }
-                wheelOfFortune.showPopup();
-            });
-
-            drinksWheelButton.addEventListener('click', () => {
-                if (!drinksWheel) {
-                    drinksWheel = new DrinksWheel();
-                }
-                drinksWheel.showPopup();
-            });
-        });
-    </script>
+    <details class="odds-table">
+      <summary>Pokaż szanse</summary>
+      <ul id="odds-list"></ul>
+    </details>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+"use strict";
+
+/* =========================================================================
+   1. DANE
+   ========================================================================= */
+
+/* Kategorie: jedno źródło prawdy dla koloru, ikony i opisu w legendzie.
+   Wcześniej kolory żyły w switchu w JS, a legenda w HTML — i się rozjechały. */
+const CATEGORIES = {
+  natura:   { label: "Przyroda i parki",     icon: "🌿", color: "#2d9c5a" },
+  plaza:    { label: "Plaże i kąpieliska",   icon: "🏖️", color: "#f4a261" },
+  zabytek:  { label: "Zabytki i starówki",   icon: "🏛️", color: "#8d6e63" },
+  widok:    { label: "Punkty widokowe",      icon: "🌅", color: "#e76f51" },
+  wyspa:    { label: "Wyspy i rejsy",        icon: "⛵", color: "#118ab2" },
+  woda:     { label: "Wodospady i jaskinie", icon: "💧", color: "#00b4d8" },
+  klimat:   { label: "Lokalny klimat",       icon: "🍷", color: "#9d4edd" },
+  impreza:  { label: "Nocne życie",          icon: "🎉", color: "#ef476f" },
+  baza:     { label: "Baza wypadowa",        icon: "🏨", color: "#264653" }
+};
+
+const ATTRACTIONS = [
+  // --- Split i okolice (baza) ---
+  { name: "Pałac Dioklecjana (Split)", cat: "zabytek", coords: [43.5081, 16.4402],
+    desc: "Rzymski pałac z IV w., dziś żywe centrum Splitu — bary i restauracje wprost w antycznych murach.",
+    link: "https://pl.wikipedia.org/wiki/Pa%C5%82ac_Dioklecjana" },
+  { name: "Katedra św. Domniusa", cat: "zabytek", coords: [43.5084, 16.4407],
+    desc: "Najstarsza katedra świata w użyciu — dawne mauzoleum Dioklecjana. Wejście na dzwonnicę = widok na całe miasto.",
+    link: "https://pl.wikipedia.org/wiki/Katedra_%C5%9Bw._Domniusa_w_Splicie" },
+  { name: "Wzgórze Marjan", cat: "widok", coords: [43.5089, 16.4180],
+    desc: "Leśny park nad Splitem, ścieżki i tarasy widokowe. Najlepiej o zachodzie słońca.",
+    link: "https://pl.wikipedia.org/wiki/Marjan" },
+  { name: "Plaża Bačvice", cat: "plaza", coords: [43.5019, 16.4514],
+    desc: "Piaszczysta, płytka plaża w mieście. Wieczorem zmienia się w strefę barów.",
+    link: "https://www.visitsplit.com/" },
+  { name: "Riva (Split)", cat: "klimat", coords: [43.5074, 16.4380],
+    desc: "Nadmorska promenada — kawa, ludzie, punkt zborny całej ekipy.",
+    link: "https://www.visitsplit.com/" },
+  { name: "Baza: Split", cat: "baza", coords: [43.5100, 16.4400],
+    desc: "Nocleg i punkt wypadowy. Stąd promy na wyspy i auto w głąb lądu.",
+    link: "https://www.visitsplit.com/" },
+
+  // --- Wyspy ---
+  { name: "Hvar — miasto", cat: "impreza", coords: [43.1729, 16.4413],
+    desc: "Stolica imprez Adriatyku. Marina, bary, kluby do rana.",
+    link: "https://pl.wikipedia.org/wiki/Hvar" },
+  { name: "Twierdza Fortica (Hvar)", cat: "widok", coords: [43.1750, 16.4419],
+    desc: "Forteca nad miastem z panoramą na Wyspy Pakleńskie. Wejście ok. 20 min pod górę.",
+    link: "https://pl.wikipedia.org/wiki/Hvar" },
+  { name: "Wyspy Pakleńskie", cat: "wyspa", coords: [43.1580, 16.3900],
+    desc: "Archipelag tuż przy Hvarze — zatoczki, beach bary, taxi-boat z portu.",
+    link: "https://pl.wikipedia.org/wiki/Wyspy_Pakle%C5%84skie" },
+  { name: "Zlatni Rat (Bol, Brač)", cat: "plaza", coords: [43.2570, 16.6360],
+    desc: "Najsłynniejsza plaża Chorwacji — żwirowy cypel zmieniający kształt z wiatrem.",
+    link: "https://pl.wikipedia.org/wiki/Zlatni_Rat" },
+  { name: "Zatoka Stiniva (Vis)", cat: "plaza", coords: [43.0300, 16.1650],
+    desc: "Zatoka zamknięta ścianami klifu, wejście wąską szczeliną. Dojazd łodzią albo stromym zejściem.",
+    link: "https://pl.wikipedia.org/wiki/Vis_(wyspa)" },
+  { name: "Błękitna Grota (Biševo)", cat: "woda", coords: [42.9903, 16.0136],
+    desc: "Jaskinia, w której woda świeci na niebiesko w południe. Tylko z przewodnikiem, rejs z Visu lub Splitu.",
+    link: "https://pl.wikipedia.org/wiki/B%C5%82%C4%99kitna_Grota_(Bi%C5%A1evo)" },
+  { name: "Korčula — Stare Miasto", cat: "zabytek", coords: [42.9600, 17.1360],
+    desc: "Miniaturowe miasto-forteca o układzie rybiej ości. Podobno urodził się tu Marco Polo.",
+    link: "https://pl.wikipedia.org/wiki/Kor%C4%8Dula" },
+  { name: "Park Narodowy Mljet", cat: "natura", coords: [42.7800, 17.3500],
+    desc: "Wyspa z dwoma słonymi jeziorami i wysepką z klasztorem. Rowery i kajaki na miejscu.",
+    link: "https://pl.wikipedia.org/wiki/Mljet_(park_narodowy)" },
+
+  // --- Parki narodowe ---
+  { name: "Jeziora Plitwickie", cat: "natura", coords: [44.8654, 15.5820],
+    desc: "16 jezior połączonych kaskadami, drewniane kładki nad wodą. Wpis UNESCO, bilety kupuj wcześniej.",
+    link: "https://pl.wikipedia.org/wiki/Park_Narodowy_Jezior_Plitwickich" },
+  { name: "Skradinski Buk (NP Krka)", cat: "woda", coords: [43.8060, 15.9640],
+    desc: "Największa kaskada Krki — 17 progów wodnych. Najbliższy duży park od Splitu.",
+    link: "https://pl.wikipedia.org/wiki/Krka_(park_narodowy)" },
+  { name: "Roški Slap (NP Krka)", cat: "woda", coords: [43.9050, 15.9750],
+    desc: "Spokojniejsza część Krki — kaskady i stare młyny wodne, mniej tłumów niż Skradinski Buk.",
+    link: "https://pl.wikipedia.org/wiki/Krka_(park_narodowy)" },
+  { name: "Park Narodowy Kornati", cat: "wyspa", coords: [43.8000, 15.3300],
+    desc: "89 wysp i skał na pustkowiu Adriatyku. Tylko rejsem — jednodniowe wycieczki z Zadaru i Šibenika.",
+    link: "https://pl.wikipedia.org/wiki/Kornati" },
+  { name: "Park Narodowy Paklenica", cat: "natura", coords: [44.3010, 15.4600],
+    desc: "Dwa kaniony wcięte w Velebit — raj wspinaczy i szlaki na każdy poziom.",
+    link: "https://pl.wikipedia.org/wiki/Paklenica" },
+  { name: "Park Narodowy Sjeverni Velebit", cat: "natura", coords: [44.7800, 14.9700],
+    desc: "Dzikie pasmo nad morzem, ścieżka Premužicia i widoki na wyspy Kvarneru.",
+    link: "https://pl.wikipedia.org/wiki/Sjeverni_Velebit" },
+  { name: "Park Narodowy Risnjak", cat: "natura", coords: [45.4300, 14.6300],
+    desc: "Górski, leśny park w Gorskim Kotarze. Rysie, niedźwiedzie i źródło rzeki Kupy.",
+    link: "https://pl.wikipedia.org/wiki/Risnjak" },
+  { name: "Wodospady Rastoke (Slunj)", cat: "woda", coords: [45.1230, 15.5860],
+    desc: "Wioska zbudowana na wodospadach, po drodze na Plitwice. Domy stoją wprost nad kaskadami.",
+    link: "https://pl.wikipedia.org/wiki/Slunj" },
+
+  // --- Dalmacja południowa ---
+  { name: "Dubrownik — Stare Miasto", cat: "zabytek", coords: [42.6407, 18.1077],
+    desc: "Perła Adriatyku, marmurowa Stradun i mury z widokiem na dachy. UNESCO.",
+    link: "https://pl.wikipedia.org/wiki/Dubrownik" },
+  { name: "Mury Dubrownika", cat: "widok", coords: [42.6415, 18.1070],
+    desc: "2 km murów obronnych wokół starówki. Idź rano — cienia brak, a upał daje w kość.",
+    link: "https://pl.wikipedia.org/wiki/Mury_miejskie_Dubrownika" },
+  { name: "Wyspa Lokrum", cat: "wyspa", coords: [42.6269, 18.1197],
+    desc: "15 minut promem z Dubrownika. Pawie, ogród botaniczny i słone Martwe Morze.",
+    link: "https://pl.wikipedia.org/wiki/Lokrum" },
+  { name: "Góra Srđ (kolejka)", cat: "widok", coords: [42.6469, 18.1108],
+    desc: "Kolejka linowa nad Dubrownik. Najlepszy widok na starówkę i wyspy — zwłaszcza o zmierzchu.",
+    link: "https://pl.wikipedia.org/wiki/Dubrownik" },
+  { name: "Ston — mury i solniska", cat: "zabytek", coords: [42.8380, 17.6950],
+    desc: "Najdłuższe mury w Europie po Chinach, do tego najlepsze ostrygi w kraju.",
+    link: "https://pl.wikipedia.org/wiki/Ston" },
+  { name: "Makarska — Punta Rata (Brela)", cat: "plaza", coords: [43.3720, 16.9280],
+    desc: "Żwirowa plaża pod sosnami, ze skałą Brela Stone. Regularnie w topkach plaż Europy.",
+    link: "https://pl.wikipedia.org/wiki/Brela" },
+  { name: "Omiš — kanion Cetiny", cat: "natura", coords: [43.4450, 16.6890],
+    desc: "Dawne miasto piratów u ujścia Cetiny. Rafting, zipline i twierdza nad miastem.",
+    link: "https://pl.wikipedia.org/wiki/Omi%C5%A1" },
+  { name: "Trogir — Stare Miasto", cat: "zabytek", coords: [43.5170, 16.2510],
+    desc: "Wyspa-starówka między lądem a Čiovem, 30 min od Splitu i tuż przy lotnisku. UNESCO.",
+    link: "https://pl.wikipedia.org/wiki/Trogir" },
+
+  // --- Šibenik / Zadar ---
+  { name: "Katedra św. Jakuba (Šibenik)", cat: "zabytek", coords: [43.7360, 15.8890],
+    desc: "Zbudowana wyłącznie z kamienia, bez zaprawy. Fryz z 71 głowami mieszkańców z XV w.",
+    link: "https://pl.wikipedia.org/wiki/Katedra_%C5%9Bw._Jakuba_w_%C5%A0ibeniku" },
+  { name: "Twierdza św. Michała (Šibenik)", cat: "widok", coords: [43.7370, 15.8880],
+    desc: "Forteca nad miastem, dziś scena koncertowa z panoramą na kanał św. Antoniego.",
+    link: "https://pl.wikipedia.org/wiki/%C5%A0ibenik" },
+  { name: "Organy Morskie (Zadar)", cat: "klimat", coords: [44.1190, 15.2210],
+    desc: "Instrument grany przez fale — schody na nabrzeżu wydają dźwięk z rur pod spodem.",
+    link: "https://pl.wikipedia.org/wiki/Organy_morskie_w_Zadarze" },
+  { name: "Pozdrav Suncu (Zadar)", cat: "klimat", coords: [44.1185, 15.2205],
+    desc: "Solarny krąg świetlny obok Organów. Zachód słońca w Zadarze Hitchcock nazwał najpiękniejszym na świecie.",
+    link: "https://pl.wikipedia.org/wiki/Zadar" },
+  { name: "Nin — Plaża Królowej", cat: "plaza", coords: [44.2420, 15.1780],
+    desc: "3 km piasku i płycizny — rzadkość na kamienistym wybrzeżu. Obok lecznicze błoto.",
+    link: "https://pl.wikipedia.org/wiki/Nin_(Chorwacja)" },
+
+  // --- Istria i Kvarner ---
+  { name: "Amfiteatr w Puli", cat: "zabytek", coords: [44.8737, 13.8500],
+    desc: "Szósta co do wielkości arena rzymska świata, zachowana w komplecie. Latem koncerty i kino.",
+    link: "https://pl.wikipedia.org/wiki/Amfiteatr_w_Puli" },
+  { name: "Rovinj — Stare Miasto", cat: "klimat", coords: [45.0810, 13.6380],
+    desc: "Kolorowe miasteczko na półwyspie z wieżą św. Eufemii. Najbardziej włoska w klimacie część Chorwacji.",
+    link: "https://pl.wikipedia.org/wiki/Rovinj" },
+  { name: "Motovun", cat: "widok", coords: [45.3370, 13.8280],
+    desc: "Średniowieczne miasteczko na szczycie wzgórza w dolinie Mirny. Truflowa stolica Istrii.",
+    link: "https://pl.wikipedia.org/wiki/Motovun" },
+  { name: "Bazylika Eufrazjusza (Poreč)", cat: "zabytek", coords: [45.2280, 13.5940],
+    desc: "Bizantyjskie mozaiki z VI wieku, jedne z najlepiej zachowanych w Europie. UNESCO.",
+    link: "https://pl.wikipedia.org/wiki/Bazylika_Eufrazjusza" },
+  { name: "Przylądek Kamenjak", cat: "plaza", coords: [44.7580, 13.9080],
+    desc: "Dziki park na południowym cyplu Istrii — skalne zatoczki, klify do skakania, zero zabudowy.",
+    link: "https://pl.wikipedia.org/wiki/Kamenjak" },
+  { name: "Jaskinia Baredine", cat: "woda", coords: [45.2760, 13.6440],
+    desc: "Pięć podziemnych sal ze stalaktytami i endemiczną odmieńcem jaskiniowym.",
+    link: "https://pl.wikipedia.org/wiki/Pore%C4%8D" },
+  { name: "Opatija — Lungomare", cat: "klimat", coords: [45.3390, 14.3080],
+    desc: "12-kilometrowa nadmorska promenada w dawnym austriackim kurorcie. Habsburski sznyt.",
+    link: "https://pl.wikipedia.org/wiki/Opatija" },
+
+  // --- Kontynent ---
+  { name: "Zagrzeb — Górne Miasto", cat: "zabytek", coords: [45.8150, 15.9740],
+    desc: "Kościół św. Marka z kolorowym dachem, brama kamienna i najkrótsza kolejka świata.",
+    link: "https://pl.wikipedia.org/wiki/Zagrzeb" },
+  { name: "Zamek Trakošćan", cat: "zabytek", coords: [46.2560, 15.9450],
+    desc: "Bajkowy zamek nad jeziorem w Zagorju, z kompletnym wyposażeniem wnętrz.",
+    link: "https://pl.wikipedia.org/wiki/Trako%C5%A1%C4%87an" },
+  { name: "Varaždin — barokowa starówka", cat: "klimat", coords: [46.3060, 16.3380],
+    desc: "Dawna stolica Chorwacji, pastelowy barok i twierdza Stari Grad.",
+    link: "https://pl.wikipedia.org/wiki/Vara%C5%BEdin" }
+];
+
+const ITINERARY = [
+  { title: "Dzień 1: Przylot i rozruch", when: "Przylot ~15:00",
+    rows: [
+      ["Popołudnie", "Lądowanie w Splicie, transfer do bazy (~30 min z lotniska)"],
+      ["Późne popołudnie", "Zameldowanie, rozpakowanie, pierwsze piwo na tarasie"],
+      ["Wieczór", "Spacer po Rivie, lekka kolacja, rekonesans barów"],
+      ["Noc", "Wcześnie spać. Teoretycznie."]
+    ],
+    note: "🛬 Dzień aklimatyzacyjny — nie planujcie nic ambitnego." },
+
+  { title: "Dzień 2: Split na piechotę", when: "Zero auta, zero promów",
+    rows: [
+      ["Rano", "Pałac Dioklecjana — piwnice, perystyl, katedra św. Domniusa"],
+      ["Południe", "Wejście na dzwonnicę, potem lunch w mieście"],
+      ["Popołudnie", "Wzgórze Marjan — punkty widokowe, kąpiel w drodze powrotnej"],
+      ["Wieczór", "Bačvice — plaża zmienia się w bary. Start sezonu towarzyskiego"]
+    ],
+    note: "🚶 Wszystko w zasięgu spaceru — idealny dzień na kaca po przylocie." },
+
+  { title: "Dzień 3: Krka i Šibenik", when: "Wynajem auta, ~1h drogi",
+    rows: [
+      ["Rano", "Odbiór auta, wyjazd do Parku Narodowego Krka"],
+      ["Przedpołudnie", "Skradinski Buk — kaskady, ścieżki, młyny wodne"],
+      ["Popołudnie", "Šibenik: katedra św. Jakuba i twierdza św. Michała"],
+      ["Wieczór", "Kolacja w Šibeniku, powrót do Splitu"]
+    ],
+    note: "🚗 Kierowca wyłączony z picia — ustalcie go rano, nie po fakcie." },
+
+  { title: "Dzień 4: Jeziora Plitwickie", when: "Najdłuższa trasa, ~3h w jedną stronę",
+    rows: [
+      ["Wcześnie rano", "Wyjazd o 6:00 — inaczej wjedziecie w tłum i upał"],
+      ["Przedpołudnie", "Plitwice: trasa dolnych i górnych jezior, kładki, łódka"],
+      ["Popołudnie", "Postój w Rastoke — wioska na wodospadach"],
+      ["Wieczór", "Powrót do Splitu, kolacja po drodze"]
+    ],
+    note: "🎟️ Bilety rezerwujcie online z wyprzedzeniem — limity wejść są realne." },
+
+  { title: "Dzień 5: Hvar", when: "Prom ze Splitu, ~1h",
+    rows: [
+      ["Rano", "Katamaran do miasta Hvar"],
+      ["Przedpołudnie", "Podejście na twierdzę Fortica — panorama Wysp Pakleńskich"],
+      ["Popołudnie", "Taxi-boat na Pakleny — zatoczki i beach bary"],
+      ["Wieczór/noc", "Hvar po zmroku. Ostatni prom albo nocleg na miejscu"]
+    ],
+    note: "🎉 Dzień imprezowy. Sprawdźcie godzinę ostatniego promu ZANIM zaczniecie." },
+
+  { title: "Dzień 6: Trogir i regeneracja", when: "Luźny dzień",
+    rows: [
+      ["Rano", "Późne śniadanie, basen, zero planów"],
+      ["Popołudnie", "Trogir — starówka UNESCO, 30 min od Splitu"],
+      ["Późne popołudnie", "Kąpiel, ostatnie zakupy i pamiątki"],
+      ["Wieczór", "Pożegnalna kolacja, pakowanie na trzeźwo"]
+    ],
+    note: "🍹 Dzień odpoczynku — po Plitwicach i Hvarze będzie potrzebny." },
+
+  { title: "Dzień 7: Wylot", when: "Wylot o 6:00",
+    rows: [
+      ["4:00", "Pobudka, ostatnie sprawdzenie pokoju"],
+      ["4:30", "Transfer na lotnisko (~30 min)"],
+      ["6:00", "Wylot ze Splitu"],
+      ["Uwaga", "Zwrot auta dzień wcześniej — o 4 rano wypożyczalnia nie działa"]
+    ],
+    note: "✈️ Kto zaśnie, ten leci sam na własny koszt." }
+];
+
+const TIPS = [
+  ["🍻 Strategia przetrwania", "Przy 30°C nawodnienie to nie żart — woda między drinkami, inaczej dzień 4 nie istnieje. Kto pierwszy padnie, stawia kolejkę."],
+  ["🚗 Auto i promy", "Dni 3–4 auto (kierowca na sucho), dzień 5 prom, reszta pieszo. Promy Jadrolinija rezerwujcie online w sezonie, bo na miejscu bywa komplet."],
+  ["💸 Budżet", "Chorwacja jest w strefie euro. Licz 90–130 € dziennie na osobę: nocleg, jedzenie, wstępy (Plitwice 40 €, Krka 20 €) i paliwo."],
+  ["🏖️ Plaże", "Wybrzeże jest kamieniste — buty do wody to nie fanaberia, tylko warunek chodzenia następnego dnia. Filtr 50+ obowiązkowo."],
+  ["🍽️ Jedzenie", "Peka (mięso spod żelaznego klosza) zamawia się z kilkugodzinnym wyprzedzeniem. Do tego črni rižot, ostrygi ze Stonu i rakija na koniec."],
+  ["📵 Praktyczne", "Bura potrafi zamknąć promy i mosty z dnia na dzień — sprawdzajcie prognozę. Power bank obowiązkowy, zdjęcia z kaca to najlepsza pamiątka."],
+  ["⚠️ Uwaga", "Za picie alkoholu w miejscach publicznych w Splicie i Dubrowniku są mandaty (do 150 €). Bary tak, deptak nie."]
+];
+
+const PEOPLE = [
+  { name: "Patryk",   weight: 1, emoji: "😴" },
+  { name: "Ola",      weight: 2, emoji: "🍸" },
+  { name: "Kami",     weight: 2, emoji: "🍺" },
+  { name: "Młody",    weight: 2, emoji: "🥃" },
+  { name: "Kuba",     weight: 2, emoji: "🍻" },
+  { name: "Kasia",    weight: 2, emoji: "🍹" },
+  { name: "Karolina", weight: 2, emoji: "🍷" },
+  { name: "Eryk",     weight: 6, emoji: "🥂" }
+];
+
+const DRINKS = [
+  { name: "Margarita",      weight: 3, emoji: "🍹" },
+  { name: "Mojito",         weight: 3, emoji: "🍸" },
+  { name: "Ožujsko",        weight: 2, emoji: "🍺" },
+  { name: "Aperol Spritz",  weight: 2, emoji: "🥂" },
+  { name: "Gin & Tonic",    weight: 2, emoji: "🍸" },
+  { name: "Rakija",         weight: 2, emoji: "🥃" },
+  { name: "Karlovačko",     weight: 1, emoji: "🍻" },
+  { name: "Bevanda",        weight: 1, emoji: "🍷" },
+  { name: "Tequila",        weight: 1, emoji: "🌵" },
+  { name: "Rum & Cola",     weight: 1, emoji: "🥤" }
+];
+
+/* =========================================================================
+   2. MAPA
+   ========================================================================= */
+
+function buildMap() {
+  const map = L.map("map", { scrollWheelZoom: false }).setView([44.6, 16.2], 7);
+
+  // Na desktopie kółko myszy zoomuje dopiero po kliknięciu w mapę,
+  // żeby przewijanie strony nie wpadało przypadkiem w zoom.
+  map.on("focus", () => map.scrollWheelZoom.enable());
+  map.on("blur",  () => map.scrollWheelZoom.disable());
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+
+  const bounds = [];
+
+  ATTRACTIONS.forEach(a => {
+    const cat = CATEGORIES[a.cat];
+
+    const icon = L.divIcon({
+      className: "",
+      html: `<div class="pin" style="background:${cat.color}"><span>${cat.icon}</span></div>`,
+      iconSize: [34, 34],
+      iconAnchor: [17, 32],
+      popupAnchor: [0, -30]
+    });
+
+    const popup = `
+      <div class="pop">
+        <h4>${a.name}</h4>
+        <span class="tag" style="background:${cat.color}">${cat.label}</span>
+        <p>${a.desc}</p>
+        <a href="${a.link}" target="_blank" rel="noopener noreferrer">Więcej o miejscu ↗</a>
+      </div>`;
+
+    L.marker(a.coords, { icon }).addTo(map).bindPopup(popup);
+    bounds.push(a.coords);
+  });
+
+  // Dopasuj widok do faktycznych markerów zamiast zgadywać środek i zoom
+  map.fitBounds(bounds, { padding: [40, 40] });
+
+  return map;
+}
+
+/* =========================================================================
+   3. LEGENDA, STATYSTYKI, PLAN
+   ========================================================================= */
+
+function buildLegend() {
+  // Pokazuj tylko kategorie, które faktycznie występują w danych
+  const used = new Set(ATTRACTIONS.map(a => a.cat));
+
+  document.getElementById("legend").innerHTML = Object.entries(CATEGORIES)
+    .filter(([key]) => used.has(key))
+    .map(([, c]) => `
+      <div>
+        <span class="dot" style="background:${c.color}22;color:${c.color}">${c.icon}</span>
+        <span>${c.label}</span>
+      </div>`)
+    .join("");
+}
+
+function buildStats() {
+  // Liczone z danych. Wcześniej były wpisane ręcznie i kłamały (40 vs 42).
+  const count = cat => ATTRACTIONS.filter(a => a.cat === cat).length;
+
+  const cards = [
+    [ATTRACTIONS.length, "Atrakcji na mapie"],
+    [count("natura") + count("woda"), "Przyroda i wodospady"],
+    [count("zabytek"), "Zabytki i starówki"],
+    [count("plaza") + count("wyspa"), "Plaże i wyspy"]
+  ];
+
+  document.getElementById("stats").innerHTML = cards
+    .map(([n, label]) => `<div class="stat"><b>${n}</b><small>${label}</small></div>`)
+    .join("");
+}
+
+function buildItinerary() {
+  document.getElementById("days").innerHTML = ITINERARY.map(d => `
+    <article class="day">
+      <header>
+        <h3>${d.title}</h3>
+        <span class="when">${d.when}</span>
+      </header>
+      <div class="body">
+        ${d.rows.map(([k, v]) => `<p><strong>${k}:</strong> ${v}</p>`).join("")}
+        <div class="note">${d.note}</div>
+      </div>
+    </article>`).join("");
+
+  document.getElementById("tips").innerHTML = TIPS
+    .map(([head, body]) => `<li><strong>${head}:</strong> ${body}</li>`)
+    .join("");
+}
+
+/* =========================================================================
+   4. KOŁO FORTUNY
+   Jedna klasa dla obu kół. Wcześniej to samo było skopiowane dwa razy
+   (~470 linii), przez co każdy fix trzeba było robić podwójnie.
+   ========================================================================= */
+
+const PALETTE = [
+  "#ef476f", "#118ab2", "#06d6a0", "#ffb703", "#9d4edd",
+  "#fb8500", "#2d9c5a", "#e76f51", "#4361ee", "#f72585"
+];
+
+class Wheel {
+  constructor(dom) {
+    this.dom = dom;
+    this.items = [];
+    this.spinning = false;
+
+    // Bieżący obrót trzymamy w JS i tylko rośnie.
+    // Odczytywanie kąta z macierzy computedStyle (jak było wcześniej) gubi
+    // pełne obroty, bo matrix zna tylko kąt mod 360.
+    this.rotation = 0;
+
+    this.onEnd = this.onEnd.bind(this);
+    this.dom.wheel.addEventListener("transitionend", this.onEnd);
+    this.dom.spin.addEventListener("click", () => this.spin());
+  }
+
+  load(items, title, hub) {
+    this.items = items;
+    this.total = items.reduce((sum, i) => sum + i.weight, 0);
+    this.seg = 360 / items.length;
+
+    this.dom.title.textContent = title;
+    this.dom.hub.textContent = hub;
+
+    this.render();
+    this.renderOdds();
+    this.reset();
+  }
+
+  /** Kąt środka segmentu i, liczony zgodnie z ruchem wskazówek od godziny 12. */
+  center(i) {
+    return (i + 0.5) * this.seg;
+  }
+
+  render() {
+    // Tło koła jako conic-gradient — jeden element zamiast N obracanych divów.
+    // Znacznie lżejsze dla telefonu niż poprzednia wersja.
+    const stops = this.items.map((item, i) => {
+      const color = PALETTE[i % PALETTE.length];
+      return `${color} ${i * this.seg}deg ${(i + 1) * this.seg}deg`;
+    }).join(", ");
+
+    this.dom.wheel.style.background = `conic-gradient(from 0deg, ${stops})`;
+
+    // Etykiety: obrót do środka segmentu, minus 90° bo element leży poziomo.
+    this.dom.wheel.innerHTML = this.items.map((item, i) => `
+      <div class="label" style="transform: rotate(${this.center(i) - 90}deg)">
+        <span>${item.name}</span><span class="em">${item.emoji}</span>
+      </div>`).join("");
+  }
+
+  renderOdds() {
+    this.dom.odds.innerHTML = this.items
+      .map(i => `<li><span>${i.emoji} ${i.name}</span><b>${this.pct(i)}%</b></li>`)
+      .join("");
+  }
+
+  pct(item) {
+    return (item.weight / this.total * 100).toFixed(1);
+  }
+
+  /** Losowanie ważone bez budowania tablicy kopii — działa też dla wag ułamkowych. */
+  draw() {
+    let roll = Math.random() * this.total;
+    for (let i = 0; i < this.items.length; i++) {
+      roll -= this.items[i].weight;
+      if (roll < 0) return i;
+    }
+    return this.items.length - 1;
+  }
+
+  spin() {
+    if (this.spinning) return;
+    this.spinning = true;
+
+    this.dom.spin.disabled = true;
+    this.dom.spin.textContent = "KRĘCI SIĘ... 🎰";
+    this.dom.result.hidden = true;
+
+    this.winner = this.draw();
+
+    // Wskaźnik stoi na godzinie 12 (0°). Chcemy, żeby środek zwycięskiego
+    // segmentu wylądował dokładnie pod nim, czyli:  center + rotation ≡ 0 (mod 360)
+    const target = -this.center(this.winner);
+
+    // Ile brakuje od bieżącego obrotu do najbliższego poprawnego ustawienia
+    const delta = ((target - this.rotation) % 360 + 360) % 360;
+
+    const spins = 4 + Math.floor(Math.random() * 3);   // 4-6 pełnych obrotów
+    const duration = 3600 + spins * 260;               // dłuższy spin = dłuższa animacja
+
+    this.rotation += spins * 360 + delta;
+
+    // Czas trwania ustawiany z JS, żeby CSS i moment pokazania wyniku
+    // nie mogły się rozjechać (wcześniej: sztywne 4s w CSS vs 3-6s setTimeout).
+    this.dom.wheel.style.transitionDuration = `${duration}ms`;
+    this.dom.wheel.style.transform = `rotate(${this.rotation}deg)`;
+
+    if (navigator.vibrate) navigator.vibrate(35);
+  }
+
+  /** Wynik pokazujemy dopiero, gdy koło faktycznie stanie. */
+  onEnd(e) {
+    if (e.propertyName !== "transform" || !this.spinning) return;
+
+    this.spinning = false;
+    this.dom.spin.disabled = false;
+    this.dom.spin.textContent = "KRĘĆ PONOWNIE! 🎲";
+
+    const item = this.items[this.winner];
+    this.dom.emoji.textContent = item.emoji;
+    this.dom.name.textContent = item.name;
+    this.dom.oddsLine.textContent = `szansa ${this.pct(item)}%`;
+    this.dom.result.hidden = false;
+
+    if (navigator.vibrate) navigator.vibrate([40, 70, 120]);
+  }
+
+  reset() {
+    this.spinning = false;
+    this.dom.result.hidden = true;
+    this.dom.spin.disabled = false;
+    this.dom.spin.textContent = "KRĘĆ KOŁEM! 🎲";
+
+    // Bez animacji wracamy do pozycji startowej
+    this.dom.wheel.style.transitionDuration = "0s";
+    this.rotation = 0;
+    this.dom.wheel.style.transform = "rotate(0deg)";
+  }
+}
+
+/* =========================================================================
+   5. MODAL
+   ========================================================================= */
+
+function setupModal(wheel) {
+  const modal = document.getElementById("modal");
+  let lastFocus = null;
+
+  const open = (items, title, hub) => {
+    lastFocus = document.activeElement;
+    wheel.load(items, title, hub);
+    modal.classList.add("open");
+    document.body.style.overflow = "hidden";   // tło nie przewija się pod modalem
+    document.getElementById("spin-btn").focus();
+  };
+
+  const close = () => {
+    modal.classList.remove("open");
+    document.body.style.overflow = "";
+    if (lastFocus) lastFocus.focus();
+  };
+
+  document.getElementById("open-people").addEventListener("click", () =>
+    open(PEOPLE, "🎰 Kto leci po drinki?", "🍺"));
+
+  document.getElementById("open-drinks").addEventListener("click", () =>
+    open(DRINKS, "🥂 Czym się dziś trujemy?", "🍹"));
+
+  document.getElementById("modal-close").addEventListener("click", close);
+
+  // Klik w tło zamyka, klik w samo okno nie
+  modal.addEventListener("click", e => { if (e.target === modal) close(); });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && modal.classList.contains("open")) close();
+  });
+}
+
+/* =========================================================================
+   6. EKRAN ŁADOWANIA + DESZCZ EMOJI
+   ========================================================================= */
+
+const EMOJI = ["🍺", "🍻", "🥂", "🍾", "🍸", "🍹", "🥃", "🍷"];
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function dropEmoji() {
+  if (reducedMotion) return;
+
+  const rain = document.getElementById("rain");
+  const el = document.createElement("i");
+
+  el.textContent = EMOJI[Math.floor(Math.random() * EMOJI.length)];
+  el.style.left = Math.random() * 100 + "vw";
+  el.style.animationDuration = (Math.random() * 2 + 2.5) + "s";
+
+  rain.appendChild(el);
+
+  // Sprzątamy po sobie. Wcześniej elementy zostawały w DOM w nieskończoność.
+  el.addEventListener("animationend", () => el.remove());
+}
+
+function runLoader(onDone) {
+  const fill   = document.getElementById("bar-fill");
+  const status = document.getElementById("loader-status");
+  const loader = document.getElementById("loader");
+
+  const counters = [
+    { el: document.getElementById("c-beer"),  max: ATTRACTIONS.length },
+    { el: document.getElementById("c-beach"), max: ATTRACTIONS.filter(a => a.cat === "plaza").length },
+    { el: document.getElementById("c-crew"),  max: PEOPLE.length }
+  ];
+
+  const messages = [
+    "Inicjalizacja systemu...",
+    "Ładowanie bazy piw...",
+    "Kalibracja kompasu na najbliższy bar...",
+    "Sprawdzanie rozkładu promów...",
+    "Synchronizacja z konobami...",
+    "Przygotowanie playlisty...",
+    "Gotowe! Živjeli! 🍻"
+  ];
+
+  const rainTimer = setInterval(dropEmoji, 450);
+  let progress = 0;
+
+  const tick = () => {
+    progress = Math.min(100, progress + Math.random() * 9 + 4);
+
+    fill.style.width = progress + "%";
+    status.textContent = messages[Math.min(messages.length - 1, Math.floor(progress / 100 * messages.length))];
+
+    counters.forEach(c => {
+      c.el.textContent = Math.round(c.max * progress / 100);
+    });
+
+    if (progress < 100) {
+      setTimeout(tick, Math.random() * 180 + 120);
+      return;
+    }
+
+    clearInterval(rainTimer);
+    setTimeout(() => {
+      loader.classList.add("done");
+      setTimeout(() => { loader.hidden = true; }, 520);
+    }, 420);
+
+    onDone();
+  };
+
+  setTimeout(tick, 300);
+}
+
+/* =========================================================================
+   7. START
+   Jeden listener. Wcześniej były dwa osobne DOMContentLoaded, przez co
+   ekran ładowania startował dwa razy naraz i szarpał progres.
+   ========================================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+  buildLegend();
+  buildStats();
+  buildItinerary();
+
+  const map = buildMap();
+
+  const wheel = new Wheel({
+    wheel:    document.getElementById("wheel"),
+    hub:      document.getElementById("hub"),
+    spin:     document.getElementById("spin-btn"),
+    title:    document.getElementById("modal-title"),
+    result:   document.getElementById("result"),
+    emoji:    document.getElementById("result-emoji"),
+    name:     document.getElementById("result-name"),
+    oddsLine: document.getElementById("result-odds"),
+    odds:     document.getElementById("odds-list")
+  });
+
+  setupModal(wheel);
+
+  runLoader(() => {
+    // Leaflet liczy rozmiar kontenera przy inicjalizacji. Loader go zasłaniał,
+    // więc po jego zniknięciu trzeba przeliczyć, inaczej kafelki są poszarpane.
+    setTimeout(() => map.invalidateSize(), 600);
+  });
+});
+</script>
 </body>
 </html>
