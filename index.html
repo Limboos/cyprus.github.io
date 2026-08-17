@@ -233,6 +233,16 @@ section { padding-block: clamp(1.75rem, 6vw, 3rem); }
 }
 .pop a:hover { background: var(--sea-700); }
 
+/* Czas dojazdu w popupie — najważniejsza informacja przy planowaniu dnia,
+   więc siedzi nad opisem, nie pod nim. */
+.pop .drive {
+  margin: .1rem 0 .4rem;
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--sea-500);
+}
+.pop .drive.far { color: var(--coral); }
+
 /* Marker */
 .pin {
   display: grid;
@@ -246,6 +256,36 @@ section { padding-block: clamp(1.75rem, 6vw, 3rem); }
   box-shadow: var(--shadow-sm);
 }
 .pin span { transform: rotate(45deg); }
+/* Poza zasięgiem bazy — widoczne, ale wyraźnie drugoplanowe */
+.pin.far { opacity: .45; }
+
+/* ---------- Filtr nad mapą ---------- */
+.map-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: .5rem 1rem;
+  border-top: 1px solid var(--line);
+}
+.map-tools label {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  min-height: 36px;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--sea-700);
+  cursor: pointer;
+}
+.map-tools input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--sea-500);
+  flex-shrink: 0;
+}
+.map-count { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 /* ---------- Przyciski kół ---------- */
 .wheel-cta {
@@ -629,7 +669,14 @@ footer {
     <div class="wrap">
       <div class="map-shell">
         <div id="map"></div>
-        <p class="map-hint">Kliknij pinezkę, żeby zobaczyć szczegóły. Mapę przesuwasz palcem, zoom szczypnięciem.</p>
+        <div class="map-tools">
+          <label>
+            <input type="checkbox" id="near-only">
+            <span>Tylko w zasięgu bazy (≤ 2 h)</span>
+          </label>
+          <span class="map-count" id="map-count"></span>
+        </div>
+        <p class="map-hint">Kliknij pinezkę — w popupie jest czas dojazdu z bazy. Blade pinezki to miejsca ponad 2 h drogi: ładne, ale nie na ten wyjazd.</p>
       </div>
     </div>
   </section>
@@ -734,176 +781,203 @@ const CATEGORIES = {
   wyspa:    { label: "Wyspy i rejsy",        icon: "⛵", color: "#118ab2" },
   woda:     { label: "Wodospady i jaskinie", icon: "💧", color: "#00b4d8" },
   klimat:   { label: "Lokalny klimat",       icon: "🍷", color: "#9d4edd" },
+  adrenalina: { label: "Sporty i adrenalina", icon: "🛶", color: "#e07a00" },
   impreza:  { label: "Nocne życie",          icon: "🎉", color: "#ef476f" },
   baza:     { label: "Baza wypadowa",        icon: "🏨", color: "#264653" }
 };
 
+/* Ile godzin jazdy z bazy jeszcze uznajemy za "na jeden dzień".
+   Powyżej tego progu pinezka blednie, a filtr nad mapą ją chowa. */
+const NEAR_LIMIT = 2;
+
+/* Pole `h` = przybliżony czas dojazdu z bazy pod Zadarem w godzinach, w jedną stronę.
+   Dla wysp liczony razem z promem/rejsem. `boat: true` = autem nie dojedziesz. */
+
 const ATTRACTIONS = [
-  // --- Split i okolice (baza) ---
-  { name: "Pałac Dioklecjana (Split)", cat: "zabytek", coords: [43.5081, 16.4402],
+  // --- Split i okolice ---
+  { name: "Pałac Dioklecjana (Split)", cat: "zabytek", coords: [43.5081, 16.4402], h: 1.7,
     desc: "Rzymski pałac z IV w., dziś żywe centrum Splitu — bary i restauracje wprost w antycznych murach.",
     link: "https://pl.wikipedia.org/wiki/Pa%C5%82ac_Dioklecjana_w_Splicie" },
-  { name: "Katedra św. Domniusa", cat: "zabytek", coords: [43.5084, 16.4407],
+  { name: "Katedra św. Domniusa", cat: "zabytek", coords: [43.5084, 16.4407], h: 1.7,
     desc: "Najstarsza katedra świata w użyciu — dawne mauzoleum Dioklecjana. Wejście na dzwonnicę = widok na całe miasto.",
     link: "https://pl.wikipedia.org/wiki/Katedra_w_Splicie" },
-  { name: "Wzgórze Marjan", cat: "widok", coords: [43.5089, 16.4180],
+  { name: "Wzgórze Marjan", cat: "widok", coords: [43.5089, 16.4180], h: 1.8,
     desc: "Leśny park nad Splitem, ścieżki i tarasy widokowe. Najlepiej o zachodzie słońca.",
     link: "https://pl.wikipedia.org/wiki/Split" },
-  { name: "Plaża Bačvice", cat: "plaza", coords: [43.5019, 16.4514],
+  { name: "Plaża Bačvice", cat: "plaza", coords: [43.5019, 16.4514], h: 1.7,
     desc: "Piaszczysta, płytka plaża w mieście. Wieczorem zmienia się w strefę barów.",
     link: "https://www.visitsplit.com/" },
-  { name: "Riva (Split)", cat: "klimat", coords: [43.5074, 16.4380],
+  { name: "Riva (Split)", cat: "klimat", coords: [43.5074, 16.4380], h: 1.7,
     desc: "Nadmorska promenada — kawa, ludzie, punkt zborny całej ekipy.",
     link: "https://www.visitsplit.com/" },
+
   // --- Zadar i okolice (BAZA) ---
-  { name: "Baza: okolice Zadaru", cat: "baza", coords: [44.1167, 15.2333],
+  { name: "Baza: okolice Zadaru", cat: "baza", coords: [44.1167, 15.2333], h: 0,
     desc: "Nocleg i punkt wypadowy. Stąd blisko na Plitwice, Krkę, Pag i rejsy po Kornatach.",
     link: "https://pl.wikipedia.org/wiki/Zadar" },
-  { name: "Zadar — Stare Miasto", cat: "zabytek", coords: [44.1150, 15.2270],
+  { name: "Zadar — Stare Miasto", cat: "zabytek", coords: [44.1150, 15.2270], h: 0.25,
     desc: "Rzymskie Forum, kościół św. Donata i marmurowe uliczki na półwyspie. Wszystko na piechotę.",
     link: "https://pl.wikipedia.org/wiki/Zadar" },
-  { name: "Telašćica (Dugi otok)", cat: "natura", coords: [43.8900, 15.1750],
+  { name: "Plaża Zaton i Sukošan", cat: "plaza", coords: [44.2260, 15.1680], h: 0.3,
+    desc: "Najbliższe porządne kąpielisko przy bazie — łagodne zejście, żwir, bary. Na dni bez auta i bez ambicji.",
+    link: "https://pl.wikipedia.org/wiki/Zaton_(%C5%BCupania_zadarska)" },
+  { name: "Wyspy Ugljan i Pašman", cat: "wyspa", coords: [44.0500, 15.1200], h: 0.5, boat: true,
+    desc: "Prom z Zadaru idzie 25 min. Rowery, puste zatoczki i konoby bez tłumu — najtańszy wypad całego wyjazdu.",
+    link: "https://pl.wikipedia.org/wiki/Ugljan" },
+  { name: "Kanion Zrmanji — rafting i kajaki", cat: "adrenalina", coords: [44.1850, 15.6800], h: 0.9,
+    desc: "Turkusowy kanion pod Obrovacem. Spływ 5–7 h, ok. 55–65 €/os., dla początkujących. Operatorzy odbierają z Zadaru.",
+    link: "https://pl.wikipedia.org/wiki/Zrmanja" },
+  { name: "Jaskinie Cerovačke", cat: "woda", coords: [44.2760, 15.8880], h: 1.0,
+    desc: "Największy system jaskiniowy Chorwacji w Velebicie. 8°C w środku — weźcie bluzę, serio.",
+    link: "https://pl.wikipedia.org/wiki/Jaskinie_Cerova%C4%8Dkie" },
+  { name: "Telašćica (Dugi otok)", cat: "natura", coords: [43.8900, 15.1750], h: 2.5, boat: true,
     desc: "Park przyrody: 160-metrowe klify od strony otwartego morza i słone jezioro Mir tuż za nimi.",
     link: "https://pl.wikipedia.org/wiki/Dugi_Otok" },
-  { name: "Plaża Sakarun (Dugi otok)", cat: "plaza", coords: [44.1160, 14.8650],
-    desc: "Biały piasek i turkusowa płycizna — najbliższa karaibskiemu widokowi rzecz w Chorwacji.",
+  { name: "Plaża Sakarun (Dugi otok)", cat: "plaza", coords: [44.1160, 14.8650], h: 2.5, boat: true,
+    desc: "Biały piasek i turkusowa płycizna — najbliższa karaibskiemu widokowi rzecz w Chorwacji. Zwykle OSOBNA wycieczka niż rejs po Kornatach.",
     link: "https://pl.wikipedia.org/wiki/Dugi_Otok" },
-  { name: "Zrće (Novalja, Pag)", cat: "impreza", coords: [44.5395, 14.8925],
-    desc: "Plaża klubowa czynna 24 h — Papaya, Aquarius, Kalypso. Chorwackie Ibiza w wersji żwirowej.",
+  { name: "Zrće (Novalja, Pag)", cat: "impreza", coords: [44.5395, 14.8925], h: 1.2,
+    desc: "Plaża klubowa: Papaya, Kalypso, Aquarius, do tego Nomad, Symbol i Lift. Sezon od maja do września.",
     link: "https://pl.wikipedia.org/wiki/Novalja" },
-  { name: "Pag — miasto i krajobraz księżycowy", cat: "widok", coords: [44.4442, 15.0533],
+  { name: "Pag — miasto i krajobraz księżycowy", cat: "widok", coords: [44.4442, 15.0533], h: 1.0,
     desc: "Wyspa wyjałowiona przez wiatr bura, wygląda jak Księżyc. Do tego ser paški sir i koronki.",
     link: "https://pl.wikipedia.org/wiki/Pag" },
-  { name: "Jezioro Vransko", cat: "natura", coords: [43.9050, 15.5600],
+  { name: "Biograd na Moru", cat: "klimat", coords: [43.9400, 15.4500], h: 0.5,
+    desc: "Dawna stolica królów chorwackich, dziś marina i drugi port, z którego wypływają rejsy na Kornaty.",
+    link: "https://pl.wikipedia.org/wiki/Biograd_na_Moru" },
+  { name: "Jezioro Vransko", cat: "natura", coords: [43.9050, 15.5600], h: 0.5,
     desc: "Największe naturalne jezioro Chorwacji, rezerwat ptaków tuż przy morzu. Rowery i taras widokowy Kamenjak.",
     link: "https://pl.wikipedia.org/wiki/Vransko_jezero" },
 
   // --- Wyspy ---
-  { name: "Hvar — miasto", cat: "impreza", coords: [43.1729, 16.4413],
+  { name: "Hvar — miasto", cat: "impreza", coords: [43.1729, 16.4413], h: 4, boat: true,
     desc: "Stolica imprez Adriatyku. Marina, bary, kluby do rana.",
     link: "https://pl.wikipedia.org/wiki/Hvar" },
-  { name: "Twierdza Fortica (Hvar)", cat: "widok", coords: [43.1750, 16.4419],
+  { name: "Twierdza Fortica (Hvar)", cat: "widok", coords: [43.1750, 16.4419], h: 4, boat: true,
     desc: "Forteca nad miastem z panoramą na Wyspy Paklińskie. Wejście ok. 20 min pod górę.",
     link: "https://pl.wikipedia.org/wiki/Hvar" },
-  { name: "Wyspy Paklińskie", cat: "wyspa", coords: [43.1580, 16.3900],
+  { name: "Wyspy Paklińskie", cat: "wyspa", coords: [43.1580, 16.3900], h: 4.5, boat: true,
     desc: "Archipelag tuż przy Hvarze — zatoczki, beach bary, taxi-boat z portu.",
     link: "https://pl.wikipedia.org/wiki/Wyspy_Pakli%C5%84skie" },
-  { name: "Zlatni Rat (Bol, Brač)", cat: "plaza", coords: [43.2570, 16.6360],
+  { name: "Zlatni Rat (Bol, Brač)", cat: "plaza", coords: [43.2570, 16.6360], h: 3.5, boat: true,
     desc: "Najsłynniejsza plaża Chorwacji — żwirowy cypel zmieniający kształt z wiatrem.",
     link: "https://pl.wikipedia.org/wiki/Zlatni_rat" },
-  { name: "Zatoka Stiniva (Vis)", cat: "plaza", coords: [43.0300, 16.1650],
+  { name: "Zatoka Stiniva (Vis)", cat: "plaza", coords: [43.0300, 16.1650], h: 5.5, boat: true,
     desc: "Zatoka zamknięta ścianami klifu, wejście wąską szczeliną. Dojazd łodzią albo stromym zejściem.",
     link: "https://pl.wikipedia.org/wiki/Vis_(wyspa)" },
-  { name: "Błękitna Grota (Biševo)", cat: "woda", coords: [42.9903, 16.0136],
+  { name: "Błękitna Grota (Biševo)", cat: "woda", coords: [42.9903, 16.0136], h: 6, boat: true,
     desc: "Jaskinia, w której woda świeci na niebiesko w południe. Tylko z przewodnikiem, rejs z Visu lub Splitu.",
     link: "https://pl.wikipedia.org/wiki/Bi%C5%A1evo" },
-  { name: "Korčula — Stare Miasto", cat: "zabytek", coords: [42.9600, 17.1360],
+  { name: "Korčula — Stare Miasto", cat: "zabytek", coords: [42.9600, 17.1360], h: 5, boat: true,
     desc: "Miniaturowe miasto-forteca o układzie rybiej ości. Podobno urodził się tu Marco Polo.",
     link: "https://pl.wikipedia.org/wiki/Kor%C4%8Dula" },
-  { name: "Park Narodowy Mljet", cat: "natura", coords: [42.7800, 17.3500],
+  { name: "Park Narodowy Mljet", cat: "natura", coords: [42.7800, 17.3500], h: 6, boat: true,
     desc: "Wyspa z dwoma słonymi jeziorami i wysepką z klasztorem. Rowery i kajaki na miejscu.",
     link: "https://pl.wikipedia.org/wiki/Park_Narodowy_Mljet" },
 
   // --- Parki narodowe ---
-  { name: "Jeziora Plitwickie", cat: "natura", coords: [44.8654, 15.5820],
-    desc: "16 jezior połączonych kaskadami, drewniane kładki nad wodą. Wpis UNESCO, bilety kupuj wcześniej.",
+  { name: "Jeziora Plitwickie", cat: "natura", coords: [44.8654, 15.5820], h: 1.75,
+    desc: "16 jezior połączonych kaskadami, drewniane kładki nad wodą. UNESCO. Bilet 40 € w sezonie, limit 300 osób na godzinę — rezerwacja obowiązkowa.",
     link: "https://pl.wikipedia.org/wiki/Park_Narodowy_Jezior_Plitwickich" },
-  { name: "Skradinski Buk (NP Krka)", cat: "woda", coords: [43.8060, 15.9640],
-    desc: "Największa kaskada Krki — 17 progów wodnych. Najbliższy duży park od Splitu.",
+  { name: "Skradinski Buk (NP Krka)", cat: "woda", coords: [43.8060, 15.9640], h: 1.0,
+    desc: "Największa kaskada Krki — 17 progów wodnych. UWAGA: kąpiel zakazana od 2021, przyjeżdżacie patrzeć, nie pływać.",
     link: "https://pl.wikipedia.org/wiki/Park_Narodowy_Krka" },
-  { name: "Roški Slap (NP Krka)", cat: "woda", coords: [43.9050, 15.9750],
-    desc: "Spokojniejsza część Krki — kaskady i stare młyny wodne, mniej tłumów niż Skradinski Buk.",
+  { name: "Roški Slap (NP Krka)", cat: "woda", coords: [43.9050, 15.9750], h: 1.0,
+    desc: "Spokojniejsza część Krki — kaskady i stare młyny. TU wolno się kąpać (VI–IX, wyznaczone miejsca), i tu jest mniej ludzi.",
     link: "https://pl.wikipedia.org/wiki/Park_Narodowy_Krka" },
-  { name: "Park Narodowy Kornati", cat: "wyspa", coords: [43.8000, 15.3300],
-    desc: "89 wysp i skał na pustkowiu Adriatyku. Tylko rejsem — jednodniowe wycieczki z Zadaru i Šibenika.",
+  { name: "Skradin", cat: "klimat", coords: [43.8180, 15.9220], h: 1.0,
+    desc: "Miasteczko u bram Krki. Stąd parkowa łódka podpływa pod Skradinski Buk — wejście przyjemniejsze niż od Lozovaca.",
+    link: "https://pl.wikipedia.org/wiki/Skradin" },
+  { name: "Park Narodowy Kornati", cat: "wyspa", coords: [43.8000, 15.3300], h: 2, boat: true,
+    desc: "89 wysp i skał na pustkowiu Adriatyku. Całodniowe rejsy z Zadaru i Biogradu, 70–110 €/os. z lunchem.",
     link: "https://pl.wikipedia.org/wiki/Kornati" },
-  { name: "Park Narodowy Paklenica", cat: "natura", coords: [44.3010, 15.4600],
+  { name: "Park Narodowy Paklenica", cat: "natura", coords: [44.3010, 15.4600], h: 0.75,
     desc: "Dwa kaniony wcięte w Velebit — raj wspinaczy i szlaki na każdy poziom.",
     link: "https://pl.wikipedia.org/wiki/Park_Narodowy_Paklenica" },
-  { name: "Park Narodowy Sjeverni Velebit", cat: "natura", coords: [44.7800, 14.9700],
+  { name: "Park Narodowy Sjeverni Velebit", cat: "natura", coords: [44.7800, 14.9700], h: 1.5,
     desc: "Dzikie pasmo nad morzem, ścieżka Premužicia i widoki na wyspy Kvarneru.",
     link: "https://pl.wikipedia.org/wiki/Park_Narodowy_Welebitu_P%C3%B3%C5%82nocnego" },
-  { name: "Park Narodowy Risnjak", cat: "natura", coords: [45.4300, 14.6300],
+  { name: "Park Narodowy Risnjak", cat: "natura", coords: [45.4300, 14.6300], h: 3,
     desc: "Górski, leśny park w Gorskim Kotarze. Rysie, niedźwiedzie i źródło rzeki Kupy.",
     link: "https://pl.wikipedia.org/wiki/Risnjak" },
-  { name: "Wodospady Rastoke (Slunj)", cat: "woda", coords: [45.1230, 15.5860],
+  { name: "Wodospady Rastoke (Slunj)", cat: "woda", coords: [45.1230, 15.5860], h: 1.9,
     desc: "Wioska zbudowana na wodospadach, po drodze na Plitwice. Domy stoją wprost nad kaskadami.",
     link: "https://pl.wikipedia.org/wiki/Slunj" },
 
   // --- Dalmacja południowa ---
-  { name: "Dubrownik — Stare Miasto", cat: "zabytek", coords: [42.6407, 18.1077],
+  { name: "Dubrownik — Stare Miasto", cat: "zabytek", coords: [42.6407, 18.1077], h: 4,
     desc: "Perła Adriatyku, marmurowa Stradun i mury z widokiem na dachy. UNESCO.",
     link: "https://pl.wikipedia.org/wiki/Dubrownik" },
-  { name: "Mury Dubrownika", cat: "widok", coords: [42.6415, 18.1070],
+  { name: "Mury Dubrownika", cat: "widok", coords: [42.6415, 18.1070], h: 4,
     desc: "2 km murów obronnych wokół starówki. Idź rano — cienia brak, a upał daje w kość.",
     link: "https://pl.wikipedia.org/wiki/Dubrownik" },
-  { name: "Wyspa Lokrum", cat: "wyspa", coords: [42.6269, 18.1197],
+  { name: "Wyspa Lokrum", cat: "wyspa", coords: [42.6269, 18.1197], h: 4.5, boat: true,
     desc: "15 minut promem z Dubrownika. Pawie, ogród botaniczny i słone Martwe Morze.",
     link: "https://pl.wikipedia.org/wiki/Lokrum" },
-  { name: "Góra Srđ (kolejka)", cat: "widok", coords: [42.6469, 18.1108],
+  { name: "Góra Srđ (kolejka)", cat: "widok", coords: [42.6469, 18.1108], h: 4,
     desc: "Kolejka linowa nad Dubrownik. Najlepszy widok na starówkę i wyspy — zwłaszcza o zmierzchu.",
     link: "https://pl.wikipedia.org/wiki/Dubrownik" },
-  { name: "Ston — mury i solniska", cat: "zabytek", coords: [42.8380, 17.6950],
+  { name: "Ston — mury i solniska", cat: "zabytek", coords: [42.8380, 17.6950], h: 3.5,
     desc: "Najdłuższe mury w Europie po Chinach, do tego najlepsze ostrygi w kraju.",
     link: "https://pl.wikipedia.org/wiki/Ston" },
-  { name: "Makarska — Punta Rata (Brela)", cat: "plaza", coords: [43.3720, 16.9280],
+  { name: "Makarska — Punta Rata (Brela)", cat: "plaza", coords: [43.3720, 16.9280], h: 2.5,
     desc: "Żwirowa plaża pod sosnami, ze skałą Brela Stone. Regularnie w topkach plaż Europy.",
     link: "https://pl.wikipedia.org/wiki/Brela" },
-  { name: "Omiš — kanion Cetiny", cat: "natura", coords: [43.4450, 16.6890],
+  { name: "Omiš — kanion Cetiny", cat: "adrenalina", coords: [43.4450, 16.6890], h: 2.2,
     desc: "Dawne miasto piratów u ujścia Cetiny. Rafting, zipline i twierdza nad miastem.",
     link: "https://pl.wikipedia.org/wiki/Omi%C5%A1" },
-  { name: "Trogir — Stare Miasto", cat: "zabytek", coords: [43.5170, 16.2510],
+  { name: "Trogir — Stare Miasto", cat: "zabytek", coords: [43.5170, 16.2510], h: 1.5,
     desc: "Wyspa-starówka między lądem a Čiovem, 30 min od Splitu i tuż przy lotnisku. UNESCO.",
     link: "https://pl.wikipedia.org/wiki/Trogir" },
 
   // --- Šibenik / Zadar ---
-  { name: "Katedra św. Jakuba (Šibenik)", cat: "zabytek", coords: [43.7360, 15.8890],
+  { name: "Katedra św. Jakuba (Šibenik)", cat: "zabytek", coords: [43.7360, 15.8890], h: 1.0,
     desc: "Zbudowana wyłącznie z kamienia, bez zaprawy. Fryz z 71 głowami mieszkańców z XV w.",
     link: "https://pl.wikipedia.org/wiki/Katedra_%C5%9Awi%C4%99tego_Jakuba_w_Szybeniku" },
-  { name: "Twierdza św. Michała (Šibenik)", cat: "widok", coords: [43.7370, 15.8880],
+  { name: "Twierdza św. Michała (Šibenik)", cat: "widok", coords: [43.7370, 15.8880], h: 1.0,
     desc: "Forteca nad miastem, dziś scena koncertowa z panoramą na kanał św. Antoniego.",
     link: "https://pl.wikipedia.org/wiki/Szybenik" },
-  { name: "Organy Morskie (Zadar)", cat: "klimat", coords: [44.1190, 15.2210],
+  { name: "Organy Morskie (Zadar)", cat: "klimat", coords: [44.1190, 15.2210], h: 0.25,
     desc: "Instrument grany przez fale — schody na nabrzeżu wydają dźwięk z rur pod spodem.",
     link: "https://pl.wikipedia.org/wiki/Morskie_organy" },
-  { name: "Pozdrav Suncu (Zadar)", cat: "klimat", coords: [44.1185, 15.2205],
+  { name: "Pozdrav Suncu (Zadar)", cat: "klimat", coords: [44.1185, 15.2205], h: 0.25,
     desc: "Solarny krąg świetlny obok Organów. Zachód słońca w Zadarze Hitchcock nazwał najpiękniejszym na świecie.",
     link: "https://pl.wikipedia.org/wiki/Zadar" },
-  { name: "Nin — Plaża Królowej", cat: "plaza", coords: [44.2420, 15.1780],
-    desc: "3 km piasku i płycizny — rzadkość na kamienistym wybrzeżu. Obok lecznicze błoto.",
+  { name: "Nin — Plaża Królowej", cat: "plaza", coords: [44.2420, 15.1780], h: 0.4,
+    desc: "3 km piasku i płycizny — rzadkość na kamienistym wybrzeżu. Obok lecznicze błoto. Po drodze na Pag.",
     link: "https://pl.wikipedia.org/wiki/Nin" },
 
   // --- Istria i Kvarner ---
-  { name: "Amfiteatr w Puli", cat: "zabytek", coords: [44.8737, 13.8500],
+  { name: "Amfiteatr w Puli", cat: "zabytek", coords: [44.8737, 13.8500], h: 4,
     desc: "Szósta co do wielkości arena rzymska świata, zachowana w komplecie. Latem koncerty i kino.",
     link: "https://pl.wikipedia.org/wiki/Amfiteatr_w_Puli" },
-  { name: "Rovinj — Stare Miasto", cat: "klimat", coords: [45.0810, 13.6380],
+  { name: "Rovinj — Stare Miasto", cat: "klimat", coords: [45.0810, 13.6380], h: 4.2,
     desc: "Kolorowe miasteczko na półwyspie z wieżą św. Eufemii. Najbardziej włoska w klimacie część Chorwacji.",
     link: "https://pl.wikipedia.org/wiki/Rovinj" },
-  { name: "Motovun", cat: "widok", coords: [45.3370, 13.8280],
+  { name: "Motovun", cat: "widok", coords: [45.3370, 13.8280], h: 4,
     desc: "Średniowieczne miasteczko na szczycie wzgórza w dolinie Mirny. Truflowa stolica Istrii.",
     link: "https://pl.wikipedia.org/wiki/Motovun" },
-  { name: "Bazylika Eufrazjusza (Poreč)", cat: "zabytek", coords: [45.2280, 13.5940],
+  { name: "Bazylika Eufrazjusza (Poreč)", cat: "zabytek", coords: [45.2280, 13.5940], h: 4.3,
     desc: "Bizantyjskie mozaiki z VI wieku, jedne z najlepiej zachowanych w Europie. UNESCO.",
     link: "https://pl.wikipedia.org/wiki/Bazylika_Eufrazjusza_w_Pore%C4%8Du" },
-  { name: "Przylądek Kamenjak", cat: "plaza", coords: [44.7580, 13.9080],
+  { name: "Przylądek Kamenjak", cat: "plaza", coords: [44.7580, 13.9080], h: 4.3,
     desc: "Dziki park na południowym cyplu Istrii — skalne zatoczki, klify do skakania, zero zabudowy.",
     link: "https://pl.wikipedia.org/wiki/Premantura" },
-  { name: "Jaskinia Baredine", cat: "woda", coords: [45.2760, 13.6440],
+  { name: "Jaskinia Baredine", cat: "woda", coords: [45.2760, 13.6440], h: 4.3,
     desc: "Pięć podziemnych sal ze stalaktytami i endemiczną odmieńcem jaskiniowym.",
     link: "https://pl.wikipedia.org/wiki/Pore%C4%8D" },
-  { name: "Opatija — Lungomare", cat: "klimat", coords: [45.3390, 14.3080],
+  { name: "Opatija — Lungomare", cat: "klimat", coords: [45.3390, 14.3080], h: 3,
     desc: "12-kilometrowa nadmorska promenada w dawnym austriackim kurorcie. Habsburski sznyt.",
     link: "https://pl.wikipedia.org/wiki/Opatija" },
 
   // --- Kontynent ---
-  { name: "Zagrzeb — Górne Miasto", cat: "zabytek", coords: [45.8150, 15.9740],
+  { name: "Zagrzeb — Górne Miasto", cat: "zabytek", coords: [45.8150, 15.9740], h: 2.5,
     desc: "Kościół św. Marka z kolorowym dachem, brama kamienna i najkrótsza kolejka świata.",
     link: "https://pl.wikipedia.org/wiki/Zagrzeb" },
-  { name: "Zamek Trakošćan", cat: "zabytek", coords: [46.2560, 15.9450],
+  { name: "Zamek Trakošćan", cat: "zabytek", coords: [46.2560, 15.9450], h: 3.5,
     desc: "Bajkowy zamek nad jeziorem w Zagorju, z kompletnym wyposażeniem wnętrz.",
     link: "https://pl.wikipedia.org/wiki/Trako%C5%A1%C4%87an" },
-  { name: "Varaždin — barokowa starówka", cat: "klimat", coords: [46.3060, 16.3380],
+  { name: "Varaždin — barokowa starówka", cat: "klimat", coords: [46.3060, 16.3380], h: 3.5,
     desc: "Dawna stolica Chorwacji, pastelowy barok i twierdza Stari Grad.",
     link: "https://pl.wikipedia.org/wiki/Vara%C5%BEdin" }
 ];
@@ -918,14 +992,15 @@ const ITINERARY = [
     ],
     note: "🛬 Dzień aklimatyzacyjny. Zachód słońca w Zadarze to obowiązkowy punkt programu." },
 
-  { title: "Dzień 2: Zadar i Nin", when: "Blisko, bez trasy",
+  { title: "Dzień 2: Zadar bez auta", when: "Auto dopiero jutro",
     rows: [
       ["Rano", "Starówka Zadaru: Forum, kościół św. Donata, mury weneckie"],
       ["Południe", "Lunch na targu, kawa na Kalelardze"],
-      ["Popołudnie", "Nin — Plaża Królowej, 3 km piasku i płycizny (20 min autem)"],
+      ["Popołudnie", "Prom na Ugljan (25 min) albo plaża Zaton — jedno i drugie bez samochodu"],
+      ["Opcja dla chętnych", "Kajaki w kanionie Zrmanji, ~60 €/os., operator odbiera z Zadaru"],
       ["Wieczór", "Powrót do bazy, grill albo tawerna"]
     ],
-    note: "🚶 Najlżejszy dzień — idealny na kaca po przylocie." },
+    note: "🚶 Najlżejszy dzień — idealny na kaca po przylocie. Nin przenieśliśmy na dzień 6, bo leży po drodze na Pag." },
 
   { title: "Dzień 3: Jeziora Plitwickie", when: "Wynajem auta, ~1,5 h",
     rows: [
@@ -938,27 +1013,28 @@ const ITINERARY = [
 
   { title: "Dzień 4: Krka i Šibenik", when: "Auto, ~1 h",
     rows: [
-      ["Rano", "Park Narodowy Krka — Skradinski Buk, kaskady i młyny"],
-      ["Południe", "Opcjonalnie rejs do Roški Slap, mniej tłoczno"],
+      ["Rano", "Wejście od strony Skradinu, łódką pod Skradinski Buk — kaskady i młyny"],
+      ["Południe", "Przejazd do Roški Slap: tu jako jedyni w parku możecie wejść do wody"],
       ["Popołudnie", "Šibenik: katedra św. Jakuba i twierdza św. Michała"],
       ["Wieczór", "Kolacja w Šibeniku, powrót do bazy"]
     ],
-    note: "🚗 Kierowca wyłączony z picia — ustalcie go rano, nie po fakcie." },
+    note: "🏊 W Skradinski Buk kąpiel jest ZAKAZANA od 2021. Kąpielówki przydadzą się dopiero przy Roški Slap. Kierowca na sucho — ustalcie go rano, nie po fakcie." },
 
-  { title: "Dzień 5: Kornati i Dugi otok", when: "Całodniowy rejs",
+  { title: "Dzień 5: Kornati i Telašćica", when: "Całodniowy rejs",
     rows: [
-      ["Rano", "Wypłynięcie z portu w Zadarze lub Biogradzie"],
+      ["8:00", "Wypłynięcie z portu w Zadarze lub Biogradzie"],
       ["Przedpołudnie", "Archipelag Kornati — 89 wysp, postoje na kąpiel"],
-      ["Popołudnie", "Telašćica: klify i słone jezioro Mir, plaża Sakarun"],
+      ["Lunch", "Na pokładzie, zwykle w cenie rejsu"],
+      ["Popołudnie", "Telašćica: 160-metrowe klify i słone jezioro Mir"],
       ["Wieczór", "Powrót do portu, kolacja z rybą"]
     ],
-    note: "⛵ Rejs rezerwujcie dzień wcześniej. Krem z filtrem i woda — na łodzi nie ma cienia." },
+    note: "⛵ 70–110 €/os. z lunchem, rezerwacja dzień wcześniej. Sakarun to OSOBNA wycieczka — nie wciskajcie go w ten dzień. Krem z filtrem i woda: na łodzi nie ma cienia." },
 
-  { title: "Dzień 6: Pag i Zrće", when: "Auto, ~1 h",
+  { title: "Dzień 6: Nin, Pag i Zrće", when: "Auto, ~1 h",
     rows: [
-      ["Rano", "Przejazd przez most na Pag — krajobraz księżycowy"],
-      ["Południe", "Miasto Pag: koronki, ser paški sir, solniska"],
-      ["Popołudnie", "Plaża Zrće — kluby na plaży czynne od południa"],
+      ["Rano", "Nin po drodze — Plaża Królowej, 3 km piasku i płycizny"],
+      ["Południe", "Przejazd przez most na Pag, krajobraz księżycowy. Miasto Pag: koronki, ser paški sir, solniska"],
+      ["Popołudnie", "Plaża Zrće — Papaya, Kalypso, Aquarius, Nomad. Kluby ruszają od południa"],
       ["Noc", "Zrće do rana albo odwrót na własną odpowiedzialność"]
     ],
     note: "🎉 Dzień imprezowy. Kierowca na sucho albo taksówka — na Pagu policja stoi na moście." },
@@ -974,12 +1050,15 @@ const ITINERARY = [
 ];
 const TIPS = [
   ["🍻 Strategia przetrwania", "Przy 30°C nawodnienie to nie żart — woda między drinkami, inaczej dzień 4 nie istnieje. Kto pierwszy padnie, stawia kolejkę."],
-  ["🚗 Auto i promy", "Auto bierzcie na dni 3–4 i 6 (kierowca na sucho). Dzień 5 to rejs — rezerwacja dzień wcześniej. Z Zadaru wszędzie blisko: Plitwice 1,5 h, Krka 1 h, Pag 1 h."],
-  ["💸 Budżet", "Chorwacja jest w strefie euro. Licz 90–130 € dziennie na osobę: nocleg, jedzenie, wstępy (Plitwice 40 €, Krka 20 €) i paliwo."],
-  ["🏖️ Plaże", "Wybrzeże jest kamieniste — buty do wody to nie fanaberia, tylko warunek chodzenia następnego dnia. Filtr 50+ obowiązkowo."],
+  ["🚗 Auto i promy", "Auto bierzcie na dni 3–4 i 6 (kierowca na sucho). Dzień 2 planujcie bez auta, dzień 5 to rejs. Z Zadaru wszędzie blisko: Plitwice 1,5–1,75 h, Krka 1 h, Pag 1 h, Zrmanja 1 h."],
+  ["🎟️ Bilety i ceny wstępów", "Plitwice: 40 € w sezonie (po 16:00 ~25 €), limit 300 osób na godzinę na wejście — rezerwujcie online z wyprzedzeniem, poranne sloty schodzą tygodniami wcześniej. Krka w lipcu i sierpniu: 40 €, nie 20 € (po 15:00 — 30 €). Rejs po Kornatach: 70–110 €/os. z lunchem."],
+  ["💸 Budżet", "Chorwacja jest w strefie euro. Same wstępy w dni 3, 4 i 5 to ok. 170 €/os. Licz realnie 130–160 € w dni z atrakcjami i 90–110 € w dni luźne: nocleg, jedzenie, wstępy i paliwo."],
+  ["🏊 Kąpiel w parkach", "W Skradinski Buk kąpiel jest zakazana od 2021 — chronią martwicę wapienną. Pływać można przy Roški Slap oraz w Stinicach i Pisaku, od czerwca do końca września. Planujcie mokrą część dnia tam."],
+  ["🏖️ Plaże", "Wybrzeże jest kamieniste — buty do wody to nie fanaberia, tylko warunek chodzenia następnego dnia. Piach realnie tylko w Ninie, na Sakarunie i w Zatonie. Filtr 50+ obowiązkowo."],
   ["🍽️ Jedzenie", "Peka (mięso spod żelaznego klosza) zamawia się z kilkugodzinnym wyprzedzeniem. Do tego črni rižot, ser paški sir z Pagu i rakija na koniec."],
-  ["📵 Praktyczne", "Bura potrafi zamknąć most na Pag i odwołać rejsy z dnia na dzień — sprawdzajcie prognozę rano. Power bank obowiązkowy, zdjęcia z kaca to najlepsza pamiątka."],
-  ["⚠️ Uwaga", "Za picie alkoholu w miejscach publicznych w Zadarze są mandaty. Bary i plaże klubowe tak, starówka i deptak nie. Na moście na Pag policja stoi regularnie."]
+  ["🌬️ Wiatr", "Latem burza, która zamyka most na Pag, to rzadkość — od połowy czerwca do początku września dominuje maestral, przyjemny wiatr od morza po południu. Realne letnie ryzyko to jugo pod koniec sierpnia i neverin, czyli nagła burza znad lądu. Przed rejsem i tak sprawdźcie prognozę rano."],
+  ["📵 Praktyczne", "Power bank obowiązkowy, zdjęcia z kaca to najlepsza pamiątka. Parking w centrum Zadaru ~2,30 €/h, na obrzeżach 0,40–0,80 €/h."],
+  ["⚠️ Mandaty", "Za picie własnego alkoholu w miejscach publicznych w Zadarze grozi 300–700 €. Zakaz obejmuje starówkę, Forum, rivę i teren przy Organach Morskich. Tarasy barów i plaże klubowe są OK. Na moście na Pag policja stoi regularnie."]
 ];
 
 const PEOPLE = [
@@ -1010,6 +1089,17 @@ const DRINKS = [
    2. MAPA
    ========================================================================= */
 
+/** "20 min z bazy" / "1,75 h z bazy" — czytelnie dla obu rzędów wielkości. */
+function driveLabel(a) {
+  const boat = a.boat ? " · dojazd łodzią" : "";
+
+  // Do pełnych 5 minut — "~24 min" udaje precyzję, której te szacunki nie mają.
+  if (a.h <= 0) return "🏨 Tu śpicie";
+  if (a.h < 1)  return `⏱ ~${Math.round(a.h * 12) * 5} min z bazy${boat}`;
+
+  return `⏱ ~${String(a.h).replace(".", ",")} h z bazy${boat}`;
+}
+
 function buildMap() {
   const map = L.map("map", { scrollWheelZoom: false }).setView([44.6, 16.2], 7);
 
@@ -1023,14 +1113,17 @@ function buildMap() {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
 
-  const bounds = [];
+  // Markery żyją w warstwie, nie bezpośrednio na mapie — inaczej nie da się
+  // ich przełączać filtrem bez zbierania referencji po całej mapie.
+  const layer = L.layerGroup().addTo(map);
 
-  ATTRACTIONS.forEach(a => {
+  const pins = ATTRACTIONS.map(a => {
     const cat = CATEGORIES[a.cat];
+    const far = a.h > NEAR_LIMIT;
 
     const icon = L.divIcon({
       className: "",
-      html: `<div class="pin" style="background:${cat.color}"><span>${cat.icon}</span></div>`,
+      html: `<div class="pin${far ? " far" : ""}" style="background:${cat.color}"><span>${cat.icon}</span></div>`,
       iconSize: [34, 34],
       iconAnchor: [17, 32],
       popupAnchor: [0, -30]
@@ -1040,18 +1133,35 @@ function buildMap() {
       <div class="pop">
         <h4>${a.name}</h4>
         <span class="tag" style="background:${cat.color}">${cat.label}</span>
+        <p class="drive${far ? " far" : ""}">${driveLabel(a)}</p>
         <p>${a.desc}</p>
         <a href="${a.link}" target="_blank" rel="noopener noreferrer">Więcej o miejscu ↗</a>
       </div>`;
 
-    L.marker(a.coords, { icon }).addTo(map).bindPopup(popup);
-    bounds.push(a.coords);
+    return { a, far, marker: L.marker(a.coords, { icon }).bindPopup(popup) };
   });
 
-  // Dopasuj widok do faktycznych markerów zamiast zgadywać środek i zoom
-  map.fitBounds(bounds, { padding: [40, 40] });
+  const toggle = document.getElementById("near-only");
+  const count  = document.getElementById("map-count");
 
-  return map;
+  const render = () => {
+    const visible = toggle.checked ? pins.filter(p => !p.far) : pins;
+
+    layer.clearLayers();
+    visible.forEach(p => layer.addLayer(p.marker));
+
+    // Dopasuj widok do faktycznych markerów zamiast zgadywać środek i zoom
+    map.fitBounds(visible.map(p => p.a.coords), { padding: [40, 40] });
+
+    count.textContent = `${visible.length} z ${pins.length} atrakcji`;
+  };
+
+  toggle.addEventListener("change", render);
+  render();
+
+  // Widok trzeba przeliczyć po zniknięciu loadera — Leaflet mierzy kontener
+  // przy starcie, a wtedy jest jeszcze zasłonięty.
+  return { map, render };
 }
 
 /* =========================================================================
@@ -1078,6 +1188,7 @@ function buildStats() {
 
   const cards = [
     [ATTRACTIONS.length, "Atrakcji na mapie"],
+    [ATTRACTIONS.filter(a => a.h <= NEAR_LIMIT).length, `W zasięgu bazy (≤${NEAR_LIMIT} h)`],
     [count("natura") + count("woda"), "Przyroda i wodospady"],
     [count("zabytek"), "Zabytki i starówki"],
     [count("plaza") + count("wyspa"), "Plaże i wyspy"]
@@ -1393,7 +1504,7 @@ document.addEventListener("DOMContentLoaded", () => {
   buildStats();
   buildItinerary();
 
-  const map = buildMap();
+  const { map, render } = buildMap();
 
   const wheel = new Wheel({
     wheel:    document.getElementById("wheel"),
@@ -1411,8 +1522,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   runLoader(() => {
     // Leaflet liczy rozmiar kontenera przy inicjalizacji. Loader go zasłaniał,
-    // więc po jego zniknięciu trzeba przeliczyć, inaczej kafelki są poszarpane.
-    setTimeout(() => map.invalidateSize(), 600);
+    // więc po jego zniknięciu trzeba przeliczyć, inaczej kafelki są poszarpane,
+    // a fitBounds z buildMap() celuje w nieaktualne wymiary.
+    setTimeout(() => { map.invalidateSize(); render(); }, 600);
   });
 });
 </script>
