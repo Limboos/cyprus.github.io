@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0b2545">
-<meta name="description" content="Interaktywna mapa atrakcji Chorwacji, 7-dniowy plan wyjazdu i koła fortuny: kto robi drinki i jaki drink wypada.">
+<meta name="description" content="Interaktywna mapa atrakcji Chorwacji, propozycje wypadów z bazy pod Zadarem i koła fortuny: kto robi drinki i jaki drink wypada.">
 <title>Chorwacja - Interaktywna Mapa</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇭🇷</text></svg>">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
@@ -392,6 +392,118 @@ section { padding-block: clamp(1.75rem, 6vw, 3rem); }
   color: #7a5200;
 }
 
+/* ---------- Karty wypadów ---------- */
+.section-lead {
+  max-width: 62ch;
+  margin: -0.75rem auto 1.75rem;
+  text-align: center;
+  font-size: .92rem;
+  color: var(--muted);
+}
+
+.trip {
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  border-top: 4px solid var(--sun);
+}
+.trip header { padding: 1rem 1.25rem .75rem; background: linear-gradient(135deg, rgba(255,183,3,.14), transparent); }
+.trip h3 { margin-top: .35rem; font-size: 1.1rem; color: var(--sea-800); line-height: 1.3; }
+
+.vibe {
+  display: inline-block;
+  padding: .15rem .6rem;
+  border-radius: 99px;
+  background: var(--sea-700);
+  color: #fff;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.trip-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem .9rem;
+  margin-top: .5rem;
+  font-size: .78rem;
+  color: var(--muted);
+}
+
+.trip .body { display: flex; flex-direction: column; padding: 1rem 1.25rem 1.25rem; }
+.trip .body p { font-size: .88rem; margin-top: .75rem; color: #33465a; }
+.trip .combo { padding: .6rem .75rem; border-radius: 10px; background: rgba(47,168,224,.1); }
+.trip .combo strong { color: var(--sea-700); }
+.trip .note {
+  margin-top: .85rem;
+  padding: .6rem .75rem;
+  border-radius: 10px;
+  background: rgba(255, 183, 3, .13);
+  font-size: .84rem;
+  color: #7a5200;
+}
+
+/* Minimapka: statyczna ilustracja trasy, celowo nieinteraktywna,
+   żeby na telefonie nie łapała przewijania strony. */
+.minimap {
+  height: 190px;
+  margin-bottom: .9rem;
+  border-radius: 12px;
+  background: #dfe9f3;
+  pointer-events: none;
+}
+.mini-pin {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: var(--coral);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  box-shadow: 0 1px 4px rgba(4,28,50,.4);
+}
+.mini-pin.mini-base { background: var(--sea-800); font-size: 11px; }
+
+.stops { list-style: none; display: grid; gap: .45rem; }
+.stops li { display: flex; align-items: flex-start; gap: .6rem; font-size: .87rem; color: #33465a; }
+.stops .num {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 21px;
+  height: 21px;
+  margin-top: .1rem;
+  border-radius: 50%;
+  background: var(--coral);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 800;
+}
+.stops b { color: var(--sea-800); font-weight: 600; }
+.stops em { display: block; font-style: normal; font-size: .78rem; color: var(--muted); }
+
+.btn-route {
+  display: block;
+  margin-top: 1rem;
+  padding: .7rem 1rem;
+  border-radius: 12px;
+  background: var(--sea-500);
+  color: #fff;
+  font-size: .85rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+.btn-route:hover { background: var(--sea-700); }
+.btn-route:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
+
 .tips { margin-top: 1.5rem; }
 .tips li {
   margin-bottom: .75rem;
@@ -719,8 +831,13 @@ footer {
   <!-- ============ Plan ============ -->
   <section>
     <div class="wrap">
-      <h2 class="section-title">🗓️ 7-dniowy plan — baza koło Zadaru</h2>
-      <div class="days" id="days"></div>
+      <h2 class="section-title">🧭 Propozycje wypadów — baza koło Zadaru</h2>
+      <p class="section-lead">
+        To nie jest plan, tylko menu. Macie własne auto i sześć pełnych dni, więc wybierzcie
+        pięć pozycji i jedną zostawcie pustą na pogodę albo kaca. Każda karta to zestaw miejsc,
+        które opłaca się zwiedzić za jednym wyjazdem.
+      </p>
+      <div class="days" id="trips"></div>
 
       <div class="panel tips">
         <h3 style="color:var(--sea-700);margin-bottom:.75rem">💡 Wskazówki praktyczne</h3>
@@ -982,83 +1099,145 @@ const ATTRACTIONS = [
     link: "https://pl.wikipedia.org/wiki/Vara%C5%BEdin" }
 ];
 
-const ITINERARY = [
-  { title: "Dzień 1: Przylot i rozruch", when: "Przylot ~15:00",
-    rows: [
-      ["Popołudnie", "Lądowanie w Zadarze, transfer do bazy"],
-      ["Późne popołudnie", "Zameldowanie, rozpakowanie, pierwsze piwo na tarasie"],
-      ["Wieczór", "Zadar: Organy Morskie i Pozdrav Suncu o zachodzie słońca"],
-      ["Noc", "Kolacja na starówce. Wcześnie spać — teoretycznie"]
-    ],
-    note: "🛬 Dzień aklimatyzacyjny. Zachód słońca w Zadarze to obowiązkowy punkt programu." },
-
-  { title: "Dzień 2: Zadar bez auta", when: "Auto dopiero jutro",
-    rows: [
-      ["Rano", "Starówka Zadaru: Forum, kościół św. Donata, mury weneckie"],
-      ["Południe", "Lunch na targu, kawa na Kalelardze"],
-      ["Popołudnie", "Prom na Ugljan (25 min) albo plaża Zaton — jedno i drugie bez samochodu"],
-      ["Opcja dla chętnych", "Kajaki w kanionie Zrmanji, ~60 €/os., operator odbiera z Zadaru"],
-      ["Wieczór", "Powrót do bazy, grill albo tawerna"]
-    ],
-    note: "🚶 Najlżejszy dzień — idealny na kaca po przylocie. Nin przenieśliśmy na dzień 6, bo leży po drodze na Pag." },
-
-  { title: "Dzień 3: Jeziora Plitwickie", when: "Wynajem auta, ~1,5 h",
-    rows: [
-      ["Wcześnie rano", "Odbiór auta, wyjazd ok. 7:00 — inaczej wjedziecie w tłum"],
-      ["Przedpołudnie", "Plitwice: dolne i górne jeziora, kładki nad wodą, łódka"],
-      ["Popołudnie", "Postój w Rastoke — wioska zbudowana na wodospadach"],
-      ["Wieczór", "Powrót do bazy, kolacja po drodze"]
-    ],
-    note: "🎟️ Bilety rezerwujcie online — limity wejść są realne, w sezonie schodzą z wyprzedzeniem." },
-
-  { title: "Dzień 4: Krka i Šibenik", when: "Auto, ~1 h",
-    rows: [
-      ["Rano", "Wejście od strony Skradinu, łódką pod Skradinski Buk — kaskady i młyny"],
-      ["Południe", "Przejazd do Roški Slap: tu jako jedyni w parku możecie wejść do wody"],
-      ["Popołudnie", "Šibenik: katedra św. Jakuba i twierdza św. Michała"],
-      ["Wieczór", "Kolacja w Šibeniku, powrót do bazy"]
-    ],
-    note: "🏊 W Skradinski Buk kąpiel jest ZAKAZANA od 2021. Kąpielówki przydadzą się dopiero przy Roški Slap. Kierowca na sucho — ustalcie go rano, nie po fakcie." },
-
-  { title: "Dzień 5: Kornati i Telašćica", when: "Całodniowy rejs",
-    rows: [
-      ["8:00", "Wypłynięcie z portu w Zadarze lub Biogradzie"],
-      ["Przedpołudnie", "Archipelag Kornati — 89 wysp, postoje na kąpiel"],
-      ["Lunch", "Na pokładzie, zwykle w cenie rejsu"],
-      ["Popołudnie", "Telašćica: 160-metrowe klify i słone jezioro Mir"],
-      ["Wieczór", "Powrót do portu, kolacja z rybą"]
-    ],
-    note: "⛵ 70–110 €/os. z lunchem, rezerwacja dzień wcześniej. Sakarun to OSOBNA wycieczka — nie wciskajcie go w ten dzień. Krem z filtrem i woda: na łodzi nie ma cienia." },
-
-  { title: "Dzień 6: Nin, Pag i Zrće", when: "Auto, ~1 h",
-    rows: [
-      ["Rano", "Nin po drodze — Plaża Królowej, 3 km piasku i płycizny"],
-      ["Południe", "Przejazd przez most na Pag, krajobraz księżycowy. Miasto Pag: koronki, ser paški sir, solniska"],
-      ["Popołudnie", "Plaża Zrće — Papaya, Kalypso, Aquarius, Nomad. Kluby ruszają od południa"],
-      ["Noc", "Zrće do rana albo odwrót na własną odpowiedzialność"]
-    ],
-    note: "🎉 Dzień imprezowy. Kierowca na sucho albo taksówka — na Pagu policja stoi na moście." },
-
-  { title: "Dzień 7: Wylot", when: "Wylot o 6:00",
-    rows: [
-      ["4:00", "Pobudka, ostatnie sprawdzenie pokoju"],
-      ["4:30", "Transfer na lotnisko w Zemuniku (~20 min od Zadaru)"],
-      ["6:00", "Wylot"],
-      ["Uwaga", "Auto oddajcie dzień wcześniej — o 4 rano wypożyczalnia nie działa"]
-    ],
-    note: "✈️ Kto zaśnie, ten leci sam i na własny koszt." }
+/* Nie plan, tylko menu. Wybierzcie 5–6 pozycji na tydzień, resztę zostawcie
+   na leżak. `stops` odwołuje się do nazw z ATTRACTIONS — stąd minimapki i trasa. */
+const TRIPS = [
+  {
+    id: "zadar",
+    title: "Zadar o zachodzie słońca",
+    vibe: "wieczór",
+    time: "3–4 h",
+    km: "pieszo",
+    effort: "zero wysiłku",
+    stops: ["Zadar — Stare Miasto", "Organy Morskie (Zadar)", "Pozdrav Suncu (Zadar)"],
+    why: "Starówka mieści się na półwyspie i obchodzi się ją w godzinę: Forum, kościół św. Donata, marmurowa Kalelarga. Cała sztuka polega na timingu — bądźcie na nabrzeżu 40 minut przed zachodem. Organy Morskie grają same, napędzane falą, a Pozdrav Suncu zapala się dokładnie wtedy, gdy słońce znika. Hitchcock nazwał ten zachód najpiękniejszym na świecie i akurat tego jednego nie wymyślili marketingowcy.",
+    combo: "Doklejcie do dowolnego dnia, w którym wracacie z trasy przed 19:00.",
+    note: "Zostawcie auto poza centrum — parking na obrzeżach 0,40–0,80 €/h zamiast 2,30 €/h w Strefie 1. Uwaga na własny alkohol: na starówce, Forum i przy Organach mandat to 300–700 €. Tarasy barów są legalne."
+  },
+  {
+    id: "pag",
+    title: "Nin, księżycowy Pag i noc na Zrće",
+    vibe: "impreza",
+    time: "cały dzień + noc",
+    km: "~190 km w pętli",
+    effort: "łatwe",
+    stops: ["Nin — Plaża Królowej", "Pag — miasto i krajobraz księżycowy", "Zrće (Novalja, Pag)"],
+    why: "Trzy zupełnie różne krajobrazy na jednej trasie na północ. Nin to 3 km piachu i płycizny — jedyne takie miejsce w okolicy, bo reszta wybrzeża jest kamienista. Potem most na Pag i wjeżdżacie w pustkowie wyżarte przez wiatr, wyglądające jak zdjęcia z Księżyca. Miasto Pag da wam ser paški sir i koronki, a wieczorem 20 minut dalej jest Zrće: Papaya, Kalypso, Aquarius, Nomad, do tego nowe Symbol i Lift. Kluby ruszają koło południa i grają do rana.",
+    combo: "Nin sam w sobie to za mało na dzień — dlatego siedzi tu, po drodze. Kto nie chce klubów, może wracać z Pagu po kolacji.",
+    note: "Kluczowa sprawa przy ośmiu osobach: ustalcie trzeźwego kierowcę RANO, nie o północy. Na moście na Pag policja stoi regularnie. Alternatywa to nocleg w Novalji albo taksówka, ale w szczycie sezonu o czwartej nad ranem konkurencja o transport jest ostra."
+  },
+  {
+    id: "krka",
+    title: "Krka od strony Skradinu i Šibenik",
+    vibe: "woda + zabytki",
+    time: "cały dzień",
+    km: "~140 km",
+    effort: "łatwe",
+    stops: ["Skradin", "Skradinski Buk (NP Krka)", "Roški Slap (NP Krka)", "Katedra św. Jakuba (Šibenik)", "Twierdza św. Michała (Šibenik)"],
+    why: "Większość wjeżdża do Krki od Lozovaca, autobusem w dół. Wjedźcie od Skradinu — zostawiacie auto w miasteczku i podpływacie pod wodospad parkową łódką, co jest po prostu ładniejszym wejściem. Skradinski Buk to 17 progów wodnych jeden nad drugim. Potem Roški Slap: mniej ludzi, stare młyny wodne i, co najważniejsze, jedyne miejsce w parku gdzie wolno wejść do wody. Na koniec Šibenik z katedrą złożoną z samego kamienia, bez grama zaprawy, i fryzem z 71 twarzami mieszkańców z XV wieku.",
+    combo: "Šibenik jest 20 minut od wyjazdu z parku, więc wchodzi w ten sam dzień bez wysiłku. Twierdza św. Michała bywa wieczorem sceną koncertową — sprawdźcie repertuar, bo widok z niej o zmierzchu jest lepszy niż w dzień.",
+    note: "Bilet w lipcu i sierpniu: 40 € dorosły, po 15:00 — 30 €. To 320 € za ósemkę, więc policzcie to wcześniej. W Skradinski Buk kąpiel jest ZAKAZANA od 2021 — kąpielówki zakładacie dopiero przy Roški Slap (czerwiec–wrzesień, wyznaczone miejsca)."
+  },
+  {
+    id: "plitwice",
+    title: "Plitwice i Rastoke — złapcie je po drodze",
+    vibe: "must-see",
+    time: "5–6 h w parku",
+    km: "~120 km z bazy",
+    effort: "dużo chodzenia",
+    stops: ["Jeziora Plitwickie", "Wodospady Rastoke (Slunj)"],
+    why: "16 jezior spiętych kaskadami, drewniane kładki prowadzone tuż nad wodą, elektryczna łódka przez jezioro Kozjak. UNESCO i najbardziej oblegane miejsce w kraju. Rastoke to bonus 30 minut dalej: wioska dosłownie zbudowana na wodospadach, domy stoją nad kaskadami.",
+    combo: "Skoro jedziecie autem z Polski, to jest wasz największy zysk czasowy: Plitwice i Rastoke leżą przy trasie ze Zgrzebia na wybrzeże. Zróbcie je w sobotę po drodze w dół albo w drodze powrotnej, zamiast tracić na to osobny dzień z bazy i nadkładać 240 km w dwie strony.",
+    note: "40 € w sezonie, po 16:00 około 25 €. Limit 300 osób na godzinę na wejście, a poranne sloty schodzą tygodniami wcześniej — rezerwacja online obowiązkowa, nie ma opcji kupienia w bramie w sierpniu. Wejście 2 jest krótsze i mniej zatłoczone niż Wejście 1."
+  },
+  {
+    id: "kornati",
+    title: "Kornati i Telašćica — całodniowy rejs",
+    vibe: "morze",
+    time: "8:00–18:00",
+    km: "auto zostaje",
+    effort: "łatwe",
+    boat: true,
+    stops: ["Park Narodowy Kornati", "Telašćica (Dugi otok)"],
+    why: "89 wysp i gołych skał rozsypanych po pustkowiu Adriatyku — krajobraz, którego nie zobaczycie z lądu w żadnej wersji. Rejs przecina archipelag, staje na kąpiel w zatoczkach, a po lunchu wchodzi w Telašćicę: 160-metrowe klify od strony otwartego morza i ciepłe słone jezioro Mir tuż za nimi. Na miejscu jest jeszcze przytulisko dla osłów, co po czterech piwach bawi bardziej niż powinno.",
+    combo: "Jedyny dzień, w którym auto stoi pod domem — dobra pozycja na dzień po Zrće. Wypłynięcie z Zadaru albo z Biogradu, oba porty w zasięgu.",
+    note: "70–110 € od osoby z lunchem, czyli 560–880 € za ekipę — rezerwujcie dzień wcześniej i pytajcie o zniżkę grupową przy ośmiu osobach. Sakarun to OSOBNA wycieczka, nie wciśniecie go w ten rejs. Na łodzi nie ma cienia: filtr 50+ i woda, bo inaczej wieczór odpada."
+  },
+  {
+    id: "velebit",
+    title: "Velebit: kanion Paklenicy i lodowate jaskinie",
+    vibe: "góry",
+    time: "cały dzień",
+    km: "~150 km",
+    effort: "wymagające",
+    stops: ["Park Narodowy Paklenica", "Jaskinie Cerovačke"],
+    why: "Paklenica to dwa kaniony wcięte pionowo w Velebit — Velika i Mala. Ściany po 400 metrów, po nich wiszą wspinacze, a dnem idzie szlak, który da się skroić na każdy poziom kondycji: od godzinnego spaceru do Anića Luki po całodniowe wejścia. Jaskinie Cerovačke to największy system jaskiniowy w Chorwacji i 8 stopni w środku, co przy czterdziestce na zewnątrz jest głównym argumentem.",
+    combo: "Idealna kolejność: kanion rano, póki chłodno, jaskinie w największy upał. Odwrotnie to męczarnia.",
+    note: "Do jaskiń weźcie bluzy — serio, 8°C po godzinie w kanionie to szok. Buty z podeszwą, bo w Paklenicy jest kamień, nie ścieżka spacerowa."
+  },
+  {
+    id: "zrmanja",
+    title: "Kajaki w kanionie Zrmanji",
+    vibe: "adrenalina",
+    time: "5–7 h",
+    km: "~110 km",
+    effort: "średnie",
+    stops: ["Kanion Zrmanji — rafting i kajaki"],
+    why: "Turkusowa rzeka wcięta w kanion pod Obrovacem, z kaskadami po drodze i wodą tak przejrzystą, że widać dno na trzech metrach. Spływ jest dla początkujących — nikt nie musi umieć nic poza pływaniem. Kręcono tu sceny do filmów o Winnetou, co widać po skałach. Dla ekipy, która całą resztę tygodnia spędzi na leżaku i w barze, to jedyna aktywność, o której będziecie gadać w listopadzie.",
+    combo: "Zajmuje pół dnia plus dojazd, więc reszta dnia zostaje wolna. Obrovac jest po drodze na Pag, gdyby ktoś chciał złożyć to z wieczorem na Zrće.",
+    note: "55–65 € od osoby ze sprzętem, przewodnikiem i ubezpieczeniem. Przy ośmiu osobach rezerwujcie z wyprzedzeniem, bo grupy schodzą. Operatorzy dowożą z Zadaru za dodatkowe ~30 €/os., ale skoro macie auto, dojedźcie sami do Kaštel Žegarski."
+  },
+  {
+    id: "dugiotok",
+    title: "Dugi otok promem: Sakarun i klify",
+    vibe: "plaża",
+    time: "cały dzień",
+    km: "prom + ~40 km",
+    effort: "łatwe",
+    boat: true,
+    stops: ["Plaża Sakarun (Dugi otok)", "Telašćica (Dugi otok)"],
+    why: "Sakarun to biały piasek i turkusowa płycizna ciągnąca się kilkadziesiąt metrów w morze — najbliższa karaibskiej pocztówce rzecz w Chorwacji i zupełnie inna liga niż kamieniste plaże pod Zadarem. Wyspa jest długa i pusta, więc z autem dojedziecie też na południowy kraniec, do Telašćicy od strony lądu.",
+    combo: "Alternatywa dla rejsu na Kornaty, nie dodatek — obie opcje pokazują Telašćicę. Wybierzcie rejs, jeśli chcecie archipelag i lunch w cenie; wybierzcie prom, jeśli chcecie leżeć na piachu i mieć swoje tempo.",
+    note: "Prom z Zadaru do Brbinja, auto płatne według długości — przy vanie sprawdźcie cennik Jadrolinii wcześniej. Ostatni powrót jest wcześnie, więc zapiszcie sobie godzinę zanim otworzycie pierwsze piwo na plaży."
+  },
+  {
+    id: "split",
+    title: "Split i Trogir — wypad na południe",
+    vibe: "UNESCO",
+    time: "od świtu do nocy",
+    km: "~330 km w dwie strony",
+    effort: "dużo jazdy",
+    stops: ["Trogir — Stare Miasto", "Pałac Dioklecjana (Split)", "Katedra św. Domniusa", "Riva (Split)", "Plaża Bačvice"],
+    why: "Pałac Dioklecjana to nie muzeum za szybą, tylko żywe centrum miasta — w rzymskich murach z IV wieku siedzą bary, sklepy i mieszkania. Katedra św. Domniusa jest najstarszą używaną katedrą świata, a wejście na dzwonnicę daje widok na cały Split. Trogir leży dokładnie po drodze, 30 minut wcześniej: cała starówka na własnej wysepce, też UNESCO.",
+    combo: "Trogir robicie w drodze do Splitu, nie z powrotem — o poranku jest pusty, po południu wchodzą wycieczki. Wieczór kończycie na Rivie albo na Bačvicach, gdzie plaża po zmroku zmienia się w strefę barów.",
+    note: "Najdłuższy wyjazd z listy i jedyny, przy którym 1,5 h w jedną stronę robi różnicę. Parking w Splicie w sierpniu to loteria — celujcie w parkingi przy Zachodnim Wybrzeżu albo zostawcie auto w Trogirze i dojedźcie autobusem."
+  },
+  {
+    id: "leniwy",
+    title: "Dzień, w którym nikomu się nie chce",
+    vibe: "regeneracja",
+    time: "ile chcecie",
+    km: "0–40 km",
+    effort: "żadne",
+    stops: ["Plaża Zaton i Sukošan", "Jezioro Vransko", "Biograd na Moru", "Wyspy Ugljan i Pašman"],
+    why: "Po Zrće albo po Paklenicy ktoś w ekipie i tak padnie, więc lepiej mieć to zaplanowane niż improwizować. Zaton to najbliższe porządne kąpielisko z łagodnym zejściem i barami. Vransko to największe naturalne jezioro w kraju, rezerwat ptaków tuż przy morzu, płaskie trasy rowerowe i taras widokowy Kamenjak. Ugljan jest 25 minut promem — rowery, puste zatoczki i konoby bez turystów.",
+    combo: "Cztery warianty na jeden dzień: wybierzcie jeden zależnie od tego, ilu ludzi wstało. Biograd to też drugi port, z którego wypływają rejsy na Kornaty.",
+    note: "Wybrzeże jest kamieniste — buty do wody to warunek chodzenia następnego dnia, nie fanaberia. Piach realnie tylko w Ninie, na Sakarunie i częściowo w Zatonie."
+  }
 ];
 const TIPS = [
-  ["🍻 Strategia przetrwania", "Przy 30°C nawodnienie to nie żart — woda między drinkami, inaczej dzień 4 nie istnieje. Kto pierwszy padnie, stawia kolejkę."],
-  ["🚗 Auto i promy", "Auto bierzcie na dni 3–4 i 6 (kierowca na sucho). Dzień 2 planujcie bez auta, dzień 5 to rejs. Z Zadaru wszędzie blisko: Plitwice 1,5–1,75 h, Krka 1 h, Pag 1 h, Zrmanja 1 h."],
-  ["🎟️ Bilety i ceny wstępów", "Plitwice: 40 € w sezonie (po 16:00 ~25 €), limit 300 osób na godzinę na wejście — rezerwujcie online z wyprzedzeniem, poranne sloty schodzą tygodniami wcześniej. Krka w lipcu i sierpniu: 40 €, nie 20 € (po 15:00 — 30 €). Rejs po Kornatach: 70–110 €/os. z lunchem."],
-  ["💸 Budżet", "Chorwacja jest w strefie euro. Same wstępy w dni 3, 4 i 5 to ok. 170 €/os. Licz realnie 130–160 € w dni z atrakcjami i 90–110 € w dni luźne: nocleg, jedzenie, wstępy i paliwo."],
+  ["🚙 Własne auto: gracie inaczej", "Macie transport przez cały tydzień, więc nie musicie niczego upychać w dni z wynajmem. Konsekwencja: rozkładajcie wypady tak, żeby po każdym mocnym dniu szedł lekki. Przy ośmiu osobach to prawie na pewno dwa auta albo van — ustalcie jeden punkt zborny na każdy postój, bo dwa auta gubią się na trasie w pięć minut."],
+  ["🛣️ Dojazd z Polski", "Winiety: Czechy i Słowacja elektroniczne, Austria winieta, Słowenia e-winieta, Chorwacja płatna bramkowo (A1 Zagrzeb–Zadar to ok. 25 € za auto osobowe). Plitwice i Rastoke leżą przy trasie z Zagrzebia — zróbcie je w drodze w dół albo w powrotnej i oszczędzicie sobie cały osobny dzień oraz 240 km."],
+  ["📅 Sobota–sobota", "Pierwsza i ostatnia sobota są stracone na jazdę, więc realnie macie sześć pełnych dni. Wybierzcie z listy pięć wypadów i zostawcie jeden dzień pusty — zawsze coś wypadnie: pogoda, kac albo rejs przełożony na jutro."],
+  ["🎟️ Bilety i ceny wstępów", "Plitwice: 40 € w sezonie (po 16:00 ~25 €), limit 300 osób na godzinę na wejście — rezerwujcie online, poranne sloty schodzą tygodniami wcześniej. Krka w lipcu i sierpniu: 40 €, nie 20 € (po 15:00 — 30 €). Rejs po Kornatach: 70–110 €/os. z lunchem. Przy ósemce zawsze pytajcie o stawkę grupową."],
+  ["💸 Budżet", "Chorwacja jest w strefie euro. Same wstępy przy trzech mocnych dniach to ok. 170 €/os. Licz realnie 130–160 € w dni z atrakcjami i 90–110 € w dni luźne: nocleg, jedzenie, wstępy i paliwo. Dla ekipy ośmiu osób jeden rejs to wydatek rzędu 560–880 € — warto mieć wspólną kasę."],
+  ["🅿️ Parkowanie", "W centrum Zadaru Strefa 1 to ~2,30 €/h, obrzeża 0,40–0,80 €/h, a parking Ravnice 2 bywa poza sezonem darmowy. W Splicie w sierpniu parking to loteria. Zasada: im większe auto, tym dalej od starówki je zostawiacie."],
   ["🏊 Kąpiel w parkach", "W Skradinski Buk kąpiel jest zakazana od 2021 — chronią martwicę wapienną. Pływać można przy Roški Slap oraz w Stinicach i Pisaku, od czerwca do końca września. Planujcie mokrą część dnia tam."],
   ["🏖️ Plaże", "Wybrzeże jest kamieniste — buty do wody to nie fanaberia, tylko warunek chodzenia następnego dnia. Piach realnie tylko w Ninie, na Sakarunie i w Zatonie. Filtr 50+ obowiązkowo."],
-  ["🍽️ Jedzenie", "Peka (mięso spod żelaznego klosza) zamawia się z kilkugodzinnym wyprzedzeniem. Do tego črni rižot, ser paški sir z Pagu i rakija na koniec."],
-  ["🌬️ Wiatr", "Latem burza, która zamyka most na Pag, to rzadkość — od połowy czerwca do początku września dominuje maestral, przyjemny wiatr od morza po południu. Realne letnie ryzyko to jugo pod koniec sierpnia i neverin, czyli nagła burza znad lądu. Przed rejsem i tak sprawdźcie prognozę rano."],
-  ["📵 Praktyczne", "Power bank obowiązkowy, zdjęcia z kaca to najlepsza pamiątka. Parking w centrum Zadaru ~2,30 €/h, na obrzeżach 0,40–0,80 €/h."],
-  ["⚠️ Mandaty", "Za picie własnego alkoholu w miejscach publicznych w Zadarze grozi 300–700 €. Zakaz obejmuje starówkę, Forum, rivę i teren przy Organach Morskich. Tarasy barów i plaże klubowe są OK. Na moście na Pag policja stoi regularnie."]
+  ["🍽️ Jedzenie", "Peka (mięso spod żelaznego klosza) zamawia się z kilkugodzinnym wyprzedzeniem — przy ośmiu osobach dzwońcie rano, nie o 19:00. Do tego črni rižot, ser paški sir z Pagu i rakija na koniec. Konoba na wsi jest tańsza i lepsza niż restauracja na nabrzeżu."],
+  ["🌬️ Wiatr", "Latem bura, która zamyka most na Pag, to rzadkość — od połowy czerwca do początku września dominuje maestral, przyjemny wiatr od morza po południu. Realne letnie ryzyko to jugo pod koniec sierpnia i neverin, czyli nagła burza znad lądu. Przed rejsem i tak sprawdźcie prognozę rano."],
+  ["🍻 Strategia przetrwania", "Przy 30°C nawodnienie to nie żart — woda między drinkami, inaczej następny dzień nie istnieje. Kto pierwszy padnie, stawia kolejkę. Power bank obowiązkowy, zdjęcia z kaca to najlepsza pamiątka."],
+  ["⚠️ Mandaty", "Za picie własnego alkoholu w miejscach publicznych w Zadarze grozi 300–700 €. Zakaz obejmuje starówkę, Forum, rivę i teren przy Organach Morskich. Tarasy barów i plaże klubowe są OK. Na moście na Pag policja stoi regularnie, a trzeźwy kierowca to w Chorwacji 0,0 promila dla kierowców do 24. roku życia i 0,5 dla reszty."]
 ];
 
 const PEOPLE = [
@@ -1199,22 +1378,121 @@ function buildStats() {
     .join("");
 }
 
-function buildItinerary() {
-  document.getElementById("days").innerHTML = ITINERARY.map(d => `
-    <article class="day">
+/** Szukamy przystanku w ATTRACTIONS — stamtąd biorą się współrzędne i ikona. */
+const byName = new Map(ATTRACTIONS.map(a => [a.name, a]));
+
+/** Trasa do nawigacji: z bazy przez wszystkie przystanki i z powrotem. */
+function routeUrl(trip) {
+  const base = ATTRACTIONS.find(a => a.cat === "baza").coords;
+  const pts  = trip.stops.map(n => byName.get(n).coords);
+  const ll   = c => encodeURIComponent(`${c[0]},${c[1]}`);
+
+  const q = [
+    "api=1",
+    `origin=${ll(base)}`,
+    `destination=${ll(base)}`,   // pętla: wyjeżdżacie i wracacie do bazy
+    "travelmode=driving"
+  ];
+
+  // Google przyjmuje maksymalnie 9 punktów pośrednich
+  if (pts.length) q.push(`waypoints=${pts.slice(0, 9).map(ll).join("%7C")}`);
+
+  return `https://www.google.com/maps/dir/?${q.join("&")}`;
+}
+
+function buildTrips() {
+  document.getElementById("trips").innerHTML = TRIPS.map(t => {
+    const stops = t.stops.map((name, i) => {
+      const a = byName.get(name);
+      return `<li><span class="num">${i + 1}</span>
+                <span><b>${name}</b> <em>${driveLabel(a)}</em></span></li>`;
+    }).join("");
+
+    // Rejs i prom nie mają trasy samochodowej, więc guzik nawigacji nie ma sensu
+    const nav = t.boat ? "" :
+      `<a class="btn-route" href="${routeUrl(t)}" target="_blank" rel="noopener noreferrer">
+         🧭 Trasa w Google Maps
+       </a>`;
+
+    return `
+    <article class="trip">
       <header>
-        <h3>${d.title}</h3>
-        <span class="when">${d.when}</span>
+        <span class="vibe">${t.vibe}</span>
+        <h3>${t.title}</h3>
+        <div class="trip-meta">
+          <span>⏱ ${t.time}</span><span>🚗 ${t.km}</span><span>💪 ${t.effort}</span>
+        </div>
       </header>
       <div class="body">
-        ${d.rows.map(([k, v]) => `<p><strong>${k}:</strong> ${v}</p>`).join("")}
-        <div class="note">${d.note}</div>
+        <div class="minimap" data-trip="${t.id}"></div>
+        <ol class="stops">${stops}</ol>
+        <p>${t.why}</p>
+        <p class="combo"><strong>Co z czym:</strong> ${t.combo}</p>
+        <div class="note">${t.note}</div>
+        ${nav}
       </div>
-    </article>`).join("");
+    </article>`;
+  }).join("");
 
   document.getElementById("tips").innerHTML = TIPS
     .map(([head, body]) => `<li><strong>${head}:</strong> ${body}</li>`)
     .join("");
+}
+
+/* Minimapki startują dopiero, gdy wjadą w ekran. Dziesięć map ładowanych
+   naraz to dziesięć kompletów kafelków — na telefonie w roamingu zabójstwo. */
+function buildMiniMaps() {
+  const base = ATTRACTIONS.find(a => a.cat === "baza");
+
+  const init = box => {
+    const trip = TRIPS.find(t => t.id === box.dataset.trip);
+
+    const mini = L.map(box, {
+      zoomControl: false, attributionControl: false,
+      dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
+      boxZoom: false, keyboard: false, touchZoom: false, tap: false
+    });
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 16 }).addTo(mini);
+
+    const pts = trip.stops.map(n => byName.get(n).coords);
+
+    // Baza zawsze widoczna, żeby było wiadomo, jak daleko to jest
+    L.marker(base.coords, { icon: L.divIcon({
+      className: "", iconSize: [22, 22], iconAnchor: [11, 11],
+      html: `<div class="mini-pin mini-base">🏨</div>`
+    }) }).addTo(mini);
+
+    pts.forEach((c, i) => {
+      L.marker(c, { icon: L.divIcon({
+        className: "", iconSize: [22, 22], iconAnchor: [11, 11],
+        html: `<div class="mini-pin">${i + 1}</div>`
+      }) }).addTo(mini);
+    });
+
+    if (pts.length > 1) {
+      L.polyline(pts, { color: "#ef476f", weight: 3, opacity: .75, dashArray: "6 5" }).addTo(mini);
+    }
+
+    mini.fitBounds([base.coords, ...pts], { padding: [26, 26] });
+  };
+
+  const boxes = document.querySelectorAll(".minimap");
+
+  if (!("IntersectionObserver" in window)) {
+    boxes.forEach(init);
+    return;
+  }
+
+  const io = new IntersectionObserver((entries, obs) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      obs.unobserve(e.target);   // każda mapa tworzona dokładnie raz
+      init(e.target);
+    });
+  }, { rootMargin: "200px" });
+
+  boxes.forEach(b => io.observe(b));
 }
 
 /* =========================================================================
@@ -1502,7 +1780,8 @@ function runLoader(onDone) {
 document.addEventListener("DOMContentLoaded", () => {
   buildLegend();
   buildStats();
-  buildItinerary();
+  buildTrips();
+  buildMiniMaps();
 
   const { map, render } = buildMap();
 
