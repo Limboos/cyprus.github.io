@@ -489,6 +489,27 @@ section { padding-block: clamp(1.75rem, 6vw, 3rem); }
 .stops b { color: var(--sea-800); font-weight: 600; }
 .stops em { display: block; font-style: normal; font-size: .78rem; color: var(--muted); }
 
+.reads-flat { list-style: none; display: grid; gap: .5rem; font-size: .88rem; }
+.reads-flat li { padding-left: 1rem; position: relative; }
+.reads-flat li::before { content: "↗"; position: absolute; left: 0; color: var(--muted); }
+.reads-flat a { color: var(--sea-700); text-decoration: underline; text-underline-offset: 2px; }
+.reads-flat a:hover { color: var(--coral); }
+
+.reads { margin-top: .85rem; font-size: .84rem; }
+.reads summary {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  color: var(--sea-500);
+  font-weight: 700;
+  cursor: pointer;
+}
+.reads ul { margin: .4rem 0 0 .2rem; list-style: none; display: grid; gap: .35rem; }
+.reads li { padding-left: .9rem; position: relative; }
+.reads li::before { content: "↗"; position: absolute; left: 0; color: var(--muted); }
+.reads a { color: var(--sea-700); text-decoration: underline; text-underline-offset: 2px; }
+.reads a:hover { color: var(--coral); }
+
 .btn-route {
   display: block;
   margin-top: 1rem;
@@ -613,6 +634,12 @@ section { padding-block: clamp(1.75rem, 6vw, 3rem); }
   top: 50%;
   left: 50%;
   width: 50%;              /* od środka do krawędzi = promień */
+  /* Znana wysokość + ujemny margines wsuwają pionowy środek etykiety dokładnie
+     na środek koła. Bez tego `top:50%` stawiał tam GÓRNĄ krawędź, więc
+     transform-origin wypadał o pół wysokości napisu NIŻEJ i wszystkie etykiety
+     obracały się wokół punktu obok osi koła — stąd krzywe napisy. */
+  height: 2em;
+  margin-top: -1em;
   transform-origin: 0 50%;
   display: flex;
   align-items: center;
@@ -842,6 +869,15 @@ footer {
       <div class="panel tips">
         <h3 style="color:var(--sea-700);margin-bottom:.75rem">💡 Wskazówki praktyczne</h3>
         <ul id="tips"></ul>
+      </div>
+
+      <div class="panel tips">
+        <h3 style="color:var(--sea-700);margin-bottom:.75rem">📚 Blogi o całej Chorwacji</h3>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:.75rem">
+          Zestawienia ogólne — dobre, gdy chcecie dorzucić coś poza zasięgiem bazy
+          albo zaplanować postoje po drodze.
+        </p>
+        <ul class="reads-flat" id="sources"></ul>
       </div>
     </div>
   </section>
@@ -1099,6 +1135,16 @@ const ATTRACTIONS = [
     link: "https://pl.wikipedia.org/wiki/Vara%C5%BEdin" }
 ];
 
+/* Zestawienia obejmujące cały kraj — pod sekcją wskazówek, nie w kartach. */
+const SOURCES = [
+  ["Bartek w podróży — TOP 19 atrakcji Chorwacji", "https://bartekwpodrozy.pl/najlepsze-atrakcje-chorwacji-top-19-miejsc-ktore-polecam/"],
+  ["CzechTheWorld — 45 miejsc z mapą", "https://czechtheworld.com/chorwacja-atrakcje-co-zobaczyc-mapa-2/"],
+  ["Balkany.pl — wycieczki z Zadaru i okolic", "https://balkany.pl/10-propozycji-najlepszych-wycieczek-w-zadarze-i-okolicach/"],
+  ["Mana w podróży — Zadar i okolice na 7–10 dni", "https://manawpodrozy.pl/zadar-i-okolice-co-zobaczyc/"],
+  ["Chorwacja Autem — blog o zwiedzaniu autem", "https://chorwacjaautem.pl/"],
+  ["Travellikeagirl — Chorwacja regionami", "https://travellikeagirl.pl/zadar-i-okolice-co-zobaczyc/"]
+];
+
 /* Nie plan, tylko menu. Wybierzcie 5–6 pozycji na tydzień, resztę zostawcie
    na leżak. `stops` odwołuje się do nazw z ATTRACTIONS — stąd minimapki i trasa. */
 const TRIPS = [
@@ -1112,7 +1158,12 @@ const TRIPS = [
     stops: ["Zadar — Stare Miasto", "Organy Morskie (Zadar)", "Pozdrav Suncu (Zadar)"],
     why: "Starówka mieści się na półwyspie i obchodzi się ją w godzinę: Forum, kościół św. Donata, marmurowa Kalelarga. Cała sztuka polega na timingu — bądźcie na nabrzeżu 40 minut przed zachodem. Organy Morskie grają same, napędzane falą, a Pozdrav Suncu zapala się dokładnie wtedy, gdy słońce znika. Hitchcock nazwał ten zachód najpiękniejszym na świecie i akurat tego jednego nie wymyślili marketingowcy.",
     combo: "Doklejcie do dowolnego dnia, w którym wracacie z trasy przed 19:00.",
-    note: "Zostawcie auto poza centrum — parking na obrzeżach 0,40–0,80 €/h zamiast 2,30 €/h w Strefie 1. Uwaga na własny alkohol: na starówce, Forum i przy Organach mandat to 300–700 €. Tarasy barów są legalne."
+    note: "Zostawcie auto poza centrum — parking na obrzeżach 0,40–0,80 €/h zamiast 2,30 €/h w Strefie 1. Uwaga na własny alkohol: na starówce, Forum i przy Organach mandat to 300–700 €. Tarasy barów są legalne.",
+    links: [
+      ["Travellikeagirl — Zadar i okolice", "https://travellikeagirl.pl/zadar-i-okolice-co-zobaczyc/"],
+      ["Chorwacja Autem — Organy i Pozdrowienie Słońca", "https://chorwacjaautem.pl/miasta/zadar/zadar-morskie-organy-i-pozdrowienie-slonca-co-zobaczyc-atrakcje-plaze/"],
+      ["Mana w podróży — plan na Zadar", "https://manawpodrozy.pl/zadar-i-okolice-co-zobaczyc/"]
+    ]
   },
   {
     id: "pag",
@@ -1124,7 +1175,11 @@ const TRIPS = [
     stops: ["Nin — Plaża Królowej", "Pag — miasto i krajobraz księżycowy", "Zrće (Novalja, Pag)"],
     why: "Trzy zupełnie różne krajobrazy na jednej trasie na północ. Nin to 3 km piachu i płycizny — jedyne takie miejsce w okolicy, bo reszta wybrzeża jest kamienista. Potem most na Pag i wjeżdżacie w pustkowie wyżarte przez wiatr, wyglądające jak zdjęcia z Księżyca. Miasto Pag da wam ser paški sir i koronki, a wieczorem 20 minut dalej jest Zrće: Papaya, Kalypso, Aquarius, Nomad, do tego nowe Symbol i Lift. Kluby ruszają koło południa i grają do rana.",
     combo: "Nin sam w sobie to za mało na dzień — dlatego siedzi tu, po drodze. Kto nie chce klubów, może wracać z Pagu po kolacji.",
-    note: "Kluczowa sprawa przy ośmiu osobach: ustalcie trzeźwego kierowcę RANO, nie o północy. Na moście na Pag policja stoi regularnie. Alternatywa to nocleg w Novalji albo taksówka, ale w szczycie sezonu o czwartej nad ranem konkurencja o transport jest ostra."
+    note: "Kluczowa sprawa przy ośmiu osobach: ustalcie trzeźwego kierowcę RANO, nie o północy. Na moście na Pag policja stoi regularnie. Alternatywa to nocleg w Novalji albo taksówka, ale w szczycie sezonu o czwartej nad ranem konkurencja o transport jest ostra.",
+    links: [
+      ["Chorwacja Autem — wyspa Pag, plaże i most", "https://chorwacjaautem.pl/regiony/wyspy/wyspa-pag/wyspa-pag-fajne-plaze-dojazd-mostem/"],
+      ["zrce.de — kluby na Zrće w sezonie 2026", "https://www.zrce.de/en/clubs/"]
+    ]
   },
   {
     id: "krka",
@@ -1136,7 +1191,11 @@ const TRIPS = [
     stops: ["Skradin", "Skradinski Buk (NP Krka)", "Roški Slap (NP Krka)", "Katedra św. Jakuba (Šibenik)", "Twierdza św. Michała (Šibenik)"],
     why: "Większość wjeżdża do Krki od Lozovaca, autobusem w dół. Wjedźcie od Skradinu — zostawiacie auto w miasteczku i podpływacie pod wodospad parkową łódką, co jest po prostu ładniejszym wejściem. Skradinski Buk to 17 progów wodnych jeden nad drugim. Potem Roški Slap: mniej ludzi, stare młyny wodne i, co najważniejsze, jedyne miejsce w parku gdzie wolno wejść do wody. Na koniec Šibenik z katedrą złożoną z samego kamienia, bez grama zaprawy, i fryzem z 71 twarzami mieszkańców z XV wieku.",
     combo: "Šibenik jest 20 minut od wyjazdu z parku, więc wchodzi w ten sam dzień bez wysiłku. Twierdza św. Michała bywa wieczorem sceną koncertową — sprawdźcie repertuar, bo widok z niej o zmierzchu jest lepszy niż w dzień.",
-    note: "Bilet w lipcu i sierpniu: 40 € dorosły, po 15:00 — 30 €. To 320 € za ósemkę, więc policzcie to wcześniej. W Skradinski Buk kąpiel jest ZAKAZANA od 2021 — kąpielówki zakładacie dopiero przy Roški Slap (czerwiec–wrzesień, wyznaczone miejsca)."
+    note: "Bilet w lipcu i sierpniu: 40 € dorosły, po 15:00 — 30 €. To 320 € za ósemkę, więc policzcie to wcześniej. W Skradinski Buk kąpiel jest ZAKAZANA od 2021 — kąpielówki zakładacie dopiero przy Roški Slap (czerwiec–wrzesień, wyznaczone miejsca).",
+    links: [
+      ["The Travel Tinker — Krka 2026: ceny i trasy", "https://thetraveltinker.com/travel-guide-croatia/krka-national-park/"],
+      ["NP Krka — oficjalny cennik 2026 (PDF)", "https://www.npkrka.hr/wp-content/uploads/CJENIK-2026-ENG.pdf"]
+    ]
   },
   {
     id: "plitwice",
@@ -1148,7 +1207,11 @@ const TRIPS = [
     stops: ["Jeziora Plitwickie", "Wodospady Rastoke (Slunj)"],
     why: "16 jezior spiętych kaskadami, drewniane kładki prowadzone tuż nad wodą, elektryczna łódka przez jezioro Kozjak. UNESCO i najbardziej oblegane miejsce w kraju. Rastoke to bonus 30 minut dalej: wioska dosłownie zbudowana na wodospadach, domy stoją nad kaskadami.",
     combo: "Skoro jedziecie autem z Polski, to jest wasz największy zysk czasowy: Plitwice i Rastoke leżą przy trasie ze Zgrzebia na wybrzeże. Zróbcie je w sobotę po drodze w dół albo w drodze powrotnej, zamiast tracić na to osobny dzień z bazy i nadkładać 240 km w dwie strony.",
-    note: "40 € w sezonie, po 16:00 około 25 €. Limit 300 osób na godzinę na wejście, a poranne sloty schodzą tygodniami wcześniej — rezerwacja online obowiązkowa, nie ma opcji kupienia w bramie w sierpniu. Wejście 2 jest krótsze i mniej zatłoczone niż Wejście 1."
+    note: "40 € w sezonie, po 16:00 około 25 €. Limit 300 osób na godzinę na wejście, a poranne sloty schodzą tygodniami wcześniej — rezerwacja online obowiązkowa, nie ma opcji kupienia w bramie w sierpniu. Wejście 2 jest krótsze i mniej zatłoczone niż Wejście 1.",
+    links: [
+      ["nativeCROATIA — bilety Plitwice 2026", "https://www.nativecroatia.com/articles/plitvice-lakes-ticket-prices-2026"],
+      ["Oficjalna strona parku — rezerwacja wejść", "https://www.np-plitvicka-jezera.hr/"]
+    ]
   },
   {
     id: "kornati",
@@ -1161,7 +1224,11 @@ const TRIPS = [
     stops: ["Park Narodowy Kornati", "Telašćica (Dugi otok)"],
     why: "89 wysp i gołych skał rozsypanych po pustkowiu Adriatyku — krajobraz, którego nie zobaczycie z lądu w żadnej wersji. Rejs przecina archipelag, staje na kąpiel w zatoczkach, a po lunchu wchodzi w Telašćicę: 160-metrowe klify od strony otwartego morza i ciepłe słone jezioro Mir tuż za nimi. Na miejscu jest jeszcze przytulisko dla osłów, co po czterech piwach bawi bardziej niż powinno.",
     combo: "Jedyny dzień, w którym auto stoi pod domem — dobra pozycja na dzień po Zrće. Wypłynięcie z Zadaru albo z Biogradu, oba porty w zasięgu.",
-    note: "70–110 € od osoby z lunchem, czyli 560–880 € za ekipę — rezerwujcie dzień wcześniej i pytajcie o zniżkę grupową przy ośmiu osobach. Sakarun to OSOBNA wycieczka, nie wciśniecie go w ten rejs. Na łodzi nie ma cienia: filtr 50+ i woda, bo inaczej wieczór odpada."
+    note: "70–110 € od osoby z lunchem, czyli 560–880 € za ekipę — rezerwujcie dzień wcześniej i pytajcie o zniżkę grupową przy ośmiu osobach. Sakarun to OSOBNA wycieczka, nie wciśniecie go w ten rejs. Na łodzi nie ma cienia: filtr 50+ i woda, bo inaczej wieczór odpada.",
+    links: [
+      ["Balkany.pl — najlepsze wycieczki z Zadaru", "https://balkany.pl/10-propozycji-najlepszych-wycieczek-w-zadarze-i-okolicach/"],
+      ["Mana w podróży — rejsy i Kornaty", "https://manawpodrozy.pl/zadar-i-okolice-co-zobaczyc/"]
+    ]
   },
   {
     id: "velebit",
@@ -1173,7 +1240,12 @@ const TRIPS = [
     stops: ["Park Narodowy Paklenica", "Jaskinie Cerovačke"],
     why: "Paklenica to dwa kaniony wcięte pionowo w Velebit — Velika i Mala. Ściany po 400 metrów, po nich wiszą wspinacze, a dnem idzie szlak, który da się skroić na każdy poziom kondycji: od godzinnego spaceru do Anića Luki po całodniowe wejścia. Jaskinie Cerovačke to największy system jaskiniowy w Chorwacji i 8 stopni w środku, co przy czterdziestce na zewnątrz jest głównym argumentem.",
     combo: "Idealna kolejność: kanion rano, póki chłodno, jaskinie w największy upał. Odwrotnie to męczarnia.",
-    note: "Do jaskiń weźcie bluzy — serio, 8°C po godzinie w kanionie to szok. Buty z podeszwą, bo w Paklenicy jest kamień, nie ścieżka spacerowa."
+    note: "Do jaskiń weźcie bluzy — serio, 8°C po godzinie w kanionie to szok. Buty z podeszwą, bo w Paklenicy jest kamień, nie ścieżka spacerowa.",
+    links: [
+      ["Górskie Wyrypy — kanion Velika Paklenica", "https://gorskiewyrypy.pl/kanion-velika-paklenica-welebit/"],
+      ["Plan na Wypad — Paklenica: szlaki i atrakcje", "https://plannawypad.pl/paklenica-chorwacja-zwiedzanie-szlaki-atrakcje/"],
+      ["Travelers.pl — kaniony, jaskinie, szlaki", "https://travelers.pl/paklenica"]
+    ]
   },
   {
     id: "zrmanja",
@@ -1185,7 +1257,11 @@ const TRIPS = [
     stops: ["Kanion Zrmanji — rafting i kajaki"],
     why: "Turkusowa rzeka wcięta w kanion pod Obrovacem, z kaskadami po drodze i wodą tak przejrzystą, że widać dno na trzech metrach. Spływ jest dla początkujących — nikt nie musi umieć nic poza pływaniem. Kręcono tu sceny do filmów o Winnetou, co widać po skałach. Dla ekipy, która całą resztę tygodnia spędzi na leżaku i w barze, to jedyna aktywność, o której będziecie gadać w listopadzie.",
     combo: "Zajmuje pół dnia plus dojazd, więc reszta dnia zostaje wolna. Obrovac jest po drodze na Pag, gdyby ktoś chciał złożyć to z wieczorem na Zrće.",
-    note: "55–65 € od osoby ze sprzętem, przewodnikiem i ubezpieczeniem. Przy ośmiu osobach rezerwujcie z wyprzedzeniem, bo grupy schodzą. Operatorzy dowożą z Zadaru za dodatkowe ~30 €/os., ale skoro macie auto, dojedźcie sami do Kaštel Žegarski."
+    note: "55–65 € od osoby ze sprzętem, przewodnikiem i ubezpieczeniem. Przy ośmiu osobach rezerwujcie z wyprzedzeniem, bo grupy schodzą. Operatorzy dowożą z Zadaru za dodatkowe ~30 €/os., ale skoro macie auto, dojedźcie sami do Kaštel Žegarski.",
+    links: [
+      ["Raftrek — spływy Zrmanją", "https://raftrek.com/tour/kayaking-zrmanja-river/"],
+      ["Balkany.pl — kanion Zrmanji w zestawieniu wycieczek", "https://balkany.pl/10-propozycji-najlepszych-wycieczek-w-zadarze-i-okolicach/"]
+    ]
   },
   {
     id: "dugiotok",
@@ -1198,7 +1274,12 @@ const TRIPS = [
     stops: ["Plaża Sakarun (Dugi otok)", "Telašćica (Dugi otok)"],
     why: "Sakarun to biały piasek i turkusowa płycizna ciągnąca się kilkadziesiąt metrów w morze — najbliższa karaibskiej pocztówce rzecz w Chorwacji i zupełnie inna liga niż kamieniste plaże pod Zadarem. Wyspa jest długa i pusta, więc z autem dojedziecie też na południowy kraniec, do Telašćicy od strony lądu.",
     combo: "Alternatywa dla rejsu na Kornaty, nie dodatek — obie opcje pokazują Telašćicę. Wybierzcie rejs, jeśli chcecie archipelag i lunch w cenie; wybierzcie prom, jeśli chcecie leżeć na piachu i mieć swoje tempo.",
-    note: "Prom z Zadaru do Brbinja, auto płatne według długości — przy vanie sprawdźcie cennik Jadrolinii wcześniej. Ostatni powrót jest wcześnie, więc zapiszcie sobie godzinę zanim otworzycie pierwsze piwo na plaży."
+    note: "Prom z Zadaru do Brbinja, auto płatne według długości — przy vanie sprawdźcie cennik Jadrolinii wcześniej. Ostatni powrót jest wcześnie, więc zapiszcie sobie godzinę zanim otworzycie pierwsze piwo na plaży.",
+    links: [
+      ["Nasze Podróże — przewodnik po Dugi otok", "https://naszepodroze.edu.pl/dugi-otok-krotki-przewodnik-po-dlugiej-wyspie/"],
+      ["Turistos — Sakarun, chorwackie Malediwy", "https://turistos.pl/sakarun-chorwackie-malediwy-najpiekniejsza-plaza-na-wyspie-dugi-otok/"],
+      ["NaWakacje.eu — atrakcje i plaże wyspy", "https://nawakacje.eu/dugi-otok-atrakcje/"]
+    ]
   },
   {
     id: "split",
@@ -1210,7 +1291,12 @@ const TRIPS = [
     stops: ["Trogir — Stare Miasto", "Pałac Dioklecjana (Split)", "Katedra św. Domniusa", "Riva (Split)", "Plaża Bačvice"],
     why: "Pałac Dioklecjana to nie muzeum za szybą, tylko żywe centrum miasta — w rzymskich murach z IV wieku siedzą bary, sklepy i mieszkania. Katedra św. Domniusa jest najstarszą używaną katedrą świata, a wejście na dzwonnicę daje widok na cały Split. Trogir leży dokładnie po drodze, 30 minut wcześniej: cała starówka na własnej wysepce, też UNESCO.",
     combo: "Trogir robicie w drodze do Splitu, nie z powrotem — o poranku jest pusty, po południu wchodzą wycieczki. Wieczór kończycie na Rivie albo na Bačvicach, gdzie plaża po zmroku zmienia się w strefę barów.",
-    note: "Najdłuższy wyjazd z listy i jedyny, przy którym 1,5 h w jedną stronę robi różnicę. Parking w Splicie w sierpniu to loteria — celujcie w parkingi przy Zachodnim Wybrzeżu albo zostawcie auto w Trogirze i dojedźcie autobusem."
+    note: "Najdłuższy wyjazd z listy i jedyny, przy którym 1,5 h w jedną stronę robi różnicę. Parking w Splicie w sierpniu to loteria — celujcie w parkingi przy Zachodnim Wybrzeżu albo zostawcie auto w Trogirze i dojedźcie autobusem.",
+    links: [
+      ["Podróże po Europie — Split: co zobaczyć", "https://www.podrozepoeuropie.pl/split-zwiedzanie/"],
+      ["Podróże po Europie — Pałac Dioklecjana", "https://www.podrozepoeuropie.pl/palac-dioklecjana-split/"],
+      ["Travellikeagirl — Split i okolice", "https://travellikeagirl.pl/split-i-okolice-co-zobaczyc-przewodnik-po-atrakcjach/"]
+    ]
   },
   {
     id: "leniwy",
@@ -1222,7 +1308,11 @@ const TRIPS = [
     stops: ["Plaża Zaton i Sukošan", "Jezioro Vransko", "Biograd na Moru", "Wyspy Ugljan i Pašman"],
     why: "Po Zrće albo po Paklenicy ktoś w ekipie i tak padnie, więc lepiej mieć to zaplanowane niż improwizować. Zaton to najbliższe porządne kąpielisko z łagodnym zejściem i barami. Vransko to największe naturalne jezioro w kraju, rezerwat ptaków tuż przy morzu, płaskie trasy rowerowe i taras widokowy Kamenjak. Ugljan jest 25 minut promem — rowery, puste zatoczki i konoby bez turystów.",
     combo: "Cztery warianty na jeden dzień: wybierzcie jeden zależnie od tego, ilu ludzi wstało. Biograd to też drugi port, z którego wypływają rejsy na Kornaty.",
-    note: "Wybrzeże jest kamieniste — buty do wody to warunek chodzenia następnego dnia, nie fanaberia. Piach realnie tylko w Ninie, na Sakarunie i częściowo w Zatonie."
+    note: "Wybrzeże jest kamieniste — buty do wody to warunek chodzenia następnego dnia, nie fanaberia. Piach realnie tylko w Ninie, na Sakarunie i częściowo w Zatonie.",
+    links: [
+      ["Mana w podróży — Vransko, Biograd, Ugljan", "https://manawpodrozy.pl/zadar-i-okolice-co-zobaczyc/"],
+      ["Balkany.pl — lekkie wypady z Zadaru", "https://balkany.pl/10-propozycji-najlepszych-wycieczek-w-zadarze-i-okolicach/"]
+    ]
   }
 ];
 const TIPS = [
@@ -1408,6 +1498,9 @@ function buildTrips() {
                 <span><b>${name}</b> <em>${driveLabel(a)}</em></span></li>`;
     }).join("");
 
+    const reads = (t.links || []).map(([label, url]) =>
+      `<li><a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a></li>`).join("");
+
     // Rejs i prom nie mają trasy samochodowej, więc guzik nawigacji nie ma sensu
     const nav = t.boat ? "" :
       `<a class="btn-route" href="${routeUrl(t)}" target="_blank" rel="noopener noreferrer">
@@ -1429,6 +1522,10 @@ function buildTrips() {
         <p>${t.why}</p>
         <p class="combo"><strong>Co z czym:</strong> ${t.combo}</p>
         <div class="note">${t.note}</div>
+        <details class="reads">
+          <summary>Poczytaj przed wyjazdem (${(t.links || []).length})</summary>
+          <ul>${reads}</ul>
+        </details>
         ${nav}
       </div>
     </article>`;
@@ -1436,6 +1533,11 @@ function buildTrips() {
 
   document.getElementById("tips").innerHTML = TIPS
     .map(([head, body]) => `<li><strong>${head}:</strong> ${body}</li>`)
+    .join("");
+
+  document.getElementById("sources").innerHTML = SOURCES
+    .map(([label, url]) =>
+      `<li><a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a></li>`)
     .join("");
 }
 
