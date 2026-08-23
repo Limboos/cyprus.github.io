@@ -242,6 +242,16 @@ section { padding-block: clamp(1.75rem, 6vw, 3rem); }
   color: var(--sea-500);
 }
 .pop .drive.far { color: var(--coral); }
+/* Miejsca rozniesione przez Instagram i TikToka: ładne, ale o 13:00 stoi tam kolejka. */
+.pop .viral {
+  margin: 0 0 .45rem;
+  padding: .3rem .5rem;
+  border-radius: 8px;
+  background: rgba(157, 78, 221, .12);
+  color: #6d28a8;
+  font-size: .76rem;
+  font-weight: 700;
+}
 
 /* Marker */
 .pin {
@@ -998,6 +1008,19 @@ const ATTRACTIONS = [
   { name: "Biograd na Moru", cat: "klimat", coords: [43.9400, 15.4500], h: 0.5,
     desc: "Dawna stolica królów chorwackich, dziś marina i drugi port, z którego wypływają rejsy na Kornaty.",
     link: "https://pl.wikipedia.org/wiki/Biograd_na_Moru" },
+  { name: "Ručica i Beritnica (Metajna, Pag)", cat: "plaza", coords: [44.5009, 15.0206], h: 1.4, viral: true,
+    desc: "Księżycowe plaże na północy Pagu — szlak nazywa się dosłownie Life on Mars Trail. Do Ručicy szutrówką z Metajny, do Beritnicy dalej pieszo po skałach.",
+    link: "https://crolove.pl/plaza-rucica-w-metajnej-na-wyspie-pag/" },
+  { name: "Kudin most i kanion Krupy", cat: "woda", coords: [44.1908, 15.8224], h: 1.1, viral: true,
+    desc: "Kamienny most nad dziewięcioma kaskadami Krupy, dopływu Zrmanji. Szlak 1,5 km i ok. 170 m przewyższenia, 45 min w jedną stronę. Parking i kasa przy ostatnim domu w Golubiciu.",
+    link: "https://www.klubpodroznikow.com/most-kudin-kanion-rzeki-krupa/" },
+  { name: "Zavratnica (Jablanac)", cat: "natura", coords: [44.6958, 14.9100], h: 1.6, viral: true,
+    desc: "900-metrowa wąska zatoka pod Velebitem, wygląda jak norweski fiord. Wstęp 5 €/os., dojście z Jablanaca ok. 30 min płaską ścieżką. Na dnie zatoki wrak z II wojny.",
+    link: "https://mynaszlaku.pl/uvala-zavratnica-zatoka-w-jablanac/" },
+  { name: "Izvor Cetine — Oko Ziemi", cat: "woda", coords: [43.9769, 16.4299], h: 2, viral: true,
+    desc: "Krasowe źródło jak cenote, sława wyłącznie z ujęć dronem — z ziemi robi dużo mniejsze wrażenie. Parking na 3–4 auta, zero infrastruktury: bez knajpy, bez wody.",
+    link: "https://www.weseektravel.com/cetina-river-spring-croatia/" },
+
   { name: "Jezioro Vransko", cat: "natura", coords: [43.9050, 15.5600], h: 0.5,
     desc: "Największe naturalne jezioro Chorwacji, rezerwat ptaków tuż przy morzu. Rowery i taras widokowy Kamenjak.",
     link: "https://pl.wikipedia.org/wiki/Vransko_jezero" },
@@ -1142,7 +1165,8 @@ const SOURCES = [
   ["Balkany.pl — wycieczki z Zadaru i okolic", "https://balkany.pl/10-propozycji-najlepszych-wycieczek-w-zadarze-i-okolicach/"],
   ["Mana w podróży — Zadar i okolice na 7–10 dni", "https://manawpodrozy.pl/zadar-i-okolice-co-zobaczyc/"],
   ["Chorwacja Autem — blog o zwiedzaniu autem", "https://chorwacjaautem.pl/"],
-  ["Travellikeagirl — Chorwacja regionami", "https://travellikeagirl.pl/zadar-i-okolice-co-zobaczyc/"]
+  ["Travellikeagirl — Chorwacja regionami", "https://travellikeagirl.pl/zadar-i-okolice-co-zobaczyc/"],
+  ["Total Croatia — jak TikTok zalewa chorwackie plaże", "https://total-croatia-news.com/news/croatia-s-hidden-beaches/"]
 ];
 
 /* Nie plan, tylko menu. Wybierzcie 5–6 pozycji na tydzień, resztę zostawcie
@@ -1172,13 +1196,16 @@ const TRIPS = [
     time: "cały dzień + noc",
     km: "~190 km w pętli",
     effort: "łatwe",
-    stops: ["Nin — Plaża Królowej", "Pag — miasto i krajobraz księżycowy", "Zrće (Novalja, Pag)"],
-    why: "Trzy zupełnie różne krajobrazy na jednej trasie na północ. Nin to 3 km piachu i płycizny — jedyne takie miejsce w okolicy, bo reszta wybrzeża jest kamienista. Potem most na Pag i wjeżdżacie w pustkowie wyżarte przez wiatr, wyglądające jak zdjęcia z Księżyca. Miasto Pag da wam ser paški sir i koronki, a wieczorem 20 minut dalej jest Zrće: Papaya, Kalypso, Aquarius, Nomad, do tego nowe Symbol i Lift. Kluby ruszają koło południa i grają do rana.",
-    combo: "Nin sam w sobie to za mało na dzień — dlatego siedzi tu, po drodze. Kto nie chce klubów, może wracać z Pagu po kolacji.",
+    stops: ["Nin — Plaża Królowej", "Pag — miasto i krajobraz księżycowy", "Ručica i Beritnica (Metajna, Pag)", "Zrće (Novalja, Pag)"],
+    why: "Trzy zupełnie różne krajobrazy na jednej trasie na północ. Nin to 3 km piachu i płycizny — jedyne takie miejsce w okolicy, bo reszta wybrzeża jest kamienista. Potem most na Pag i wjeżdżacie w pustkowie wyżarte przez wiatr, wyglądające jak zdjęcia z Księżyca. Miasto Pag da wam ser paški sir i koronki, a wieczorem 20 minut dalej jest Zrće: Papaya, Kalypso, Aquarius, Nomad, do tego nowe Symbol i Lift. Kluby ruszają koło południa i grają do rana. Po drodze wpada jeszcze Ručica pod Metajną, gdzie szlak nazywa się Life on Mars Trail i wygląda dokładnie tak, jak brzmi — to najczęściej fotografowany kawałek Pagu.",
+    combo: "Nin sam w sobie to za mało na dzień — dlatego siedzi tu, po drodze. Ručicę robicie przed 11:00, zanim zjadą się dronowcy. Kto nie chce klubów, może wracać z Pagu po kolacji.",
     note: "Kluczowa sprawa przy ośmiu osobach: ustalcie trzeźwego kierowcę RANO, nie o północy. Na moście na Pag policja stoi regularnie. Alternatywa to nocleg w Novalji albo taksówka, ale w szczycie sezonu o czwartej nad ranem konkurencja o transport jest ostra.",
     links: [
       ["Chorwacja Autem — wyspa Pag, plaże i most", "https://chorwacjaautem.pl/regiony/wyspy/wyspa-pag/wyspa-pag-fajne-plaze-dojazd-mostem/"],
-      ["zrce.de — kluby na Zrće w sezonie 2026", "https://www.zrce.de/en/clubs/"]
+      ["zrce.de — kluby na Zrće w sezonie 2026", "https://www.zrce.de/en/clubs/"],
+      ["CroLove — plaża Ručica w Metajnej", "https://crolove.pl/plaza-rucica-w-metajnej-na-wyspie-pag/"],
+      ["CroLove — plaża Beritnica", "https://crolove.pl/plaza-beritnica-w-metajnej-na-wyspie-pag/"],
+      ["AtrakcjeChorwacji — jak trafić na Beritnicę", "https://atrakcjechorwacji.pl/plaza-beritnica-w-metajna-co-oferuje-jak-na-nia-trafic-jak-dojechac/"]
     ]
   },
   {
@@ -1237,14 +1264,17 @@ const TRIPS = [
     time: "cały dzień",
     km: "~150 km",
     effort: "wymagające",
-    stops: ["Park Narodowy Paklenica", "Jaskinie Cerovačke"],
+    stops: ["Park Narodowy Paklenica", "Jaskinie Cerovačke", "Zavratnica (Jablanac)"],
     why: "Paklenica to dwa kaniony wcięte pionowo w Velebit — Velika i Mala. Ściany po 400 metrów, po nich wiszą wspinacze, a dnem idzie szlak, który da się skroić na każdy poziom kondycji: od godzinnego spaceru do Anića Luki po całodniowe wejścia. Jaskinie Cerovačke to największy system jaskiniowy w Chorwacji i 8 stopni w środku, co przy czterdziestce na zewnątrz jest głównym argumentem.",
-    combo: "Idealna kolejność: kanion rano, póki chłodno, jaskinie w największy upał. Odwrotnie to męczarnia.",
+    combo: "Idealna kolejność: kanion rano, póki chłodno, jaskinie w największy upał, a na koniec Zavratnica — 900-metrowa zatoka pod Velebitem wyglądająca jak norweski fiord, ulubieniec dronów. Odwrotnie to męczarnia.",
     note: "Do jaskiń weźcie bluzy — serio, 8°C po godzinie w kanionie to szok. Buty z podeszwą, bo w Paklenicy jest kamień, nie ścieżka spacerowa.",
     links: [
       ["Górskie Wyrypy — kanion Velika Paklenica", "https://gorskiewyrypy.pl/kanion-velika-paklenica-welebit/"],
       ["Plan na Wypad — Paklenica: szlaki i atrakcje", "https://plannawypad.pl/paklenica-chorwacja-zwiedzanie-szlaki-atrakcje/"],
-      ["Travelers.pl — kaniony, jaskinie, szlaki", "https://travelers.pl/paklenica"]
+      ["Travelers.pl — kaniony, jaskinie, szlaki", "https://travelers.pl/paklenica"],
+      ["Mynaszlaku — zatoka Zavratnica", "https://mynaszlaku.pl/uvala-zavratnica-zatoka-w-jablanac/"],
+      ["Podróże dla każdego — Zavratnica i wrak", "https://podrozedlakazdego.pl/zatoka-zavratnica-i-pamiatka-z-ii-wojny-swiatowej/"],
+      ["Croatia Week — Zavratnica z drona (wideo)", "https://www.croatiaweek.com/video-beautiful-drone-footage-of-one-of-croatias-gems-zavratnica/"]
     ]
   },
   {
@@ -1254,13 +1284,14 @@ const TRIPS = [
     time: "5–7 h",
     km: "~110 km",
     effort: "średnie",
-    stops: ["Kanion Zrmanji — rafting i kajaki"],
+    stops: ["Kanion Zrmanji — rafting i kajaki", "Kudin most i kanion Krupy"],
     why: "Turkusowa rzeka wcięta w kanion pod Obrovacem, z kaskadami po drodze i wodą tak przejrzystą, że widać dno na trzech metrach. Spływ jest dla początkujących — nikt nie musi umieć nic poza pływaniem. Kręcono tu sceny do filmów o Winnetou, co widać po skałach. Dla ekipy, która całą resztę tygodnia spędzi na leżaku i w barze, to jedyna aktywność, o której będziecie gadać w listopadzie.",
-    combo: "Zajmuje pół dnia plus dojazd, więc reszta dnia zostaje wolna. Obrovac jest po drodze na Pag, gdyby ktoś chciał złożyć to z wieczorem na Zrće.",
+    combo: "Spływ zajmuje pół dnia, więc po nim wpada Kudin most na Krupie — dopływie Zrmanji, kilkanaście minut dalej. Kamienny most nad dziewięcioma kaskadami, szlak 1,5 km w jedną stronę. Obrovac jest też po drodze na Pag, gdyby ktoś chciał złożyć to z wieczorem na Zrće.",
     note: "55–65 € od osoby ze sprzętem, przewodnikiem i ubezpieczeniem. Przy ośmiu osobach rezerwujcie z wyprzedzeniem, bo grupy schodzą. Operatorzy dowożą z Zadaru za dodatkowe ~30 €/os., ale skoro macie auto, dojedźcie sami do Kaštel Žegarski.",
     links: [
       ["Raftrek — spływy Zrmanją", "https://raftrek.com/tour/kayaking-zrmanja-river/"],
-      ["Balkany.pl — kanion Zrmanji w zestawieniu wycieczek", "https://balkany.pl/10-propozycji-najlepszych-wycieczek-w-zadarze-i-okolicach/"]
+      ["Balkany.pl — kanion Zrmanji w zestawieniu wycieczek", "https://balkany.pl/10-propozycji-najlepszych-wycieczek-w-zadarze-i-okolicach/"],
+      ["Klub Podróżników — Kudin most i kanion Krupy", "https://www.klubpodroznikow.com/most-kudin-kanion-rzeki-krupa/"]
     ]
   },
   {
@@ -1296,6 +1327,22 @@ const TRIPS = [
       ["Podróże po Europie — Split: co zobaczyć", "https://www.podrozepoeuropie.pl/split-zwiedzanie/"],
       ["Podróże po Europie — Pałac Dioklecjana", "https://www.podrozepoeuropie.pl/palac-dioklecjana-split/"],
       ["Travellikeagirl — Split i okolice", "https://travellikeagirl.pl/split-i-okolice-co-zobaczyc-przewodnik-po-atrakcjach/"]
+    ]
+  },
+  {
+    id: "oko",
+    title: "Oko Ziemi — spot rodem z drona",
+    vibe: "viral",
+    time: "4–5 h z dojazdem",
+    km: "~280 km w dwie strony",
+    effort: "łatwe",
+    stops: ["Izvor Cetine — Oko Ziemi"],
+    why: "Krasowe źródło Cetiny, wyglądające jak meksykańskie cenote wrzucone w dalmatyńskie pustkowie. Kilka lat temu nikt tam nie jeździł — całą sławę zrobiły ujęcia dronem, na których widać idealnie okrągłe, szmaragdowe oko wpuszczone w skałę. Dookoła jest tylko serbska cerkiew prawosławna i dwieście osób we wsi. Droga wiedzie przez wyludnione wioski i twierdze, i szczerze mówiąc jest połową atrakcji.",
+    combo: "Leży w głąb lądu w tę samą stronę co Krka, więc najsensowniej doczepić to do dnia z Krką i Šibenikiem albo do przejazdu na Split. Jako osobny wyjazd to dużo kilometrów za jedno miejsce.",
+    note: "Uczciwie: z ziemi to robi znacznie mniejsze wrażenie niż na zdjęciach, bo cały efekt daje ujęcie z góry. Parking mieści 3–4 auta — przy dwóch waszych autach przyjedźcie wcześnie albo zostawcie je wzdłuż drogi. Nie ma tam knajpy, sklepu ani wody, więc bierzcie swoje. Loty dronem sprawdźcie w chorwackich przepisach, bo rejestracja operatora jest wymagana.",
+    links: [
+      ["We Seek Travel — Cetina River Spring", "https://www.weseektravel.com/cetina-river-spring-croatia/"],
+      ["Go World Travel — Eye of the Earth", "https://www.goworldtravel.com/the-eye-of-the-earth-croatias-cetina-river-springs/"]
     ]
   },
   {
@@ -1403,6 +1450,7 @@ function buildMap() {
         <h4>${a.name}</h4>
         <span class="tag" style="background:${cat.color}">${cat.label}</span>
         <p class="drive${far ? " far" : ""}">${driveLabel(a)}</p>
+        ${a.viral ? `<p class="viral">📸 Viralowy spot — jedźcie przed 9:00 albo po 17:00</p>` : ""}
         <p>${a.desc}</p>
         <a href="${a.link}" target="_blank" rel="noopener noreferrer">Więcej o miejscu ↗</a>
       </div>`;
