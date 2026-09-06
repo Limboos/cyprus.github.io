@@ -731,33 +731,6 @@ section { padding-block: clamp(1.75rem, 6vw, 3rem); }
 .result[hidden] { display: none; }
 .result .big { font-size: clamp(1.3rem, 6vw, 1.8rem); font-weight: 900; line-height: 1.2; }
 .result .em { font-size: clamp(2rem, 9vw, 2.8rem); line-height: 1.2; }
-.result .odds { font-size: .8rem; opacity: .8; }
-
-.odds-table {
-  margin-top: 1.25rem;
-  font-size: .78rem;
-  color: var(--muted);
-  text-align: left;
-}
-.odds-table summary {
-  cursor: pointer;
-  text-align: center;
-  color: var(--sea-500);
-  font-weight: 600;
-  min-height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.odds-table ul { margin-top: .5rem; list-style: none; columns: 2; column-gap: 1rem; }
-.odds-table li {
-  display: flex;
-  justify-content: space-between;
-  gap: .5rem;
-  padding: .2rem 0;
-  break-inside: avoid;
-}
-.odds-table b { color: var(--ink); font-variant-numeric: tabular-nums; }
 
 /* ---------- Stopka ---------- */
 footer {
@@ -771,7 +744,6 @@ footer {
 @media (max-width: 480px) {
   .wrap { width: calc(100% - 1.5rem); }
   .cta { min-height: 84px; padding: 1rem; gap: .75rem; }
-  .odds-table ul { columns: 1; }
   .modal { padding: .5rem; }
   .modal .box { padding: 1.25rem .9rem 1.5rem; border-radius: 20px; }
 }
@@ -916,13 +888,7 @@ footer {
     <div class="result" id="result" hidden aria-live="polite">
       <div class="em" id="result-emoji"></div>
       <div class="big" id="result-name"></div>
-      <div class="odds" id="result-odds"></div>
     </div>
-
-    <details class="odds-table">
-      <summary>Pokaż szanse</summary>
-      <ul id="odds-list"></ul>
-    </details>
   </div>
 </div>
 
@@ -1681,7 +1647,6 @@ class Wheel {
     this.dom.hub.textContent = hub;
 
     this.render();
-    this.renderOdds();
     this.reset();
   }
 
@@ -1711,16 +1676,6 @@ class Wheel {
         <span class="txt"><span>${item.name}</span><span class="em">${item.emoji}</span></span>
       </div>`;
     }).join("");
-  }
-
-  renderOdds() {
-    this.dom.odds.innerHTML = this.items
-      .map(i => `<li><span>${i.emoji} ${i.name}</span><b>${this.pct(i)}%</b></li>`)
-      .join("");
-  }
-
-  pct(item) {
-    return (item.weight / this.total * 100).toFixed(1);
   }
 
   /** Losowanie ważone bez budowania tablicy kopii — działa też dla wag ułamkowych. */
@@ -1789,7 +1744,6 @@ class Wheel {
     const item = this.items[this.winner];
     this.dom.emoji.textContent = item.emoji;
     this.dom.name.textContent = item.name;
-    this.dom.oddsLine.textContent = `szansa ${this.pct(item)}%`;
     this.dom.result.hidden = false;
 
     if (navigator.vibrate) navigator.vibrate([40, 70, 120]);
@@ -1942,9 +1896,7 @@ document.addEventListener("DOMContentLoaded", () => {
     title:    document.getElementById("modal-title"),
     result:   document.getElementById("result"),
     emoji:    document.getElementById("result-emoji"),
-    name:     document.getElementById("result-name"),
-    oddsLine: document.getElementById("result-odds"),
-    odds:     document.getElementById("odds-list")
+    name:     document.getElementById("result-name")
   });
 
   setupModal(wheel);
